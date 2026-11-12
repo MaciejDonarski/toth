@@ -39,6 +39,7 @@ export const hexagonalBoundaries = defineConfig([
                 "@/app/*",
                 "@/ui/*",
                 "@/composition-root",
+                "@/generated/*",
               ],
               message:
                 "core/ must not depend on adapters. Depend on a port instead.",
@@ -62,6 +63,23 @@ export const hexagonalBoundaries = defineConfig([
             {
               group: ["@/app/*", "@/ui/*", "@/composition-root"],
               message: "Driven adapters must not depend on driving adapters.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ["src/app/**/*.{ts,tsx}", "src/ui/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/generated/*"],
+              message:
+                "The Prisma client is a driven adapter. Use it only from src/infrastructure/.",
             },
           ],
         },

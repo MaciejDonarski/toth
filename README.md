@@ -33,6 +33,29 @@ pnpm format            # Prettier (with tailwind class sorting)
 
 Filter to one workspace with `pnpm --filter @toth/ui test`, and so on.
 
+## Local stack (database + mail)
+
+`compose.yaml` runs Postgres 17 (same major as Supabase) and [Mailpit](https://mailpit.axllent.org)
+(catches all outgoing mail). Host ports are non-default so they do not clash with other stacks.
+
+```bash
+pnpm stack:up                                   # Postgres :5433, SMTP :1026, Mailpit UI http://localhost:8026
+cp apps/app/.env.example apps/app/.env          # then fill AUTH_SECRET
+pnpm --filter @toth/app db:migrate              # prisma migrate dev
+pnpm --filter @toth/app db:studio               # Prisma Studio
+pnpm stack:down                                 # stack:reset also drops the DB volume
+```
+
+Override ports with `TOTH_DB_PORT`, `TOTH_SMTP_PORT`, `TOTH_MAIL_UI_PORT`, and update `apps/app/.env` to match.
+
+| Concern  | Local                           | Production                                                |
+| -------- | ------------------------------- | --------------------------------------------------------- |
+| Database | compose `db` (one URL)          | Supabase: `DATABASE_URL` = pooler :6543 `?pgbouncer=true` |
+|          |                                 | `DIRECT_URL` = :5432 (Prisma CLI / migrations)            |
+| Migrate  | `db:migrate`                    | `db:deploy` (`prisma migrate deploy`) in CI/build         |
+| Mail     | `MAIL_TRANSPORT=smtp` → Mailpit | `MAIL_TRANSPORT=resend` + `RESEND_API_KEY`                |
+| Hosting  | `pnpm dev`                      | Vercel (`postinstall` runs `prisma generate`)             |
+
 A pre-commit hook (husky + lint-staged) runs `eslint --fix` and Prettier on staged files.
 
 ## Adding shadcn components

@@ -8,3 +8,4 @@ storybook-static
 next-env.d.ts
 .omc
 .playwright-mcp
+apps/*/src/generated

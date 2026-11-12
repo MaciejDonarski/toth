@@ -20,6 +20,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - When you add a workspace, also add it to the `workspaces` list in `lint-staged.config.mjs`. The pre-commit hook runs ESLint per workspace with `--max-warnings=0`, and it skips files outside the listed workspaces.
 - `apps/app/src/composition-root.ts` is `server-only`. In Vitest, `server-only` is aliased to `apps/app/test/server-only-stub.ts`.
 
+## Database (Prisma 7)
+
+- Schema: `apps/app/prisma/schema.prisma`. CLI config: `apps/app/prisma.config.ts` (uses `DIRECT_URL`). The runtime client is in `src/infrastructure/db/prisma-client.ts` (`@prisma/adapter-pg`, `DATABASE_URL`).
+- The client is generated into `apps/app/src/generated/prisma` (gitignored, created on `postinstall`). Import it as `@/generated/prisma/client`, and only from `src/infrastructure/`. ESLint enforces this.
+- Local stack is `compose.yaml` (`pnpm stack:up`). Ports are 5433/1026/8026, because the defaults clash with other local projects.
+
 ## shadcn / @toth/ui gotchas
 
 - The preset `bgmJ1SHMW` resolves to style `base-vega`, so components use **Base UI** (`@base-ui/react`), not Radix. Use the `render` prop instead of `asChild`.

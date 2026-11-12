@@ -7,6 +7,8 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
   msw: false
+  "@prisma/engines": true
+  prisma: true
 
 minimumReleaseAgeExclude:
   - "@testing-library/user-event@14.6.10"

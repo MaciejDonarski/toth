@@ -1,0 +1,11 @@
+{
+  "extends": "@toth/typescript-config/react-library.json",
+  "compilerOptions": {
+    "types": ["vite/client"],
+    "paths": {
+      "@toth/form/*": ["./src/*"]
+    }
+  },
+  "include": ["src", "test", ".storybook", "*.ts"],
+  "exclude": ["node_modules", "dist", "storybook-static"]
+}

@@ -1,0 +1,84 @@
+import type { Meta, StoryObj } from "@storybook/react-vite"
+import { z } from "zod"
+
+import { Form } from "./form"
+import { FormItem, type FormItemProps } from "./form-item"
+
+const options = [
+  { value: "pl", label: "Poland" },
+  { value: "de", label: "Germany" },
+  { value: "fr", label: "France", disabled: true },
+]
+
+function Preview(props: FormItemProps) {
+  return (
+    <Form
+      schema={z.record(z.string(), z.unknown())}
+      onSubmit={() => {}}
+      className="w-80"
+    >
+      <FormItem {...props} />
+    </Form>
+  )
+}
+
+const meta = {
+  title: "Form/FormItem",
+  component: Preview,
+  args: { name: "field", label: "Label", type: "text" },
+} satisfies Meta<typeof Preview>
+
+export default meta
+type Story = StoryObj<typeof meta>
+
+export const Text: Story = {
+  args: {
+    type: "text",
+    label: "Name",
+    placeholder: "Ada Lovelace",
+    description: "Your full name.",
+    required: true,
+  },
+}
+export const Email: Story = { args: { type: "email", label: "Email" } }
+export const Password: Story = { args: { type: "password", label: "Password" } }
+export const NumberInput: Story = {
+  args: { type: "number", label: "Quantity", min: 0, step: 1 },
+}
+export const Textarea: Story = {
+  args: { type: "textarea", label: "Bio", rows: 4 },
+}
+export const Select: Story = {
+  args: {
+    type: "select",
+    label: "Country",
+    placeholder: "Select a country",
+    options,
+  },
+}
+export const Multiselect: Story = {
+  args: {
+    type: "multiselect",
+    label: "Countries",
+    placeholder: "Add country",
+    options,
+  },
+}
+export const Checkbox: Story = {
+  args: {
+    type: "checkbox",
+    label: "Accept terms",
+    description: "You agree to our policy.",
+  },
+}
+export const Switch: Story = { args: { type: "switch", label: "Newsletter" } }
+export const Radio: Story = {
+  args: { type: "radio", label: "Country", options },
+}
+export const DatePicker: Story = { args: { type: "date", label: "Birthday" } }
+export const DateRange: Story = {
+  args: { type: "date-range", label: "Vacation", placeholder: "Pick a range" },
+}
+export const Disabled: Story = {
+  args: { type: "text", label: "Disabled", disabled: true },
+}

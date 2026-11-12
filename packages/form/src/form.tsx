@@ -12,16 +12,16 @@ import type { z } from "zod"
 
 import { cn } from "@toth/ui/lib/utils"
 
-import { FormConfigContext } from "./form-context"
+import { FormConfigContext, type FormLocaleSettings } from "./form-context"
 import { applySubmitResult, type SubmitResult } from "./lib/submit"
 import type { LinkComponent } from "./types"
 
 type Values<TSchema extends z.ZodType> = z.input<TSchema> & object
 
-export interface FormProps<TSchema extends z.ZodType> extends Omit<
-  ComponentProps<"form">,
-  "onSubmit" | "children"
-> {
+export interface FormProps<TSchema extends z.ZodType>
+  extends
+    Omit<ComponentProps<"form">, "onSubmit" | "children">,
+    FormLocaleSettings {
   /** Zod schema — validates input and produces the values passed to `onSubmit`. */
   schema: TSchema
   /** Initial values (schema input shape). */
@@ -50,6 +50,9 @@ function Form<TSchema extends z.ZodType>({
   onSubmit,
   mode = "onTouched",
   linkComponent,
+  locale,
+  dateFormat,
+  messages,
   className,
   children,
   ...props
@@ -70,8 +73,15 @@ function Form<TSchema extends z.ZodType>({
   })
 
   const config = useMemo(
-    () => ({ linkComponent, formError, setFormError }),
-    [linkComponent, formError]
+    () => ({
+      linkComponent,
+      formError,
+      setFormError,
+      locale,
+      dateFormat,
+      messages,
+    }),
+    [linkComponent, formError, locale, dateFormat, messages]
   )
 
   return (

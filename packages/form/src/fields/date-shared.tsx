@@ -66,33 +66,44 @@ export function DateTrigger({
   )
 }
 
-interface PresetListProps<TPreset extends { label: string }> {
-  presets: TPreset[]
-  onPick: (preset: TPreset) => void
+/** Text of a preset: its own `label`, or the translation of `labelKey`. */
+export function presetLabel<TKey extends string>(
+  preset: { label?: string; labelKey?: TKey },
+  translations: Record<TKey, string>
+): string {
+  return preset.label ?? (preset.labelKey ? translations[preset.labelKey] : "")
+}
+
+export interface PresetOption {
+  label: string
+  onPick: () => void
+}
+
+interface PresetListProps {
+  /** Accessible name of the group. */
+  label: string
+  options: PresetOption[]
 }
 
 /** Column of shortcut buttons next to the calendar. Renders nothing when empty. */
-export function PresetList<TPreset extends { label: string }>({
-  presets,
-  onPick,
-}: PresetListProps<TPreset>): ReactNode {
-  if (presets.length === 0) return null
+export function PresetList({ label, options }: PresetListProps): ReactNode {
+  if (options.length === 0) return null
   return (
     <div
       role="group"
-      aria-label="Presets"
+      aria-label={label}
       className="flex flex-col gap-1 border-r p-3"
     >
-      {presets.map((preset) => (
+      {options.map((option) => (
         <Button
-          key={preset.label}
+          key={option.label}
           type="button"
           variant="ghost"
           size="sm"
           className="justify-start font-normal"
-          onClick={() => onPick(preset)}
+          onClick={option.onPick}
         >
-          {preset.label}
+          {option.label}
         </Button>
       ))}
     </div>

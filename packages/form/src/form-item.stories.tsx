@@ -2,8 +2,11 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { z } from "zod"
 
 import { Form } from "./form"
+import { FormDefaultsProvider } from "./form-defaults"
 import { FormItem, type FormItemProps } from "./form-item"
 import { DATE_PRESETS, DATE_RANGE_PRESETS } from "./lib/date-presets"
+import { plLocale } from "./lib/locales"
+import { plMessages } from "./lib/messages"
 
 const options = [
   { value: "pl", label: "Poland" },
@@ -93,4 +96,24 @@ export const DateRangeWithPresets: Story = {
 }
 export const Disabled: Story = {
   args: { type: "text", label: "Disabled", disabled: true },
+}
+
+/** Polish via `FormDefaultsProvider`: messages, calendar and `dd.MM.yyyy`. */
+export const PolishDateRange: Story = {
+  args: {
+    type: "date-range",
+    label: "Okres",
+    presets: DATE_RANGE_PRESETS,
+  },
+  decorators: [
+    (Story) => (
+      <FormDefaultsProvider
+        locale={plLocale}
+        dateFormat="dd.MM.yyyy"
+        messages={plMessages}
+      >
+        <Story />
+      </FormDefaultsProvider>
+    ),
+  ],
 }

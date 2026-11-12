@@ -2,10 +2,12 @@
 
 import { useState } from "react"
 import { format } from "date-fns"
+import type { Locale } from "react-day-picker"
 
 import { Calendar } from "@toth/ui/components/calendar"
 import { Popover, PopoverContent } from "@toth/ui/components/popover"
 
+import { useFormLocale } from "../form-context"
 import type { DateRangeItem } from "../types"
 import { DateInput } from "./date-input"
 import {
@@ -13,13 +15,20 @@ import {
   isDate,
   isRange,
   PresetList,
+  presetLabel,
   type PartialRange,
 } from "./date-shared"
 import type { FieldRendererProps } from "./field-props"
 
-function formatRange(range: PartialRange | undefined, pattern: string) {
-  const from = isDate(range?.from) ? format(range.from, pattern) : undefined
-  const to = isDate(range?.to) ? format(range.to, pattern) : undefined
+function formatRange(
+  range: PartialRange | undefined,
+  pattern: string,
+  locale: Locale | undefined
+) {
+  const fmt = (date: Date | undefined) =>
+    isDate(date) ? format(date, pattern, { locale }) : undefined
+  const from = fmt(range?.from)
+  const to = fmt(range?.to)
   if (from && to) return `${from} – ${to}`
   if (from) return `${from} –`
   if (to) return `– ${to}`
@@ -43,7 +52,8 @@ function DateRangeField({
   const value = isRange(raw) ? raw : undefined
   const from = isDate(value?.from) ? value.from : undefined
   const to = isDate(value?.to) ? value.to : undefined
-  const pattern = item.dateFormat ?? "PP"
+  const { locale, dateFormat, messages } = useFormLocale()
+  const pattern = item.dateFormat ?? dateFormat
   const [month, setMonth] = useState<Date | undefined>(from ?? to)
 
   const setRange = (next: PartialRange | undefined) => {
@@ -75,16 +85,17 @@ function DateRangeField({
         disabled={item.disabled ?? field.disabled}
         invalid={fieldState.invalid}
         describedBy={describedBy}
-        label={formatRange(value, pattern)}
-        placeholder={item.placeholder ?? "Pick a date range"}
+        label={formatRange(value, pattern, locale)}
+        placeholder={item.placeholder ?? messages.pickDateRange}
       />
       <PopoverContent className="w-auto gap-0 p-0" align="start">
         <div className="flex gap-3 border-b p-3">
           <DateInput
-            label="From"
-            clearLabel="Clear from"
+            label={messages.from}
+            clearLabel={messages.clearFrom}
             value={from}
             pattern={pattern}
+            locale={locale}
             // A start after the current end drops the end.
             onChange={(date) =>
               setRange({
@@ -94,10 +105,11 @@ function DateRangeField({
             }
           />
           <DateInput
-            label="To"
-            clearLabel="Clear to"
+            label={messages.to}
+            clearLabel={messages.clearTo}
             value={to}
             pattern={pattern}
+            locale={locale}
             // An end before the current start drops the start.
             onChange={(date) =>
               setRange({
@@ -109,14 +121,18 @@ function DateRangeField({
         </div>
         <div className="flex">
           <PresetList
-            presets={item.presets ?? []}
-            onPick={(preset) => {
-              setRange(preset.value())
-              close()
-            }}
+            label={messages.presets}
+            options={(item.presets ?? []).map((preset) => ({
+              label: presetLabel(preset, messages.rangePresets),
+              onPick: () => {
+                setRange(preset.value())
+                close()
+              },
+            }))}
           />
           <Calendar
             mode="range"
+            locale={locale}
             numberOfMonths={2}
             selected={from || to ? { from, to } : undefined}
             month={month}

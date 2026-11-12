@@ -3,6 +3,7 @@
 import { useId, useState } from "react"
 import { format, isValid, parse } from "date-fns"
 import { XIcon } from "lucide-react"
+import type { Locale } from "react-day-picker"
 
 import {
   InputGroup,
@@ -19,6 +20,8 @@ interface DateInputProps {
   onChange: (date: Date | undefined) => void
   /** date-fns format used to show and parse the text. */
   pattern: string
+  /** date-fns locale for month names in `pattern`. Defaults to en-US. */
+  locale?: Locale
 }
 
 /**
@@ -32,14 +35,15 @@ function DateInput({
   value,
   onChange,
   pattern,
+  locale,
 }: DateInputProps) {
   const id = useId()
   // null = not editing, show the formatted value.
   const [draft, setDraft] = useState<string | null>(null)
   const [invalid, setInvalid] = useState(false)
   // Today as an example of the expected format.
-  const [placeholder] = useState(() => format(new Date(), pattern))
-  const text = draft ?? (value ? format(value, pattern) : "")
+  const [placeholder] = useState(() => format(new Date(), pattern, { locale }))
+  const text = draft ?? (value ? format(value, pattern, { locale }) : "")
 
   const commit = () => {
     if (draft === null) return
@@ -47,7 +51,7 @@ function DateInput({
     if (!trimmed) {
       onChange(undefined)
     } else {
-      const parsed = parse(trimmed, pattern, new Date())
+      const parsed = parse(trimmed, pattern, new Date(), { locale })
       if (isValid(parsed)) onChange(parsed)
       else setInvalid(true)
     }

@@ -14,6 +14,7 @@ import {
   useComboboxAnchor,
 } from "@toth/ui/components/combobox"
 
+import { useFormLocale } from "../form-context"
 import type { FormOption, SelectItem } from "../types"
 import type { FieldRendererProps } from "./field-props"
 
@@ -21,9 +22,10 @@ const toLabel = (option: FormOption) => option.label
 const isSameOption = (a: FormOption, b: FormOption) => a.value === b.value
 
 function OptionList({ emptyText }: { emptyText?: string }) {
+  const { messages } = useFormLocale()
   return (
     <>
-      <ComboboxEmpty>{emptyText ?? "No results."}</ComboboxEmpty>
+      <ComboboxEmpty>{emptyText ?? messages.noResults}</ComboboxEmpty>
       <ComboboxList>
         {(option: FormOption) => (
           <ComboboxItem

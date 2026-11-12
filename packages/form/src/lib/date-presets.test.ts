@@ -12,21 +12,21 @@ describe("date presets", () => {
   afterEach(() => vi.useRealTimers())
 
   it("DATE_PRESETS are relative to today at midnight", () => {
-    expect(DATE_PRESETS.map((p) => [p.label, p.value()])).toEqual([
-      ["Yesterday", day(14)],
-      ["3 days ago", day(12)],
-      ["Week ago", day(8)],
-      ["Month ago", day(15, 1)],
+    expect(DATE_PRESETS.map((p) => [p.labelKey, p.value()])).toEqual([
+      ["yesterday", day(14)],
+      ["daysAgo3", day(12)],
+      ["weekAgo", day(8)],
+      ["monthAgo", day(15, 1)],
     ])
   })
 
   it("DATE_RANGE_PRESETS are rolling ranges ending today", () => {
-    expect(DATE_RANGE_PRESETS.map((p) => [p.label, p.value()])).toEqual([
-      ["Today", { from: day(15), to: day(15) }],
-      ["Yesterday", { from: day(14), to: day(14) }],
-      ["Last 3 days", { from: day(13), to: day(15) }],
-      ["Last 7 days", { from: day(9), to: day(15) }],
-      ["Last 30 days", { from: day(15, 1), to: day(15) }],
+    expect(DATE_RANGE_PRESETS.map((p) => [p.labelKey, p.value()])).toEqual([
+      ["today", { from: day(15), to: day(15) }],
+      ["yesterday", { from: day(14), to: day(14) }],
+      ["last3Days", { from: day(13), to: day(15) }],
+      ["last7Days", { from: day(9), to: day(15) }],
+      ["last30Days", { from: day(15, 1), to: day(15) }],
     ])
   })
 })

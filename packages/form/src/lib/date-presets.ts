@@ -4,12 +4,13 @@ import type { DatePreset, DateRangePreset } from "../types"
 
 /**
  * Built-in shortcuts for `type="date"`, relative to today (local midnight).
+ * Labels come from `FormMessages.datePresets`.
  */
 export const DATE_PRESETS: DatePreset[] = [
-  { label: "Yesterday", value: () => subDays(startOfToday(), 1) },
-  { label: "3 days ago", value: () => subDays(startOfToday(), 3) },
-  { label: "Week ago", value: () => subWeeks(startOfToday(), 1) },
-  { label: "Month ago", value: () => subMonths(startOfToday(), 1) },
+  { labelKey: "yesterday", value: () => subDays(startOfToday(), 1) },
+  { labelKey: "daysAgo3", value: () => subDays(startOfToday(), 3) },
+  { labelKey: "weekAgo", value: () => subWeeks(startOfToday(), 1) },
+  { labelKey: "monthAgo", value: () => subMonths(startOfToday(), 1) },
 ]
 
 /** The last `days` days, today included. */
@@ -20,17 +21,18 @@ function lastDays(days: number) {
 
 /**
  * Built-in rolling shortcuts for `type="date-range"`, ending today.
+ * Labels come from `FormMessages.rangePresets`.
  */
 export const DATE_RANGE_PRESETS: DateRangePreset[] = [
-  { label: "Today", value: () => lastDays(1) },
+  { labelKey: "today", value: () => lastDays(1) },
   {
-    label: "Yesterday",
+    labelKey: "yesterday",
     value: () => {
       const day = subDays(startOfToday(), 1)
       return { from: day, to: day }
     },
   },
-  { label: "Last 3 days", value: () => lastDays(3) },
-  { label: "Last 7 days", value: () => lastDays(7) },
-  { label: "Last 30 days", value: () => lastDays(30) },
+  { labelKey: "last3Days", value: () => lastDays(3) },
+  { labelKey: "last7Days", value: () => lastDays(7) },
+  { labelKey: "last30Days", value: () => lastDays(30) },
 ]

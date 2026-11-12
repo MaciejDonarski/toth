@@ -3,6 +3,8 @@ import type { FieldPath, FieldValues } from "react-hook-form"
 
 import type { Button } from "@toth/ui/components/button"
 
+import type { DatePresetKey, DateRangePresetKey } from "./lib/messages"
+
 /* -------------------------------------------------------------------------- */
 /* Grid                                                                       */
 /* -------------------------------------------------------------------------- */
@@ -80,15 +82,18 @@ export interface RadioItem<
   orientation?: "vertical" | "horizontal"
 }
 
+/**
+ * Preset label: plain text, or a key into `FormMessages` (used by the
+ * built-in presets so they follow the active language).
+ */
+type PresetLabel<TKey extends string> =
+  { label: string; labelKey?: never } | { labelKey: TKey; label?: never }
+
 /** A shortcut in the date popup. `value` runs on click, so "today" is fresh. */
-export interface DatePreset {
-  label: string
-  value: () => Date
-}
+export type DatePreset = PresetLabel<DatePresetKey> & { value: () => Date }
 
 /** A shortcut in the date-range popup. */
-export interface DateRangePreset {
-  label: string
+export type DateRangePreset = PresetLabel<DateRangePresetKey> & {
   value: () => { from: Date; to: Date }
 }
 
@@ -96,7 +101,7 @@ export interface DateItem<
   TValues extends FieldValues = FieldValues,
 > extends BaseItem<TValues> {
   type: "date"
-  /** date-fns format string for the trigger label. Defaults to `"PP"`. */
+  /** date-fns format for the trigger label. Defaults to the form's `dateFormat` (`"PP"`). */
   dateFormat?: string
   /** Shortcuts shown next to the calendar. None by default, see `DATE_PRESETS`. */
   presets?: DatePreset[]
@@ -106,7 +111,7 @@ export interface DateRangeItem<
   TValues extends FieldValues = FieldValues,
 > extends BaseItem<TValues> {
   type: "date-range"
-  /** date-fns format string for the trigger label and the From/To inputs. Defaults to `"PP"`. */
+  /** date-fns format for the trigger label and the From/To inputs. Defaults to the form's `dateFormat` (`"PP"`). */
   dateFormat?: string
   /** Shortcuts shown next to the calendar. None by default, see `DATE_RANGE_PRESETS`. */
   presets?: DateRangePreset[]

@@ -1,12 +1,13 @@
 import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { z } from "zod"
 
 import { Form } from "./form"
 import { FormActions } from "./form-actions"
 import { FormItem } from "./form-item"
+import { DATE_PRESETS, DATE_RANGE_PRESETS } from "./lib/date-presets"
 
 const options = [
   { value: "pl", label: "Poland" },
@@ -165,6 +166,124 @@ describe("FormItem", () => {
     expect(screen.getByRole("button", { name: "Stay" })).toHaveTextContent(
       "Jan 1, 2024 – Jan 7, 2024"
     )
+  })
+
+  it("date-range shows a partial range", () => {
+    renderInForm(<FormItem name="stay" type="date-range" label="Stay" />, {
+      stay: { from: undefined, to: new Date(2024, 0, 7) },
+    })
+    expect(screen.getByRole("button", { name: "Stay" })).toHaveTextContent(
+      "– Jan 7, 2024"
+    )
+  })
+
+  describe("date presets and inputs", () => {
+    afterEach(() => vi.useRealTimers())
+    const fakeToday = () => {
+      vi.useFakeTimers({ toFake: ["Date"] })
+      vi.setSystemTime(new Date(2024, 2, 15, 12))
+    }
+
+    it("date shows no presets by default", async () => {
+      const user = userEvent.setup()
+      renderInForm(<FormItem name="d" type="date" label="Day" />)
+      await user.click(screen.getByRole("button", { name: "Day" }))
+      expect(await screen.findByRole("grid")).toBeInTheDocument()
+      expect(screen.queryByRole("group", { name: "Presets" })).toBeNull()
+    })
+
+    it("date preset sets the value and closes the popup", async () => {
+      fakeToday()
+      const user = userEvent.setup()
+      const { submit } = renderInForm(
+        <FormItem name="d" type="date" label="Day" presets={DATE_PRESETS} />
+      )
+      await user.click(screen.getByRole("button", { name: "Day" }))
+      const presets = await screen.findByRole("group", { name: "Presets" })
+      await user.click(
+        within(presets).getByRole("button", { name: "Yesterday" })
+      )
+      await waitFor(() => expect(screen.queryByRole("grid")).toBeNull())
+      expect(screen.getByRole("button", { name: "Day" })).toHaveTextContent(
+        "Mar 14, 2024"
+      )
+      expect(await submit()).toEqual({ d: new Date(2024, 2, 14) })
+    })
+
+    it("date-range From/To inputs are set and cleared independently", async () => {
+      const user = userEvent.setup()
+      const { submit } = renderInForm(
+        <FormItem name="stay" type="date-range" label="Stay" />
+      )
+      await user.click(screen.getByRole("button", { name: "Stay" }))
+      const fromInput = await screen.findByLabelText("From")
+      await user.type(fromInput, "Jan 1, 2024{Enter}")
+      await user.type(screen.getByLabelText("To"), "Jan 7, 2024{Enter}")
+      expect(fromInput).toHaveValue("Jan 1, 2024")
+
+      await user.click(screen.getByRole("button", { name: "Clear from" }))
+      expect(fromInput).toHaveValue("")
+      expect(screen.getByLabelText("To")).toHaveValue("Jan 7, 2024")
+
+      await user.keyboard("{Escape}")
+      expect(await submit()).toEqual({
+        stay: { from: undefined, to: new Date(2024, 0, 7) },
+      })
+    })
+
+    it("date-range input reverts invalid text", async () => {
+      const user = userEvent.setup()
+      renderInForm(<FormItem name="stay" type="date-range" label="Stay" />, {
+        stay: { from: new Date(2024, 0, 1), to: new Date(2024, 0, 7) },
+      })
+      await user.click(screen.getByRole("button", { name: "Stay" }))
+      const fromInput = await screen.findByLabelText("From")
+      await user.clear(fromInput)
+      await user.type(fromInput, "nonsense{Enter}")
+      expect(fromInput).toHaveValue("Jan 1, 2024")
+      expect(fromInput).toHaveAttribute("aria-invalid", "true")
+    })
+
+    it("date-range drops the end when the start moves past it", async () => {
+      const user = userEvent.setup()
+      const { submit } = renderInForm(
+        <FormItem name="stay" type="date-range" label="Stay" />,
+        { stay: { from: new Date(2024, 0, 1), to: new Date(2024, 0, 7) } }
+      )
+      await user.click(screen.getByRole("button", { name: "Stay" }))
+      const fromInput = await screen.findByLabelText("From")
+      await user.clear(fromInput)
+      await user.type(fromInput, "Jan 10, 2024{Enter}")
+      expect(screen.getByLabelText("To")).toHaveValue("")
+      await user.keyboard("{Escape}")
+      expect(await submit()).toEqual({
+        stay: { from: new Date(2024, 0, 10), to: undefined },
+      })
+    })
+
+    it("date-range preset sets a rolling range", async () => {
+      fakeToday()
+      const user = userEvent.setup()
+      const { submit } = renderInForm(
+        <FormItem
+          name="stay"
+          type="date-range"
+          label="Stay"
+          presets={DATE_RANGE_PRESETS}
+        />
+      )
+      await user.click(screen.getByRole("button", { name: "Stay" }))
+      const presets = await screen.findByRole("group", { name: "Presets" })
+      await user.click(
+        within(presets).getByRole("button", { name: "Last 7 days" })
+      )
+      expect(screen.getByRole("button", { name: "Stay" })).toHaveTextContent(
+        "Mar 9, 2024 – Mar 15, 2024"
+      )
+      expect(await submit()).toEqual({
+        stay: { from: new Date(2024, 2, 9), to: new Date(2024, 2, 15) },
+      })
+    })
   })
 
   it("applies colSpan classes", () => {

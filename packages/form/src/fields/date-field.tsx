@@ -2,38 +2,15 @@
 
 import { useState } from "react"
 import { format } from "date-fns"
-import { CalendarIcon } from "lucide-react"
-import type { DateRange } from "react-day-picker"
 
-import { Button } from "@toth/ui/components/button"
 import { Calendar } from "@toth/ui/components/calendar"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@toth/ui/components/popover"
+import { Popover, PopoverContent } from "@toth/ui/components/popover"
 
 import type { DateItem } from "../types"
+import { DateTrigger, isDate, PresetList } from "./date-shared"
 import type { FieldRendererProps } from "./field-props"
 
-function isDate(value: unknown): value is Date {
-  return value instanceof Date && !Number.isNaN(value.getTime())
-}
-
-function isRange(value: unknown): value is DateRange {
-  return typeof value === "object" && value !== null && "from" in value
-}
-
-function formatValue(value: unknown, pattern: string): string | undefined {
-  if (isDate(value)) return format(value, pattern)
-  if (isRange(value) && isDate(value.from)) {
-    const from = format(value.from, pattern)
-    return isDate(value.to) ? `${from} – ${format(value.to, pattern)}` : from
-  }
-  return undefined
-}
-
-/** Date picker (`Date`) or date-range picker (`{ from, to }`). */
+/** Single date picker (`Date`), with optional presets. */
 function DateField({
   item,
   field,
@@ -44,7 +21,13 @@ function DateField({
 }: FieldRendererProps<DateItem>) {
   const [open, setOpen] = useState(false)
   const value: unknown = field.value
-  const label = formatValue(value, item.dateFormat ?? "PP")
+  const selected = isDate(value) ? value : undefined
+
+  const pick = (date: Date | undefined) => {
+    field.onChange(date)
+    setOpen(false)
+    field.onBlur()
+  }
 
   return (
     <Popover
@@ -54,43 +37,26 @@ function DateField({
         if (!next) field.onBlur()
       }}
     >
-      <PopoverTrigger
-        render={
-          <Button
-            id={id}
-            ref={inputRef}
-            variant="outline"
-            disabled={item.disabled ?? field.disabled}
-            aria-invalid={fieldState.invalid || undefined}
-            aria-describedby={describedBy}
-            className="w-full justify-start font-normal data-[empty=true]:text-muted-foreground"
-            data-empty={!label}
-          />
-        }
-      >
-        <CalendarIcon data-icon="inline-start" />
-        {label ?? item.placeholder ?? "Pick a date"}
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        {item.type === "date-range" ? (
-          <Calendar
-            mode="range"
-            numberOfMonths={2}
-            selected={isRange(value) ? value : undefined}
-            defaultMonth={isRange(value) ? value.from : undefined}
-            onSelect={(range) => field.onChange(range)}
-          />
-        ) : (
-          <Calendar
-            mode="single"
-            selected={isDate(value) ? value : undefined}
-            defaultMonth={isDate(value) ? value : undefined}
-            onSelect={(date) => {
-              field.onChange(date)
-              setOpen(false)
-            }}
-          />
-        )}
+      <DateTrigger
+        id={id}
+        inputRef={inputRef}
+        disabled={item.disabled ?? field.disabled}
+        invalid={fieldState.invalid}
+        describedBy={describedBy}
+        label={selected && format(selected, item.dateFormat ?? "PP")}
+        placeholder={item.placeholder ?? "Pick a date"}
+      />
+      <PopoverContent className="w-auto flex-row gap-0 p-0" align="start">
+        <PresetList
+          presets={item.presets ?? []}
+          onPick={(preset) => pick(preset.value())}
+        />
+        <Calendar
+          mode="single"
+          selected={selected}
+          defaultMonth={selected}
+          onSelect={pick}
+        />
       </PopoverContent>
     </Popover>
   )

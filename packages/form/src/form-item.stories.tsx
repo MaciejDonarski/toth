@@ -3,6 +3,7 @@ import { z } from "zod"
 
 import { Form } from "./form"
 import { FormItem, type FormItemProps } from "./form-item"
+import { DATE_PRESETS, DATE_RANGE_PRESETS } from "./lib/date-presets"
 
 const options = [
   { value: "pl", label: "Poland" },
@@ -78,6 +79,17 @@ export const Radio: Story = {
 export const DatePicker: Story = { args: { type: "date", label: "Birthday" } }
 export const DateRange: Story = {
   args: { type: "date-range", label: "Vacation", placeholder: "Pick a range" },
+}
+export const DatePickerWithPresets: Story = {
+  args: { type: "date", label: "Last visit", presets: DATE_PRESETS },
+}
+export const DateRangeWithPresets: Story = {
+  args: {
+    type: "date-range",
+    label: "Period",
+    placeholder: "Pick a range",
+    presets: DATE_RANGE_PRESETS,
+  },
 }
 export const Disabled: Story = {
   args: { type: "text", label: "Disabled", disabled: true },

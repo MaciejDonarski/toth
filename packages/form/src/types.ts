@@ -80,12 +80,36 @@ export interface RadioItem<
   orientation?: "vertical" | "horizontal"
 }
 
+/** A shortcut in the date popup. `value` runs on click, so "today" is fresh. */
+export interface DatePreset {
+  label: string
+  value: () => Date
+}
+
+/** A shortcut in the date-range popup. */
+export interface DateRangePreset {
+  label: string
+  value: () => { from: Date; to: Date }
+}
+
 export interface DateItem<
   TValues extends FieldValues = FieldValues,
 > extends BaseItem<TValues> {
-  type: "date" | "date-range"
+  type: "date"
   /** date-fns format string for the trigger label. Defaults to `"PP"`. */
   dateFormat?: string
+  /** Shortcuts shown next to the calendar. None by default, see `DATE_PRESETS`. */
+  presets?: DatePreset[]
+}
+
+export interface DateRangeItem<
+  TValues extends FieldValues = FieldValues,
+> extends BaseItem<TValues> {
+  type: "date-range"
+  /** date-fns format string for the trigger label and the From/To inputs. Defaults to `"PP"`. */
+  dateFormat?: string
+  /** Shortcuts shown next to the calendar. None by default, see `DATE_RANGE_PRESETS`. */
+  presets?: DateRangePreset[]
 }
 
 export type FormItemConfig<TValues extends FieldValues = FieldValues> =
@@ -95,6 +119,7 @@ export type FormItemConfig<TValues extends FieldValues = FieldValues> =
   | BooleanItem<TValues>
   | RadioItem<TValues>
   | DateItem<TValues>
+  | DateRangeItem<TValues>
 
 export type FormItemType = FormItemConfig["type"]
 

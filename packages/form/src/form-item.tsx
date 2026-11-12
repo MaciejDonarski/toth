@@ -15,6 +15,7 @@ import { cn } from "@toth/ui/lib/utils"
 
 import { BooleanField } from "./fields/boolean-field"
 import { DateField } from "./fields/date-field"
+import { DateRangeField } from "./fields/date-range-field"
 import type { FieldRendererProps } from "./fields/field-props"
 import { InputField } from "./fields/input-field"
 import { RadioField } from "./fields/radio-field"
@@ -39,7 +40,7 @@ const RENDERERS = {
   switch: BooleanField,
   radio: RadioField,
   date: DateField,
-  "date-range": DateField,
+  "date-range": DateRangeField,
 } satisfies Record<FormItemType, unknown> as unknown as Record<
   FormItemType,
   AnyRenderer

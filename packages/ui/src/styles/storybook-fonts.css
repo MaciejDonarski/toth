@@ -1,0 +1,10 @@
+/* Mirrors the next/font setup of the preset (apps/app/app/layout.tsx). */
+@import "@fontsource-variable/outfit";
+@import "@fontsource-variable/noto-sans";
+@import "@fontsource-variable/geist-mono";
+
+:root {
+  --font-sans: "Outfit Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Noto Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, monospace;
+}

@@ -1,0 +1,26 @@
+{
+  "name": "@toth/eslint-config",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./base": "./base.js",
+    "./react": "./react.js",
+    "./react-internal": "./react-internal.js",
+    "./next-js": "./next.js"
+  },
+  "devDependencies": {
+    "@eslint-react/eslint-plugin": "^5.30.2",
+    "@eslint/js": "^10",
+    "@next/eslint-plugin-next": "^16.4.4",
+    "eslint": "^10",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsx-a11y-x": "^0.2.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-storybook": "^10.6.7",
+    "eslint-plugin-turbo": "^2.11.10",
+    "globals": "^17.14.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.72.2"
+  }
+}

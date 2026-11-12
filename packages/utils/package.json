@@ -1,0 +1,29 @@
+{
+  "name": "@toth/utils",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "sideEffects": false,
+  "scripts": {
+    "lint": "eslint",
+    "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "cn": "^0.5.2"
+  },
+  "devDependencies": {
+    "@toth/eslint-config": "workspace:*",
+    "@toth/typescript-config": "workspace:*",
+    "@types/node": "^22.20.5",
+    "eslint": "^10",
+    "typescript": "^5",
+    "vitest": "^5.1.0"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  }
+}

@@ -7,11 +7,8 @@ describe("LoginForm", () => {
   it("renders labelled email and password fields", () => {
     render(<LoginForm />)
     expect(screen.getByLabelText("Email")).toHaveAttribute("type", "email")
-    expect(screen.getByLabelText("Password")).toHaveAttribute(
-      "type",
-      "password"
-    )
-    expect(screen.getByRole("button", { name: "Login" })).toHaveAttribute(
+    expect(screen.getByLabelText("Hasło")).toHaveAttribute("type", "password")
+    expect(screen.getByRole("button", { name: "Zaloguj" })).toHaveAttribute(
       "type",
       "submit"
     )

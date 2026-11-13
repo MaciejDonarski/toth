@@ -38,6 +38,15 @@ export const AUTH_POLICY = Object.freeze({
 
   defaultCompanyUserLimit: 5,
   termsVersion: "2026-11-01",
+
+  /** Fixed-window limits per bucket (see RateLimiter port). */
+  rateLimits: Object.freeze({
+    registerPerIp: { limit: 5, windowMs: 1 * HOUR },
+    /** "Someone tried to register with your email" mails per address. */
+    registrationAttemptMailPerEmail: { limit: 3, windowMs: 1 * HOUR },
+    verificationResendPerIp: { limit: 10, windowMs: 1 * HOUR },
+    verificationResendPerEmail: { limit: 5, windowMs: 1 * HOUR },
+  }),
 })
 
 export type AuthPolicy = typeof AUTH_POLICY

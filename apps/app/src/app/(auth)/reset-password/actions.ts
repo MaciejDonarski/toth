@@ -1,6 +1,7 @@
 "use server"
 
 import { redirect } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 
 import type { SubmitResult } from "@toth/form"
 
@@ -33,8 +34,9 @@ export async function resetPasswordAction(
     await resetPassword(token, parsed.data, await getRequestMeta())
   } catch (error) {
     if (isAuthError(error, "TOKEN_INVALID")) {
+      const t = await getTranslations("auth.reset.errors")
       return {
-        formError: "Link wygasł lub został już użyty.",
+        formError: t("invalidToken"),
         invalidToken: true,
       }
     }

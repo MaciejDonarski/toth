@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import Link from "next/link"
 
 import {
@@ -30,15 +31,13 @@ export type ResetPasswordFormProps = {
 }
 
 export function ResetPasswordForm({ onReset }: ResetPasswordFormProps) {
+  const t = useTranslations("auth.reset")
   const [invalid, setInvalid] = useState(false)
   if (invalid) return <InvalidResetLink />
 
   return (
     <div className="flex flex-col gap-6">
-      <AuthHeading
-        title="Ustaw nowe hasło"
-        description="Po zmianie hasła zostaniesz wylogowany ze wszystkich urządzeń."
-      />
+      <AuthHeading title={t("title")} description={t("description")} />
       <Form
         schema={resetPasswordSchema}
         defaultValues={{ password: "", confirmPassword: "" }}
@@ -52,7 +51,7 @@ export function ResetPasswordForm({ onReset }: ResetPasswordFormProps) {
         <FormItem
           type="password"
           name="password"
-          label="Nowe hasło"
+          label={t("newPassword")}
           autoComplete="new-password"
           required
         />
@@ -60,13 +59,13 @@ export function ResetPasswordForm({ onReset }: ResetPasswordFormProps) {
         <FormItem
           type="password"
           name="confirmPassword"
-          label="Powtórz nowe hasło"
+          label={t("confirmPassword")}
           autoComplete="new-password"
           required
         />
         <FormActions
           actions={[
-            { kind: "submit", label: "Zmień hasło", className: "w-full" },
+            { kind: "submit", label: t("submit"), className: "w-full" },
           ]}
         />
       </Form>
@@ -75,18 +74,16 @@ export function ResetPasswordForm({ onReset }: ResetPasswordFormProps) {
 }
 
 export function InvalidResetLink() {
+  const t = useTranslations("auth.reset")
   return (
     <div className="flex flex-col gap-4">
-      <AuthHeading title="Ustaw nowe hasło" />
+      <AuthHeading title={t("title")} />
       <Alert variant="destructive">
-        <AlertTitle>Link jest nieprawidłowy lub wygasł</AlertTitle>
-        <AlertDescription>
-          Link do zmiany hasła działa tylko raz i przez ograniczony czas. Poproś
-          o nowy.
-        </AlertDescription>
+        <AlertTitle>{t("invalidTitle")}</AlertTitle>
+        <AlertDescription>{t("invalidDescription")}</AlertDescription>
       </Alert>
       <Button nativeButton={false} render={<Link href="/forgot-password" />}>
-        Wyślij nowy link
+        {t("sendNew")}
       </Button>
     </div>
   )

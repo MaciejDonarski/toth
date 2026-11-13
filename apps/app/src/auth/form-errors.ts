@@ -1,6 +1,9 @@
 import type { z } from "zod"
 
-/** First message per field, in the `SubmitResult.fieldErrors` shape. */
+/**
+ * First message per field, in the `SubmitResult.fieldErrors` shape. Messages
+ * are message KEYS; the form translates them (`translateError`).
+ */
 export function toFieldErrors<T extends object>(
   error: z.ZodError<T>
 ): Partial<Record<Extract<keyof T, string>, string>> {
@@ -13,8 +16,3 @@ export function toFieldErrors<T extends object>(
   }
   return result as Partial<Record<Extract<keyof T, string>, string>>
 }
-
-export const GENERIC_ERROR = "Coś poszło nie tak. Spróbuj ponownie za chwilę."
-
-export const RATE_LIMITED_ERROR =
-  "Zbyt wiele prób. Odczekaj chwilę i spróbuj ponownie."

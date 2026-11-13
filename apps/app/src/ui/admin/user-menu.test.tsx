@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { render, screen } from "@test/render"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -21,7 +21,7 @@ describe("UserMenu", () => {
 
   it("shows the user's initials, name and email", () => {
     render(<UserMenu user={user} onLogout={vi.fn()} />)
-    const trigger = screen.getByRole("button", { name: /account menu/i })
+    const trigger = screen.getByRole("button", { name: /Menu konta/ })
     expect(trigger).toHaveTextContent("JD")
     expect(trigger).toHaveTextContent("Jane Doe")
     expect(trigger).toHaveTextContent("jane@example.com")
@@ -30,8 +30,8 @@ describe("UserMenu", () => {
   it("toggles from light to dark mode", async () => {
     const u = userEvent.setup()
     render(<UserMenu user={user} onLogout={vi.fn()} />)
-    await u.click(screen.getByRole("button", { name: /account menu/i }))
-    await u.click(await screen.findByRole("menuitem", { name: "Dark mode" }))
+    await u.click(screen.getByRole("button", { name: /Menu konta/ }))
+    await u.click(await screen.findByRole("menuitem", { name: "Tryb ciemny" }))
     expect(theme.setTheme).toHaveBeenCalledWith("dark")
   })
 
@@ -39,8 +39,8 @@ describe("UserMenu", () => {
     theme.resolvedTheme = "dark"
     const u = userEvent.setup()
     render(<UserMenu user={user} onLogout={vi.fn()} />)
-    await u.click(screen.getByRole("button", { name: /account menu/i }))
-    await u.click(await screen.findByRole("menuitem", { name: "Light mode" }))
+    await u.click(screen.getByRole("button", { name: /Menu konta/ }))
+    await u.click(await screen.findByRole("menuitem", { name: "Tryb jasny" }))
     expect(theme.setTheme).toHaveBeenCalledWith("light")
   })
 
@@ -48,8 +48,8 @@ describe("UserMenu", () => {
     const onLogout = vi.fn().mockResolvedValue(undefined)
     const u = userEvent.setup()
     render(<UserMenu user={user} onLogout={onLogout} />)
-    await u.click(screen.getByRole("button", { name: /account menu/i }))
-    await u.click(await screen.findByRole("menuitem", { name: "Log out" }))
+    await u.click(screen.getByRole("button", { name: /Menu konta/ }))
+    await u.click(await screen.findByRole("menuitem", { name: "Wyloguj" }))
     expect(onLogout).toHaveBeenCalledTimes(1)
   })
 })

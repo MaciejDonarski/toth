@@ -1,6 +1,7 @@
 "use client"
 
 import { usePathname } from "next/navigation"
+import { useTranslations } from "next-intl"
 
 import {
   Breadcrumb,
@@ -13,6 +14,7 @@ import {
 import { findNavTrail } from "./nav-config"
 
 function AdminBreadcrumbs() {
+  const t = useTranslations("nav")
   const trail = findNavTrail(usePathname())
 
   if (!trail) {
@@ -23,11 +25,11 @@ function AdminBreadcrumbs() {
     <Breadcrumb>
       <BreadcrumbList>
         <BreadcrumbItem className="hidden md:block">
-          {trail.group.label}
+          {t(`groups.${trail.group.key}`)}
         </BreadcrumbItem>
         <BreadcrumbSeparator className="hidden md:block" />
         <BreadcrumbItem>
-          <BreadcrumbPage>{trail.item.title}</BreadcrumbPage>
+          <BreadcrumbPage>{t(`items.${trail.item.key}`)}</BreadcrumbPage>
         </BreadcrumbItem>
       </BreadcrumbList>
     </Breadcrumb>

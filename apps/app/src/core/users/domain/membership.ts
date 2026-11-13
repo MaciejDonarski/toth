@@ -1,14 +1,7 @@
-import type { Role } from "@/core/auth/domain/role"
-
 /**
- * Domain: company membership rules.
+ * Domain: company membership rules. Role names are shown via the message
+ * key `roles.<ROLE>`.
  */
-
-export const ROLE_LABELS: Readonly<Record<Role, string>> = Object.freeze({
-  ADMIN: "Administrator",
-  MANAGER: "Kierownik",
-  WORKER: "Pracownik",
-})
 
 /** Seats taken = active users + pending (unexpired, unrevoked) invitations. */
 export type SeatUsage = Readonly<{ used: number; limit: number }>

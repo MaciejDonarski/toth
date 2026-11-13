@@ -3,6 +3,7 @@
 import { Fragment, useMemo } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useTranslations } from "next-intl"
 
 import {
   Sidebar,
@@ -31,6 +32,7 @@ function AppSidebar({
   permissions: readonly Permission[]
 }) {
   const pathname = usePathname()
+  const t = useTranslations()
   const groups = useMemo(() => filterNav(navGroups, permissions), [permissions])
 
   return (
@@ -40,17 +42,21 @@ function AppSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={<Link href="/dashboard" />}>
               <LogoMark />
-              <span className="font-heading text-base font-medium">Toth</span>
+              <span className="font-heading text-base font-medium">
+                {t("common.brand")}
+              </span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         {groups.map((group, index) => (
-          <Fragment key={group.label}>
+          <Fragment key={group.key}>
             {index > 0 && <SidebarSeparator className="mx-0" />}
             <SidebarGroup>
-              <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+              <SidebarGroupLabel>
+                {t(`nav.groups.${group.key}`)}
+              </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   {group.items.map((item) => (
@@ -58,10 +64,10 @@ function AppSidebar({
                       <SidebarMenuButton
                         render={<Link href={item.href} />}
                         isActive={isActiveHref(pathname, item.href)}
-                        tooltip={item.title}
+                        tooltip={t(`nav.items.${item.key}`)}
                       >
                         <item.icon />
-                        <span>{item.title}</span>
+                        <span>{t(`nav.items.${item.key}`)}</span>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   ))}

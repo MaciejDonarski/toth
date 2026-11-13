@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { MailCheckIcon } from "lucide-react"
 
@@ -30,21 +31,21 @@ export type ForgotPasswordFormProps = {
 }
 
 export function ForgotPasswordForm({ onRequest }: ForgotPasswordFormProps) {
+  const t = useTranslations()
   const [sent, setSent] = useState(false)
 
   return (
     <div className="flex flex-col gap-6">
       <AuthHeading
-        title="Nie pamiętasz hasła?"
-        description="Podaj adres email konta, a wyślemy link do ustawienia nowego hasła."
+        title={t("auth.forgot.title")}
+        description={t("auth.forgot.description")}
       />
       {sent ? (
         <Alert>
           <MailCheckIcon />
-          <AlertTitle>Sprawdź skrzynkę</AlertTitle>
+          <AlertTitle>{t("auth.forgot.sentTitle")}</AlertTitle>
           <AlertDescription>
-            Jeśli konto z tym adresem istnieje, wysłaliśmy na nie link do zmiany
-            hasła. Link jest ważny {RESET_MINUTES} minut i działa tylko raz.
+            {t("auth.forgot.sentDescription", { minutes: RESET_MINUTES })}
           </AlertDescription>
         </Alert>
       ) : (
@@ -61,20 +62,24 @@ export function ForgotPasswordForm({ onRequest }: ForgotPasswordFormProps) {
           <FormItem
             type="email"
             name="email"
-            label="Email"
+            label={t("common.email")}
             autoComplete="email"
-            placeholder="jan@firma.pl"
+            placeholder={t("common.emailPlaceholder")}
           />
           <FormActions
             actions={[
-              { kind: "submit", label: "Wyślij link", className: "w-full" },
+              {
+                kind: "submit",
+                label: t("auth.forgot.submit"),
+                className: "w-full",
+              },
             ]}
           />
         </Form>
       )}
       <p className="text-center text-sm text-muted-foreground">
         <Link href="/login" className="underline underline-offset-4">
-          Wróć do logowania
+          {t("common.backToLogin")}
         </Link>
       </p>
     </div>

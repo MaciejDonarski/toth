@@ -1,4 +1,6 @@
 import type { Metadata } from "next"
+import { NextIntlClientProvider } from "next-intl"
+import { getLocale, getTranslations } from "next-intl/server"
 import { Geist_Mono, Noto_Sans, Outfit } from "next/font/google"
 
 import "@toth/ui/globals.css"
@@ -15,19 +17,23 @@ const fontHeading = Noto_Sans({
 const fontSans = Outfit({ subsets: ["latin"], variable: "--font-sans" })
 const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" })
 
-export const metadata: Metadata = {
-  title: { default: "Toth", template: "%s · Toth" },
-  description: "Panel administracyjny Toth",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("metadata")
+  return {
+    title: { default: t("appTitle"), template: t("titleTemplate") },
+    description: t("description"),
+  }
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const locale = await getLocale()
   return (
     <html
-      lang="pl"
+      lang={locale}
       suppressHydrationWarning
       className={cn(
         "font-sans antialiased",
@@ -37,9 +43,11 @@ export default function RootLayout({
       )}
     >
       <body>
-        <ThemeProvider>
-          <AppFormDefaults>{children}</AppFormDefaults>
-        </ThemeProvider>
+        <NextIntlClientProvider>
+          <ThemeProvider>
+            <AppFormDefaults>{children}</AppFormDefaults>
+          </ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   )

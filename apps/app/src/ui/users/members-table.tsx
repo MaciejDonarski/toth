@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { useFormatter, useTranslations } from "next-intl"
 
 import { Alert, AlertDescription } from "@toth/ui/components/alert"
 import { Badge } from "@toth/ui/components/badge"
@@ -22,7 +23,6 @@ import {
 } from "@toth/ui/components/table"
 
 import { ROLES, type Role } from "@/core/auth/domain/role"
-import { ROLE_LABELS } from "@/core/users/domain/membership"
 
 export type MemberRow = {
   id: string
@@ -45,17 +45,16 @@ export type MembersTableProps = {
   onSetActive: (userId: string, active: boolean) => Promise<ActionResult>
 }
 
-const ROLE_ITEMS = ROLES.map((role) => ({
-  value: role,
-  label: ROLE_LABELS[role],
-}))
-const dateFormat = new Intl.DateTimeFormat("pl-PL", {
-  dateStyle: "short",
-  timeStyle: "short",
-})
+const DATE_TIME = { dateStyle: "short", timeStyle: "short" } as const
 
 export function MembersTable(props: MembersTableProps) {
   const { members, currentUserId, canManage } = props
+  const t = useTranslations()
+  const format = useFormatter()
+  const roleItems = ROLES.map((role) => ({
+    value: role,
+    label: t(`roles.${role}`),
+  }))
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
@@ -79,11 +78,15 @@ export function MembersTable(props: MembersTableProps) {
       <Table aria-busy={pending || undefined}>
         <TableHeader>
           <TableRow>
-            <TableHead>Użytkownik</TableHead>
-            <TableHead>Rola</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Ostatnie logowanie</TableHead>
-            {canManage && <TableHead className="text-right">Akcje</TableHead>}
+            <TableHead>{t("users.columns.user")}</TableHead>
+            <TableHead>{t("users.columns.role")}</TableHead>
+            <TableHead>{t("users.columns.status")}</TableHead>
+            <TableHead>{t("users.columns.lastLogin")}</TableHead>
+            {canManage && (
+              <TableHead className="text-right">
+                {t("users.columns.actions")}
+              </TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -96,7 +99,10 @@ export function MembersTable(props: MembersTableProps) {
                   <div className="font-medium">
                     {member.name ?? member.email}
                     {self && (
-                      <span className="text-muted-foreground"> (Ty)</span>
+                      <span className="text-muted-foreground">
+                        {" "}
+                        {t("common.you")}
+                      </span>
                     )}
                   </div>
                   {member.name && (
@@ -108,7 +114,7 @@ export function MembersTable(props: MembersTableProps) {
                 <TableCell>
                   {editable ? (
                     <Select
-                      items={ROLE_ITEMS}
+                      items={roleItems}
                       value={member.role}
                       onValueChange={(role) => {
                         if (role && role !== member.role) {
@@ -119,12 +125,12 @@ export function MembersTable(props: MembersTableProps) {
                     >
                       <SelectTrigger
                         className="w-40"
-                        aria-label={`Rola: ${member.email}`}
+                        aria-label={t("users.roleFor", { email: member.email })}
                       >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {ROLE_ITEMS.map((item) => (
+                        {roleItems.map((item) => (
                           <SelectItem key={item.value} value={item.value}>
                             {item.label}
                           </SelectItem>
@@ -132,7 +138,7 @@ export function MembersTable(props: MembersTableProps) {
                       </SelectContent>
                     </Select>
                   ) : (
-                    ROLE_LABELS[member.role]
+                    t(`roles.${member.role}`)
                   )}
                 </TableCell>
                 <TableCell>
@@ -141,13 +147,13 @@ export function MembersTable(props: MembersTableProps) {
                       member.status === "ACTIVE" ? "secondary" : "outline"
                     }
                   >
-                    {member.status === "ACTIVE" ? "Aktywny" : "Wyłączony"}
+                    {t(`users.status.${member.status}`)}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">
                   {member.lastLoginAt
-                    ? dateFormat.format(member.lastLoginAt)
-                    : "Nigdy"}
+                    ? format.dateTime(member.lastLoginAt, DATE_TIME)
+                    : t("common.never")}
                 </TableCell>
                 {canManage && (
                   <TableCell className="text-right">
@@ -156,7 +162,12 @@ export function MembersTable(props: MembersTableProps) {
                         variant="outline"
                         size="sm"
                         disabled={pending}
-                        aria-label={`${member.status === "ACTIVE" ? "Wyłącz" : "Włącz"} ${member.email}`}
+                        aria-label={t(
+                          member.status === "ACTIVE"
+                            ? "users.disableFor"
+                            : "users.enableFor",
+                          { email: member.email }
+                        )}
                         onClick={() =>
                           run(() =>
                             props.onSetActive(
@@ -166,7 +177,11 @@ export function MembersTable(props: MembersTableProps) {
                           )
                         }
                       >
-                        {member.status === "ACTIVE" ? "Wyłącz" : "Włącz"}
+                        {t(
+                          member.status === "ACTIVE"
+                            ? "users.disable"
+                            : "users.enable"
+                        )}
                       </Button>
                     )}
                   </TableCell>

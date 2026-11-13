@@ -1,6 +1,7 @@
 "use server"
 
 import { redirect } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 
 import type { SubmitResult } from "@toth/form"
 
@@ -10,7 +11,7 @@ import {
   setPendingEmail,
 } from "@/auth/cookies"
 import { completeSignIn } from "@/auth/complete-sign-in"
-import { RATE_LIMITED_ERROR, toFieldErrors } from "@/auth/form-errors"
+import { toFieldErrors } from "@/auth/form-errors"
 import { getRequestMeta } from "@/auth/request-meta"
 import { safeRedirectPath } from "@/auth/safe-redirect"
 import { startLogin } from "@/composition-root"
@@ -38,8 +39,9 @@ export async function loginAction(
       await getTrustedDeviceCookie()
     )
   } catch (error) {
+    const t = await getTranslations()
     if (isAuthError(error, "INVALID_CREDENTIALS")) {
-      return { formError: "Nieprawidłowy email lub hasło." }
+      return { formError: t("auth.login.errors.invalidCredentials") }
     }
     if (isAuthError(error, "ACCOUNT_LOCKED")) {
       const retryAt = error.detail?.retryAt
@@ -47,19 +49,17 @@ export async function loginAction(
         retryAt instanceof Date
           ? Math.max(1, Math.ceil((retryAt.getTime() - Date.now()) / 60_000))
           : Math.ceil(AUTH_POLICY.loginLockoutMs / 60_000)
-      return {
-        formError: `Konto jest tymczasowo zablokowane po wielu nieudanych próbach. Spróbuj ponownie za ${minutes} min.`,
-      }
+      return { formError: t("auth.login.errors.locked", { minutes }) }
     }
     if (isAuthError(error, "EMAIL_NOT_VERIFIED")) {
       await setPendingEmail(parsed.data.email)
       return {
-        formError: "Najpierw potwierdź adres email linkiem z wiadomości.",
+        formError: t("auth.login.errors.unverified"),
         unverified: true,
       }
     }
     if (isAuthError(error, "RATE_LIMITED")) {
-      return { formError: RATE_LIMITED_ERROR }
+      return { formError: t("errors.rateLimited") }
     }
     throw error
   }

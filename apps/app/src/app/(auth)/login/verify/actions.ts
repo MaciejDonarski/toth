@@ -1,5 +1,7 @@
 "use server"
 
+import { getTranslations } from "next-intl/server"
+
 import { completeSignIn } from "@/auth/complete-sign-in"
 import {
   clearLoginChallengeCookie,
@@ -23,15 +25,13 @@ export type VerifyCodeResult = {
   expired?: boolean
 }
 
-const RESTART =
-  "Logowanie wygasło lub wykorzystano limit prób. Zaloguj się ponownie."
-
 export async function verifyCodeAction(
   input: LoginCodeInput,
   callbackUrl?: string
 ): Promise<VerifyCodeResult> {
+  const t = await getTranslations()
   const parsed = loginCodeSchema.safeParse(input)
-  if (!parsed.success) return { error: "Kod składa się z 6 cyfr." }
+  if (!parsed.success) return { error: t("validation.code.format") }
 
   const challengeToken = await getLoginChallengeCookie()
   let result
@@ -44,16 +44,14 @@ export async function verifyCodeAction(
   } catch (error) {
     if (isAuthError(error, "CODE_INVALID")) {
       const left = Number(error.detail?.attemptsLeft ?? 0)
-      return {
-        error: `Nieprawidłowy kod. Pozostało prób: ${left}.`,
-      }
+      return { error: t("auth.verify.errors.invalidCode", { count: left }) }
     }
     if (isAuthError(error, "CODE_EXPIRED")) {
-      return { error: "Kod wygasł. Wyślij nowy kod.", expired: true }
+      return { error: t("auth.verify.errors.codeExpired"), expired: true }
     }
     if (isAuthError(error, "CHALLENGE_INVALID")) {
       await clearLoginChallengeCookie()
-      return { error: RESTART, restart: true }
+      return { error: t("auth.verify.errors.restart"), restart: true }
     }
     throw error
   }
@@ -79,6 +77,7 @@ export type ResendCodeResult =
   | { ok: false; error: string; restart?: boolean; retryAt?: number }
 
 export async function resendCodeAction(): Promise<ResendCodeResult> {
+  const t = await getTranslations("auth.verify.errors")
   try {
     const result = await resendLoginCode(await getLoginChallengeCookie())
     return {
@@ -92,20 +91,20 @@ export async function resendCodeAction(): Promise<ResendCodeResult> {
       const retryAt = error.detail?.retryAt
       return {
         ok: false,
-        error: "Odczekaj chwilę przed ponowną wysyłką.",
+        error: t("resendTooSoon"),
         retryAt: retryAt instanceof Date ? retryAt.getTime() : undefined,
       }
     }
     if (isAuthError(error, "RESEND_LIMIT_REACHED")) {
       return {
         ok: false,
-        error: "Wykorzystano limit ponownych wysyłek. Zaloguj się ponownie.",
+        error: t("resendLimit"),
         restart: true,
       }
     }
     if (isAuthError(error, "CHALLENGE_INVALID")) {
       await clearLoginChallengeCookie()
-      return { ok: false, error: RESTART, restart: true }
+      return { ok: false, error: t("restart"), restart: true }
     }
     throw error
   }

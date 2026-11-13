@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { useFormatter, useTranslations } from "next-intl"
 
 import { Alert, AlertDescription } from "@toth/ui/components/alert"
 import { Button } from "@toth/ui/components/button"
@@ -14,7 +15,6 @@ import {
 } from "@toth/ui/components/table"
 
 import type { Role } from "@/core/auth/domain/role"
-import { ROLE_LABELS } from "@/core/users/domain/membership"
 
 export type InvitationRow = {
   id: string
@@ -30,23 +30,22 @@ export type InvitationsTableProps = {
   onRevoke: (invitationId: string) => Promise<{ error?: string }>
 }
 
-const dateFormat = new Intl.DateTimeFormat("pl-PL", {
-  dateStyle: "short",
-  timeStyle: "short",
-})
+const DATE_TIME = { dateStyle: "short", timeStyle: "short" } as const
 
 export function InvitationsTable({
   invitations,
   canRevoke,
   onRevoke,
 }: InvitationsTableProps) {
+  const t = useTranslations()
+  const format = useFormatter()
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
   if (invitations.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        Brak oczekujących zaproszeń.
+        {t("users.noInvitations")}
       </p>
     )
   }
@@ -63,19 +62,23 @@ export function InvitationsTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Email</TableHead>
-            <TableHead>Rola</TableHead>
-            <TableHead>Ważne do</TableHead>
-            {canRevoke && <TableHead className="text-right">Akcje</TableHead>}
+            <TableHead>{t("users.columns.email")}</TableHead>
+            <TableHead>{t("users.columns.role")}</TableHead>
+            <TableHead>{t("users.columns.expiresAt")}</TableHead>
+            {canRevoke && (
+              <TableHead className="text-right">
+                {t("users.columns.actions")}
+              </TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
           {invitations.map((invitation) => (
             <TableRow key={invitation.id}>
               <TableCell>{invitation.email}</TableCell>
-              <TableCell>{ROLE_LABELS[invitation.role]}</TableCell>
+              <TableCell>{t(`roles.${invitation.role}`)}</TableCell>
               <TableCell className="text-sm text-muted-foreground">
-                {dateFormat.format(invitation.expiresAt)}
+                {format.dateTime(invitation.expiresAt, DATE_TIME)}
               </TableCell>
               {canRevoke && (
                 <TableCell className="text-right">
@@ -83,7 +86,9 @@ export function InvitationsTable({
                     variant="outline"
                     size="sm"
                     disabled={pending}
-                    aria-label={`Odwołaj zaproszenie ${invitation.email}`}
+                    aria-label={t("users.revokeFor", {
+                      email: invitation.email,
+                    })}
                     onClick={() => {
                       setError(null)
                       startTransition(async () => {
@@ -92,7 +97,7 @@ export function InvitationsTable({
                       })
                     }}
                   >
-                    Odwołaj
+                    {t("users.revoke")}
                   </Button>
                 </TableCell>
               )}

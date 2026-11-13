@@ -2,6 +2,7 @@
 
 import { useId, useState, useTransition } from "react"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import { CircleAlertIcon } from "lucide-react"
 
 import { Alert, AlertDescription } from "@toth/ui/components/alert"
@@ -48,6 +49,8 @@ export type VerifyCodeFormProps = {
 
 export function VerifyCodeForm(props: VerifyCodeFormProps) {
   const { maskedEmail, onVerify, onResend } = props
+  const t = useTranslations("auth.verify")
+  const tCommon = useTranslations("common")
   const rememberId = useId()
   const [code, setCode] = useState("")
   const [remember, setRemember] = useState(false)
@@ -88,7 +91,7 @@ export function VerifyCodeForm(props: VerifyCodeFormProps) {
         setResendAt(new Date(result.nextResendAt))
         setResendsLeft(result.resendsLeft)
         setCode("")
-        setNotice("Wysłaliśmy nowy kod. Poprzedni przestał działać.")
+        setNotice(t("newCodeSent"))
         return
       }
       setError(result.error)
@@ -100,13 +103,13 @@ export function VerifyCodeForm(props: VerifyCodeFormProps) {
   if (restart) {
     return (
       <div className="flex flex-col gap-6">
-        <AuthHeading title="Weryfikacja dwuetapowa" />
+        <AuthHeading title={t("title")} />
         <Alert variant="destructive">
           <CircleAlertIcon />
           <AlertDescription>{error}</AlertDescription>
         </Alert>
         <Button nativeButton={false} render={<Link href="/login" />}>
-          Wróć do logowania
+          {tCommon("backToLogin")}
         </Button>
       </div>
     )
@@ -121,13 +124,12 @@ export function VerifyCodeForm(props: VerifyCodeFormProps) {
       }}
     >
       <AuthHeading
-        title="Weryfikacja dwuetapowa"
-        description={
-          <>
-            Wpisz {CODE_LENGTH}-cyfrowy kod wysłany na adres{" "}
-            <strong>{maskedEmail}</strong>.
-          </>
-        }
+        title={t("title")}
+        description={t.rich("description", {
+          length: CODE_LENGTH,
+          email: maskedEmail,
+          strong: (chunks) => <strong>{chunks}</strong>,
+        })}
       />
 
       <div className="flex flex-col items-center gap-3">
@@ -136,7 +138,7 @@ export function VerifyCodeForm(props: VerifyCodeFormProps) {
           pattern="^\d+$"
           inputMode="numeric"
           autoComplete="one-time-code"
-          aria-label="Kod weryfikacyjny"
+          aria-label={t("codeLabel")}
           value={code}
           onChange={setCode}
           onComplete={verify}
@@ -154,11 +156,9 @@ export function VerifyCodeForm(props: VerifyCodeFormProps) {
           data-testid="code-timer"
         >
           {expired ? (
-            <span className="text-destructive">
-              Kod wygasł. Wyślij nowy kod.
-            </span>
+            <span className="text-destructive">{t("expired")}</span>
           ) : (
-            <>Kod jest ważny jeszcze {formatCountdown(codeLeft)}</>
+            t("validFor", { time: formatCountdown(codeLeft) })
           )}
         </p>
       </div>
@@ -170,7 +170,7 @@ export function VerifyCodeForm(props: VerifyCodeFormProps) {
           onCheckedChange={(checked) => setRemember(checked === true)}
         />
         <FieldLabel htmlFor={rememberId} className="font-normal">
-          Zapamiętaj tę przeglądarkę na {TRUST_DAYS} dni
+          {t("remember", { days: TRUST_DAYS })}
         </FieldLabel>
       </Field>
 
@@ -195,7 +195,7 @@ export function VerifyCodeForm(props: VerifyCodeFormProps) {
           aria-busy={verifying || undefined}
         >
           {verifying && <Spinner data-icon="inline-start" />}
-          Zweryfikuj
+          {t("submit")}
         </Button>
         <Button
           type="button"
@@ -206,16 +206,16 @@ export function VerifyCodeForm(props: VerifyCodeFormProps) {
         >
           {resending && <Spinner data-icon="inline-start" />}
           {resendsLeft <= 0
-            ? "Limit ponownych wysyłek wykorzystany"
+            ? t("resendLimit")
             : resendLeft > 0
-              ? `Wyślij kod ponownie za ${formatCountdown(resendLeft)}`
-              : "Wyślij kod ponownie"}
+              ? t("resendIn", { time: formatCountdown(resendLeft) })
+              : t("resend")}
         </Button>
       </div>
 
       <p className="text-center text-sm text-muted-foreground">
         <Link href="/login" className="underline underline-offset-4">
-          Zaloguj się na inne konto
+          {t("otherAccount")}
         </Link>
       </p>
     </form>

@@ -1,8 +1,10 @@
 "use server"
 
+import { getTranslations } from "next-intl/server"
+
 import type { SubmitResult } from "@toth/form"
 
-import { RATE_LIMITED_ERROR, toFieldErrors } from "@/auth/form-errors"
+import { toFieldErrors } from "@/auth/form-errors"
 import { getRequestMeta } from "@/auth/request-meta"
 import { requestPasswordReset } from "@/composition-root"
 import {
@@ -26,7 +28,8 @@ export async function forgotPasswordAction(
     await requestPasswordReset(parsed.data.email, await getRequestMeta())
   } catch (error) {
     if (isAuthError(error, "RATE_LIMITED")) {
-      return { formError: RATE_LIMITED_ERROR }
+      const t = await getTranslations("errors")
+      return { formError: t("rateLimited") }
     }
     throw error
   }

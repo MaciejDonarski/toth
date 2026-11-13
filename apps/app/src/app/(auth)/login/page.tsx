@@ -1,5 +1,6 @@
-import type { Metadata } from "next"
+import { translatedMetadata } from "@/i18n/metadata"
 import { redirect } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 import { CircleAlertIcon, CircleCheckIcon } from "lucide-react"
 
 import { Alert, AlertDescription } from "@toth/ui/components/alert"
@@ -10,7 +11,7 @@ import { LoginForm } from "@/ui/auth/login-form"
 
 import { loginAction } from "./actions"
 
-export const metadata: Metadata = { title: "Logowanie" }
+export const generateMetadata = translatedMetadata("login")
 
 type SearchParams = Promise<{
   verified?: string
@@ -31,6 +32,15 @@ export default async function Page({
   // Validated against the DB, so a stale cookie cannot cause a redirect loop.
   if (await getCurrentUser()) redirect(target)
 
+  const t = await getTranslations("auth.login")
+  // Status banners after redirects to /login (?verified=1, ?reset=1, …).
+  const notices = [
+    { show: verified === "1", text: t("verified"), error: false },
+    { show: invited === "1", text: t("invited"), error: false },
+    { show: reset === "1", text: t("reset"), error: false },
+    { show: expired === "1", text: t("expired"), error: true },
+  ].filter((notice) => notice.show)
+
   async function login(values: Parameters<typeof loginAction>[0]) {
     "use server"
     return loginAction(values, target)
@@ -38,39 +48,15 @@ export default async function Page({
 
   return (
     <div className="flex flex-col gap-6">
-      {verified === "1" && (
-        <Alert>
-          <CircleCheckIcon />
-          <AlertDescription>
-            Adres email potwierdzony. Możesz się zalogować.
-          </AlertDescription>
+      {notices.map((notice) => (
+        <Alert
+          key={notice.text}
+          variant={notice.error ? "destructive" : "default"}
+        >
+          {notice.error ? <CircleAlertIcon /> : <CircleCheckIcon />}
+          <AlertDescription>{notice.text}</AlertDescription>
         </Alert>
-      )}
-      {invited === "1" && (
-        <Alert>
-          <CircleCheckIcon />
-          <AlertDescription>
-            Konto zostało utworzone. Zaloguj się, aby dołączyć do firmy.
-          </AlertDescription>
-        </Alert>
-      )}
-      {reset === "1" && (
-        <Alert>
-          <CircleCheckIcon />
-          <AlertDescription>
-            Hasło zostało zmienione, a wszystkie sesje wylogowane. Zaloguj się
-            nowym hasłem.
-          </AlertDescription>
-        </Alert>
-      )}
-      {expired === "1" && (
-        <Alert variant="destructive">
-          <CircleAlertIcon />
-          <AlertDescription>
-            Weryfikacja wygasła. Zaloguj się ponownie.
-          </AlertDescription>
-        </Alert>
-      )}
+      ))}
       <LoginForm onLogin={login} />
     </div>
   )

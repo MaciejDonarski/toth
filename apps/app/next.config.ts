@@ -1,4 +1,5 @@
 import type { NextConfig } from "next"
+import createNextIntlPlugin from "next-intl/plugin"
 
 const nextConfig: NextConfig = {
   // forbidden() / unauthorized() + forbidden.tsx (403 for missing permissions).
@@ -22,4 +23,6 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@toth/ui", "@toth/utils", "@toth/form", "@toth/table"],
 }
 
-export default nextConfig
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts")
+
+export default withNextIntl(nextConfig)

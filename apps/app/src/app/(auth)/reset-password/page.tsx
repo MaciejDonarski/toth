@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import { translatedMetadata } from "@/i18n/metadata"
 
 import { checkPasswordResetToken } from "@/composition-root"
 import type { ResetPasswordInput } from "@/core/auth/application/schemas"
@@ -9,11 +9,10 @@ import {
 
 import { resetPasswordAction } from "./actions"
 
-export const metadata: Metadata = {
-  title: "Nowe hasło",
+export const generateMetadata = translatedMetadata("resetPassword", {
   // Keep the token out of Referer headers sent to other origins.
   referrer: "no-referrer",
-}
+})
 
 export default async function Page({
   searchParams,

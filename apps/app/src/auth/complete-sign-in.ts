@@ -2,6 +2,7 @@ import "server-only"
 
 import { AuthError as NextAuthError } from "next-auth"
 import { redirect } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 
 import { signIn } from "./next-auth"
 import { safeRedirectPath } from "./safe-redirect"
@@ -21,7 +22,8 @@ export async function completeSignIn(
     await signIn("login-grant", { grant, redirect: false })
   } catch (error) {
     if (error instanceof NextAuthError) {
-      return { formError: "Logowanie nie powiodło się. Zaloguj się ponownie." }
+      const t = await getTranslations("auth.login.errors")
+      return { formError: t("signInFailed") }
     }
     throw error
   }

@@ -1,6 +1,7 @@
 "use client"
 
 import { useActionState } from "react"
+import { useTranslations } from "next-intl"
 import Link from "next/link"
 
 import { Alert, AlertDescription, AlertTitle } from "@toth/ui/components/alert"
@@ -15,6 +16,7 @@ export type VerifyEmailFormProps = {
 }
 
 export function VerifyEmailForm({ token, action }: VerifyEmailFormProps) {
+  const t = useTranslations("auth.verifyEmail")
   const [state, formAction, pending] = useActionState<VerifyState, FormData>(
     action,
     {
@@ -29,27 +31,25 @@ export function VerifyEmailForm({ token, action }: VerifyEmailFormProps) {
       <input type="hidden" name="token" value={token} />
       <Button type="submit" disabled={pending} aria-busy={pending || undefined}>
         {pending && <Spinner data-icon="inline-start" />}
-        Potwierdź adres email
+        {t("submit")}
       </Button>
     </form>
   )
 }
 
 export function InvalidVerificationLink() {
+  const t = useTranslations("auth.verifyEmail")
   return (
     <div className="flex flex-col gap-4">
       <Alert variant="destructive">
-        <AlertTitle>Link jest nieprawidłowy lub wygasł</AlertTitle>
-        <AlertDescription>
-          Link mógł zostać już użyty albo minęła jego ważność. Wyślij nowy link,
-          aby potwierdzić adres.
-        </AlertDescription>
+        <AlertTitle>{t("invalidTitle")}</AlertTitle>
+        <AlertDescription>{t("invalidDescription")}</AlertDescription>
       </Alert>
       <Button
         nativeButton={false}
         render={<Link href="/register/check-email" />}
       >
-        Wyślij nowy link
+        {t("sendNew")}
       </Button>
     </div>
   )

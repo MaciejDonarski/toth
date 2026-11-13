@@ -1,11 +1,12 @@
 "use server"
 
 import { redirect } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 
 import type { SubmitResult } from "@toth/form"
 
 import { getPendingEmail, setPendingEmail } from "@/auth/cookies"
-import { RATE_LIMITED_ERROR, toFieldErrors } from "@/auth/form-errors"
+import { toFieldErrors } from "@/auth/form-errors"
 import { getRequestMeta } from "@/auth/request-meta"
 import { registerCompany, resendVerification } from "@/composition-root"
 import {
@@ -27,7 +28,8 @@ export async function registerAction(
     await registerCompany(parsed.data, await getRequestMeta())
   } catch (error) {
     if (isAuthError(error, "RATE_LIMITED")) {
-      return { formError: RATE_LIMITED_ERROR }
+      const t = await getTranslations("errors")
+      return { formError: t("rateLimited") }
     }
     throw error
   }
@@ -47,17 +49,18 @@ export type ResendVerificationResult =
 export async function resendVerificationAction(
   email?: string
 ): Promise<ResendVerificationResult> {
+  const t = await getTranslations()
   const target = email ?? (await getPendingEmail())
   const parsed = resendVerificationSchema.safeParse({ email: target ?? "" })
   if (!parsed.success) {
-    return { ok: false, error: "Podaj prawidłowy adres email." }
+    return { ok: false, error: t("auth.checkEmail.invalidEmail") }
   }
 
   try {
     await resendVerification(parsed.data.email, await getRequestMeta())
   } catch (error) {
     if (isAuthError(error, "RATE_LIMITED")) {
-      return { ok: false, error: RATE_LIMITED_ERROR }
+      return { ok: false, error: t("errors.rateLimited") }
     }
     throw error
   }

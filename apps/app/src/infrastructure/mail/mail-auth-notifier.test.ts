@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 import type { Mailer } from "@/core/notifications/application/ports/mailer"
 
 import { MailAuthNotifier } from "./mail-auth-notifier"
-import { formatDuration } from "./templates/layout"
+import { formatDuration, mailTranslator } from "./templates/auth-templates"
 
 function setup() {
   const mailer: Mailer = { send: vi.fn().mockResolvedValue(undefined) }
@@ -63,6 +63,6 @@ describe("formatDuration", () => {
     [24 * 3_600_000, "24 godziny"],
     [30 * 24 * 3_600_000, "30 dni"],
   ])("%i ms → %s", (ms, expected) => {
-    expect(formatDuration(ms)).toBe(expected)
+    expect(formatDuration(mailTranslator("pl"), ms)).toBe(expected)
   })
 })

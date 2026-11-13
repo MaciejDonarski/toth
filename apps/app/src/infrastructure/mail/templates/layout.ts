@@ -13,24 +13,6 @@ export function escapeHtml(value: string): string {
     .replaceAll("'", "&#39;")
 }
 
-/** "3 minuty", "30 minut", "24 godziny", "3 dni" — Polish plural rules. */
-export function formatDuration(ms: number): string {
-  const minutes = Math.round(ms / 60_000)
-  if (minutes < 60) return plural(minutes, "minuta", "minuty", "minut")
-  const hours = Math.round(minutes / 60)
-  if (hours < 48) return plural(hours, "godzina", "godziny", "godzin")
-  return plural(Math.round(hours / 24), "dzień", "dni", "dni")
-}
-
-function plural(n: number, one: string, few: string, many: string): string {
-  if (n === 1) return `${n} ${one}`
-  const lastDigit = n % 10
-  const lastTwo = n % 100
-  const isFew =
-    lastDigit >= 2 && lastDigit <= 4 && (lastTwo < 12 || lastTwo > 14)
-  return `${n} ${isFew ? few : many}`
-}
-
 type Block =
   | { kind: "p"; text: string }
   | { kind: "code"; text: string }
@@ -41,7 +23,11 @@ type Block =
  * Minimal, client-safe HTML layout plus a matching plain-text version.
  * All dynamic values are escaped here.
  */
-export function renderMail(subject: string, blocks: Block[]): RenderedMail {
+export function renderMail(
+  lang: string,
+  subject: string,
+  blocks: Block[]
+): RenderedMail {
   const htmlBlocks = blocks
     .map((block) => {
       switch (block.kind) {
@@ -57,7 +43,7 @@ export function renderMail(subject: string, blocks: Block[]): RenderedMail {
     })
     .join("\n")
 
-  const html = `<!doctype html><html lang="pl"><body style="margin:0;padding:24px;background:#f9fafb;font-family:system-ui,sans-serif;color:#111827"><div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:8px;padding:32px"><h1 style="margin:0 0 24px;font-size:20px">${escapeHtml(subject)}</h1>${htmlBlocks}</div></body></html>`
+  const html = `<!doctype html><html lang="${escapeHtml(lang)}"><body style="margin:0;padding:24px;background:#f9fafb;font-family:system-ui,sans-serif;color:#111827"><div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:8px;padding:32px"><h1 style="margin:0 0 24px;font-size:20px">${escapeHtml(subject)}</h1>${htmlBlocks}</div></body></html>`
 
   const text = blocks
     .map((block) =>

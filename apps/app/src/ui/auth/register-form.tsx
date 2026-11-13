@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 
 import {
   Form,
@@ -33,11 +34,12 @@ export type RegisterFormProps = {
 }
 
 export function RegisterForm({ onRegister }: RegisterFormProps) {
+  const t = useTranslations()
   return (
     <div className="flex flex-col gap-6">
       <AuthHeading
-        title="Załóż konto firmy"
-        description="Zarejestruj firmę i zostań jej administratorem."
+        title={t("auth.register.title")}
+        description={t("auth.register.description")}
       />
       <Form
         schema={registerSchema}
@@ -48,22 +50,22 @@ export function RegisterForm({ onRegister }: RegisterFormProps) {
         <FormItem
           type="text"
           name="companyName"
-          label="Nazwa firmy"
+          label={t("auth.register.companyName")}
           autoComplete="organization"
           required
         />
         <FormItem
           type="email"
           name="email"
-          label="Email"
+          label={t("common.email")}
           autoComplete="email"
-          placeholder="jan@firma.pl"
+          placeholder={t("common.emailPlaceholder")}
           required
         />
         <FormItem
           type="password"
           name="password"
-          label="Hasło"
+          label={t("common.password")}
           autoComplete="new-password"
           required
         />
@@ -71,35 +73,39 @@ export function RegisterForm({ onRegister }: RegisterFormProps) {
         <FormItem
           type="password"
           name="confirmPassword"
-          label="Powtórz hasło"
+          label={t("common.confirmPassword")}
           autoComplete="new-password"
           required
         />
         <FormItem
           type="checkbox"
           name="acceptTerms"
-          label="Akceptuję regulamin"
+          label={t("common.acceptTerms")}
           description={
             <Link
               href="/regulamin"
               target="_blank"
               className="underline underline-offset-4"
             >
-              Przeczytaj regulamin
+              {t("common.readTerms")}
             </Link>
           }
           required
         />
         <FormActions
           actions={[
-            { kind: "submit", label: "Zarejestruj", className: "w-full" },
+            {
+              kind: "submit",
+              label: t("auth.register.submit"),
+              className: "w-full",
+            },
           ]}
         />
       </Form>
       <p className="text-center text-sm text-muted-foreground">
-        Masz już konto?{" "}
+        {t("auth.register.haveAccount")}{" "}
         <Link href="/login" className="underline underline-offset-4">
-          Zaloguj się
+          {t("auth.register.login")}
         </Link>
       </p>
     </div>

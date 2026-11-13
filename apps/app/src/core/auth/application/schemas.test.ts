@@ -27,7 +27,7 @@ describe("registerSchema", () => {
 
   it("requires terms acceptance", () => {
     expect(issues({ ...valid, acceptTerms: false })).toEqual({
-      acceptTerms: "Musisz zaakceptować regulamin",
+      acceptTerms: "validation.terms.required",
     })
   })
 
@@ -35,7 +35,7 @@ describe("registerSchema", () => {
     expect(
       issues({ ...valid, password: "weak", confirmPassword: "weak" })
     ).toEqual({
-      password: "Hasło nie spełnia wymagań",
+      password: "validation.password.weak",
     })
   })
 
@@ -43,8 +43,8 @@ describe("registerSchema", () => {
     expect(
       issues({ ...valid, companyName: "", confirmPassword: "Zaq1@wsy" })
     ).toEqual({
-      companyName: "Podaj nazwę firmy",
-      confirmPassword: "Hasła nie są identyczne",
+      companyName: "validation.companyName.tooShort",
+      confirmPassword: "validation.password.mismatch",
     })
   })
 })

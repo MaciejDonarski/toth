@@ -1,6 +1,7 @@
 "use client"
 
 import { CheckIcon, XIcon } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { useWatch } from "react-hook-form"
 
 import { cn } from "@toth/ui/lib/utils"
@@ -12,6 +13,7 @@ import { PASSWORD_RULES } from "@/core/auth/domain/password-policy"
  * a `@toth/form` `<Form>`; reads the field named `name`.
  */
 export function PasswordChecklist({ name = "password" }: { name?: string }) {
+  const t = useTranslations("passwordRules")
   const value = useWatch({ name }) as string | undefined
   const password = value ?? ""
   // The max-length rule only matters once violated.
@@ -21,7 +23,7 @@ export function PasswordChecklist({ name = "password" }: { name?: string }) {
 
   return (
     <ul
-      aria-label="Wymagania hasła"
+      aria-label={t("listLabel")}
       className="-mt-3 grid grid-cols-2 gap-x-3 gap-y-1 text-xs"
     >
       {rules.map((rule) => {
@@ -41,10 +43,8 @@ export function PasswordChecklist({ name = "password" }: { name?: string }) {
               className={cn("size-3.5", met && "text-green-600")}
             />
             <span>
-              {rule.label}
-              <span className="sr-only">
-                {met ? " — spełnione" : " — niespełnione"}
-              </span>
+              {t(rule.id, rule.params)}
+              <span className="sr-only">{met ? t("met") : t("unmet")}</span>
             </span>
           </li>
         )

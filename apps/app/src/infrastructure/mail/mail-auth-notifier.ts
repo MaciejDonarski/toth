@@ -1,29 +1,32 @@
 import type { AuthNotifier } from "@/core/auth/application/ports/auth-notifier"
 import type { Mailer } from "@/core/notifications/application/ports/mailer"
 
-import {
-  accountLockedMail,
-  emailVerificationMail,
-  invitationMail,
-  loginCodeMail,
-  passwordChangedMail,
-  passwordResetMail,
-  registrationAttemptMail,
-} from "./templates/auth-templates"
+import { DEFAULT_LOCALE, type AppLocale } from "@/i18n/config"
+
+import { authTemplates } from "./templates/auth-templates"
 import type { RenderedMail } from "./templates/layout"
 
-/** Builds absolute links from `appUrl` and sends Polish auth emails. */
+/**
+ * Builds absolute links from `appUrl` and sends auth emails. Texts come from
+ * the message catalog in `locale` (a per-user language can be passed here
+ * once users have one).
+ */
 export class MailAuthNotifier implements AuthNotifier {
+  readonly #mail: ReturnType<typeof authTemplates>
+
   constructor(
     private readonly mailer: Mailer,
-    private readonly appUrl: string
-  ) {}
+    private readonly appUrl: string,
+    locale: AppLocale = DEFAULT_LOCALE
+  ) {
+    this.#mail = authTemplates(locale)
+  }
 
   sendLoginCode(
     to: string,
     { code, validForMs }: { code: string; validForMs: number }
   ) {
-    return this.#send(to, loginCodeMail(code, validForMs))
+    return this.#send(to, this.#mail.loginCode(code, validForMs))
   }
 
   sendEmailVerification(
@@ -32,14 +35,17 @@ export class MailAuthNotifier implements AuthNotifier {
   ) {
     return this.#send(
       to,
-      emailVerificationMail(this.#url("/verify-email", token), validForMs)
+      this.#mail.emailVerification(
+        this.#url("/verify-email", token),
+        validForMs
+      )
     )
   }
 
   sendRegistrationAttempt(to: string) {
     return this.#send(
       to,
-      registrationAttemptMail(
+      this.#mail.registrationAttempt(
         this.#url("/login"),
         this.#url("/forgot-password")
       )
@@ -52,18 +58,21 @@ export class MailAuthNotifier implements AuthNotifier {
   ) {
     return this.#send(
       to,
-      passwordResetMail(this.#url("/reset-password", token), validForMs)
+      this.#mail.passwordReset(this.#url("/reset-password", token), validForMs)
     )
   }
 
   sendPasswordChanged(to: string) {
-    return this.#send(to, passwordChangedMail(this.#url("/forgot-password")))
+    return this.#send(
+      to,
+      this.#mail.passwordChanged(this.#url("/forgot-password"))
+    )
   }
 
   sendAccountLocked(to: string, { lockedForMs }: { lockedForMs: number }) {
     return this.#send(
       to,
-      accountLockedMail(lockedForMs, this.#url("/forgot-password"))
+      this.#mail.accountLocked(lockedForMs, this.#url("/forgot-password"))
     )
   }
 
@@ -77,7 +86,7 @@ export class MailAuthNotifier implements AuthNotifier {
   ) {
     return this.#send(
       to,
-      invitationMail(
+      this.#mail.invitation(
         this.#url("/accept-invite", token),
         companyName,
         validForMs

@@ -1,6 +1,7 @@
 "use server"
 
 import { redirect } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 
 import type { SubmitResult } from "@toth/form"
 
@@ -31,19 +32,15 @@ export async function acceptInvitationAction(
       await getRequestMeta()
     )
   } catch (error) {
+    const t = await getTranslations("acceptInvite.errors")
     if (isAuthError(error, "TOKEN_INVALID")) {
-      return { formError: "Zaproszenie jest nieważne.", invalid: true }
+      return { formError: t("invalid"), invalid: true }
     }
     if (isAuthError(error, "USER_LIMIT_REACHED")) {
-      return {
-        formError:
-          "Firma wykorzystała limit użytkowników. Skontaktuj się z administratorem.",
-      }
+      return { formError: t("limit") }
     }
     if (isAuthError(error, "EMAIL_TAKEN")) {
-      return {
-        formError: "Ten adres ma już konto. Zaloguj się albo zresetuj hasło.",
-      }
+      return { formError: t("emailTaken") }
     }
     throw error
   }

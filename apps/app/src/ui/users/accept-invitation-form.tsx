@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import Link from "next/link"
 
 import {
@@ -12,6 +13,7 @@ import {
 } from "@toth/form"
 import { Alert, AlertDescription, AlertTitle } from "@toth/ui/components/alert"
 
+import type { Role } from "@/core/auth/domain/role"
 import {
   acceptInvitationSchema,
   type AcceptInvitationInput,
@@ -29,7 +31,7 @@ const DEFAULT_VALUES: AcceptInvitationInput = {
 export type AcceptInvitationFormProps = {
   companyName: string
   email: string
-  roleLabel: string
+  role: Role
   onAccept: (
     values: AcceptInvitationInput
   ) => Promise<
@@ -38,19 +40,19 @@ export type AcceptInvitationFormProps = {
 }
 
 export function AcceptInvitationForm(props: AcceptInvitationFormProps) {
+  const t = useTranslations()
   const [invalid, setInvalid] = useState(false)
   if (invalid) return <InvalidInvitation />
 
   return (
     <div className="flex flex-col gap-6">
       <AuthHeading
-        title={`Dołącz do ${props.companyName}`}
-        description={
-          <>
-            Zaproszenie dla <strong>{props.email}</strong> z rolą{" "}
-            <strong>{props.roleLabel}</strong>. Ustaw swoje dane logowania.
-          </>
-        }
+        title={t("acceptInvite.title", { company: props.companyName })}
+        description={t.rich("acceptInvite.description", {
+          email: props.email,
+          role: t(`roles.${props.role}`),
+          strong: (chunks) => <strong>{chunks}</strong>,
+        })}
       />
       <Form
         schema={acceptInvitationSchema}
@@ -65,14 +67,14 @@ export function AcceptInvitationForm(props: AcceptInvitationFormProps) {
         <FormItem
           type="text"
           name="name"
-          label="Imię i nazwisko"
+          label={t("common.name")}
           autoComplete="name"
           required
         />
         <FormItem
           type="password"
           name="password"
-          label="Hasło"
+          label={t("common.password")}
           autoComplete="new-password"
           required
         />
@@ -80,28 +82,32 @@ export function AcceptInvitationForm(props: AcceptInvitationFormProps) {
         <FormItem
           type="password"
           name="confirmPassword"
-          label="Powtórz hasło"
+          label={t("common.confirmPassword")}
           autoComplete="new-password"
           required
         />
         <FormItem
           type="checkbox"
           name="acceptTerms"
-          label="Akceptuję regulamin"
+          label={t("common.acceptTerms")}
           description={
             <Link
               href="/regulamin"
               target="_blank"
               className="underline underline-offset-4"
             >
-              Przeczytaj regulamin
+              {t("common.readTerms")}
             </Link>
           }
           required
         />
         <FormActions
           actions={[
-            { kind: "submit", label: "Załóż konto", className: "w-full" },
+            {
+              kind: "submit",
+              label: t("acceptInvite.submit"),
+              className: "w-full",
+            },
           ]}
         />
       </Form>
@@ -110,19 +116,19 @@ export function AcceptInvitationForm(props: AcceptInvitationFormProps) {
 }
 
 export function InvalidInvitation() {
+  const t = useTranslations()
   return (
     <div className="flex flex-col gap-4">
-      <AuthHeading title="Zaproszenie" />
+      <AuthHeading title={t("acceptInvite.invalidHeading")} />
       <Alert variant="destructive">
-        <AlertTitle>Zaproszenie jest nieważne</AlertTitle>
+        <AlertTitle>{t("acceptInvite.invalidTitle")}</AlertTitle>
         <AlertDescription>
-          Link wygasł, został już użyty albo zaproszenie odwołano. Poproś
-          administratora firmy o nowe zaproszenie.
+          {t("acceptInvite.invalidDescription")}
         </AlertDescription>
       </Alert>
       <p className="text-center text-sm">
         <Link href="/login" className="underline underline-offset-4">
-          Przejdź do logowania
+          {t("common.goToLogin")}
         </Link>
       </p>
     </div>

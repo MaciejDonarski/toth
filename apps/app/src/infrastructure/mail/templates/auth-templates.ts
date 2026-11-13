@@ -1,105 +1,118 @@
-import { formatDuration, renderMail, type RenderedMail } from "./layout"
+import { createTranslator } from "next-intl"
 
-const NOT_YOU = "Jeśli to nie Ty, zignoruj tę wiadomość."
+import type { AppLocale } from "@/i18n/config"
+import { MESSAGES } from "@/i18n/messages"
 
-export function loginCodeMail(code: string, validForMs: number): RenderedMail {
-  return renderMail("Kod logowania", [
-    { kind: "p", text: "Twój kod do zalogowania:" },
-    { kind: "code", text: code },
-    { kind: "p", text: `Kod jest ważny przez ${formatDuration(validForMs)}.` },
-    { kind: "muted", text: `Nikomu go nie podawaj. ${NOT_YOU}` },
-  ])
+import { renderMail, type RenderedMail } from "./layout"
+
+/** Translator for the `mail` namespace of the message catalog. */
+export function mailTranslator(locale: AppLocale) {
+  return createTranslator({
+    locale,
+    messages: MESSAGES[locale],
+    namespace: "mail",
+  })
 }
 
-export function emailVerificationMail(
-  url: string,
-  validForMs: number
-): RenderedMail {
-  return renderMail("Potwierdź adres email", [
-    {
-      kind: "p",
-      text: "Dziękujemy za rejestrację. Potwierdź adres email, aby aktywować konto.",
-    },
-    { kind: "button", label: "Potwierdź email", href: url },
-    {
-      kind: "muted",
-      text: `Link jest ważny przez ${formatDuration(validForMs)}. ${NOT_YOU}`,
-    },
-  ])
+export type MailTranslator = ReturnType<typeof mailTranslator>
+
+/** 180 000 → "3 minuty", 86 400 000 → "24 godziny", 3 days → "3 dni". */
+export function formatDuration(t: MailTranslator, ms: number): string {
+  const minutes = Math.round(ms / 60_000)
+  if (minutes < 60) return t("duration.minutes", { count: minutes })
+  const hours = Math.round(minutes / 60)
+  if (hours < 48) return t("duration.hours", { count: hours })
+  return t("duration.days", { count: Math.round(hours / 24) })
 }
 
-export function registrationAttemptMail(
-  loginUrl: string,
-  resetUrl: string
-): RenderedMail {
-  return renderMail("Próba rejestracji na Twój adres", [
-    {
-      kind: "p",
-      text: "Ktoś próbował założyć nowe konto na ten adres email, ale konto już istnieje.",
-    },
-    { kind: "button", label: "Zaloguj się", href: loginUrl },
-    { kind: "p", text: "Nie pamiętasz hasła? Możesz je zresetować:" },
-    { kind: "button", label: "Zresetuj hasło", href: resetUrl },
-    { kind: "muted", text: NOT_YOU },
-  ])
-}
+/** Builds the auth emails in one language. All texts come from `mail.*`. */
+export function authTemplates(locale: AppLocale) {
+  const t = mailTranslator(locale)
+  const render = (subject: string, blocks: Parameters<typeof renderMail>[2]) =>
+    renderMail(locale, subject, blocks)
+  const duration = (ms: number) => formatDuration(t, ms)
 
-export function passwordResetMail(
-  url: string,
-  validForMs: number
-): RenderedMail {
-  return renderMail("Reset hasła", [
-    {
-      kind: "p",
-      text: "Otrzymaliśmy prośbę o zresetowanie hasła do Twojego konta.",
+  return {
+    loginCode(code: string, validForMs: number): RenderedMail {
+      return render(t("loginCode.subject"), [
+        { kind: "p", text: t("loginCode.intro") },
+        { kind: "code", text: code },
+        {
+          kind: "p",
+          text: t("loginCode.validity", { duration: duration(validForMs) }),
+        },
+        { kind: "muted", text: `${t("loginCode.warning")} ${t("notYou")}` },
+      ])
     },
-    { kind: "button", label: "Ustaw nowe hasło", href: url },
-    {
-      kind: "muted",
-      text: `Link jest ważny przez ${formatDuration(validForMs)} i działa tylko raz. ${NOT_YOU} Twoje hasło pozostanie bez zmian.`,
-    },
-  ])
-}
 
-export function passwordChangedMail(resetUrl: string): RenderedMail {
-  return renderMail("Hasło zostało zmienione", [
-    {
-      kind: "p",
-      text: "Hasło do Twojego konta zostało właśnie zmienione. Wszystkie sesje i zapamiętane przeglądarki zostały wylogowane.",
+    emailVerification(url: string, validForMs: number): RenderedMail {
+      return render(t("emailVerification.subject"), [
+        { kind: "p", text: t("emailVerification.intro") },
+        { kind: "button", label: t("emailVerification.button"), href: url },
+        {
+          kind: "muted",
+          text: `${t("emailVerification.validity", { duration: duration(validForMs) })} ${t("notYou")}`,
+        },
+      ])
     },
-    { kind: "muted", text: "Jeśli to nie Ty, natychmiast zresetuj hasło:" },
-    { kind: "button", label: "Zresetuj hasło", href: resetUrl },
-  ])
-}
 
-export function accountLockedMail(
-  lockedForMs: number,
-  resetUrl: string
-): RenderedMail {
-  return renderMail("Wykryto nieudane próby logowania", [
-    {
-      kind: "p",
-      text: `Z powodu wielu nieudanych prób logowania konto zostało tymczasowo zablokowane na ${formatDuration(lockedForMs)}.`,
+    registrationAttempt(loginUrl: string, resetUrl: string): RenderedMail {
+      return render(t("registrationAttempt.subject"), [
+        { kind: "p", text: t("registrationAttempt.intro") },
+        {
+          kind: "button",
+          label: t("registrationAttempt.login"),
+          href: loginUrl,
+        },
+        { kind: "p", text: t("registrationAttempt.forgot") },
+        {
+          kind: "button",
+          label: t("registrationAttempt.reset"),
+          href: resetUrl,
+        },
+        { kind: "muted", text: t("notYou") },
+      ])
     },
-    { kind: "p", text: "Jeśli to nie Ty, zalecamy zmianę hasła:" },
-    { kind: "button", label: "Zresetuj hasło", href: resetUrl },
-  ])
-}
 
-export function invitationMail(
-  url: string,
-  companyName: string,
-  validForMs: number
-): RenderedMail {
-  return renderMail(`Zaproszenie do ${companyName}`, [
-    {
-      kind: "p",
-      text: `Zostałeś zaproszony do firmy ${companyName}. Ustaw hasło, aby aktywować konto.`,
+    passwordReset(url: string, validForMs: number): RenderedMail {
+      return render(t("passwordReset.subject"), [
+        { kind: "p", text: t("passwordReset.intro") },
+        { kind: "button", label: t("passwordReset.button"), href: url },
+        {
+          kind: "muted",
+          text: `${t("passwordReset.validity", { duration: duration(validForMs) })} ${t("notYou")} ${t("passwordReset.unchanged")}`,
+        },
+      ])
     },
-    { kind: "button", label: "Przyjmij zaproszenie", href: url },
-    {
-      kind: "muted",
-      text: `Zaproszenie jest ważne przez ${formatDuration(validForMs)}. ${NOT_YOU}`,
+
+    passwordChanged(resetUrl: string): RenderedMail {
+      return render(t("passwordChanged.subject"), [
+        { kind: "p", text: t("passwordChanged.intro") },
+        { kind: "muted", text: t("passwordChanged.notYou") },
+        { kind: "button", label: t("passwordChanged.reset"), href: resetUrl },
+      ])
     },
-  ])
+
+    accountLocked(lockedForMs: number, resetUrl: string): RenderedMail {
+      return render(t("accountLocked.subject"), [
+        {
+          kind: "p",
+          text: t("accountLocked.intro", { duration: duration(lockedForMs) }),
+        },
+        { kind: "p", text: t("accountLocked.advice") },
+        { kind: "button", label: t("accountLocked.reset"), href: resetUrl },
+      ])
+    },
+
+    invitation(url: string, company: string, validForMs: number): RenderedMail {
+      return render(t("invitation.subject", { company }), [
+        { kind: "p", text: t("invitation.intro", { company }) },
+        { kind: "button", label: t("invitation.button"), href: url },
+        {
+          kind: "muted",
+          text: `${t("invitation.validity", { duration: duration(validForMs) })} ${t("notYou")}`,
+        },
+      ])
+    },
+  }
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import Link from "next/link"
 
 import {
@@ -24,13 +25,14 @@ export type LoginFormProps = {
 }
 
 export function LoginForm({ onLogin }: LoginFormProps) {
+  const t = useTranslations()
   const [unverified, setUnverified] = useState(false)
 
   return (
     <div className="flex flex-col gap-6">
       <AuthHeading
-        title="Zaloguj się"
-        description="Podaj email i hasło, aby zalogować się do panelu"
+        title={t("auth.login.title")}
+        description={t("auth.login.description")}
       />
       <Form
         schema={loginSchema}
@@ -45,26 +47,32 @@ export function LoginForm({ onLogin }: LoginFormProps) {
         <FormItem
           type="email"
           name="email"
-          label="Email"
+          label={t("common.email")}
           autoComplete="username"
-          placeholder="jan@firma.pl"
+          placeholder={t("common.emailPlaceholder")}
         />
         <FormItem
           type="password"
           name="password"
-          label="Hasło"
+          label={t("common.password")}
           autoComplete="current-password"
           description={
             <Link
               href="/forgot-password"
               className="underline-offset-4 hover:underline"
             >
-              Nie pamiętasz hasła?
+              {t("auth.login.forgotPassword")}
             </Link>
           }
         />
         <FormActions
-          actions={[{ kind: "submit", label: "Zaloguj", className: "w-full" }]}
+          actions={[
+            {
+              kind: "submit",
+              label: t("auth.login.submit"),
+              className: "w-full",
+            },
+          ]}
         />
       </Form>
       {unverified && (
@@ -73,14 +81,14 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             href="/register/check-email"
             className="underline underline-offset-4"
           >
-            Wyślij link aktywacyjny ponownie
+            {t("auth.login.resendActivation")}
           </Link>
         </p>
       )}
       <p className="text-center text-sm text-muted-foreground">
-        Nie masz konta?{" "}
+        {t("auth.login.noAccount")}{" "}
         <Link href="/register" className="underline underline-offset-4">
-          Zarejestruj firmę
+          {t("auth.login.register")}
         </Link>
       </p>
     </div>

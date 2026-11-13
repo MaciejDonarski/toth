@@ -8,7 +8,8 @@ import {
 import type { Permission } from "@/core/auth/domain/permissions"
 
 type NavItem = {
-  title: string
+  /** Message key: `nav.items.<key>`. */
+  key: "dashboard" | "users" | "settings"
   href: string
   icon: LucideIcon
   /**
@@ -19,16 +20,17 @@ type NavItem = {
 }
 
 type NavGroup = {
-  label: string
+  /** Message key: `nav.groups.<key>`. */
+  key: "overview" | "management"
   items: NavItem[]
 }
 
 const navGroups: NavGroup[] = [
   {
-    label: "Przegląd",
+    key: "overview",
     items: [
       {
-        title: "Pulpit",
+        key: "dashboard",
         href: "/dashboard",
         icon: LayoutDashboardIcon,
         permission: "dashboard.view",
@@ -36,16 +38,16 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
-    label: "Zarządzanie",
+    key: "management",
     items: [
       {
-        title: "Użytkownicy",
+        key: "users",
         href: "/users",
         icon: UsersIcon,
         permission: "users.view",
       },
       {
-        title: "Ustawienia",
+        key: "settings",
         href: "/settings",
         icon: SettingsIcon,
         permission: "settings.view",

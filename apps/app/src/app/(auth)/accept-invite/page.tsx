@@ -1,8 +1,7 @@
-import type { Metadata } from "next"
+import { translatedMetadata } from "@/i18n/metadata"
 
 import { invitationAcceptance } from "@/composition-root"
 import type { AcceptInvitationInput } from "@/core/users/application/schemas"
-import { ROLE_LABELS } from "@/core/users/domain/membership"
 import {
   AcceptInvitationForm,
   InvalidInvitation,
@@ -10,10 +9,9 @@ import {
 
 import { acceptInvitationAction } from "./actions"
 
-export const metadata: Metadata = {
-  title: "Zaproszenie",
+export const generateMetadata = translatedMetadata("acceptInvite", {
   referrer: "no-referrer",
-}
+})
 
 export default async function Page({
   searchParams,
@@ -35,7 +33,7 @@ export default async function Page({
     <AcceptInvitationForm
       companyName={invitation.companyName}
       email={invitation.email}
-      roleLabel={ROLE_LABELS[invitation.role]}
+      role={invitation.role}
       onAccept={accept}
     />
   )

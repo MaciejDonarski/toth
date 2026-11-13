@@ -3,6 +3,7 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
+      "@test/*": ["./test/*"],
       "@toth/ui/*": ["../../packages/ui/src/*"]
     },
     "plugins": [

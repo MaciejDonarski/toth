@@ -1,6 +1,8 @@
-import type { Metadata } from "next"
+import { translatedMetadata } from "@/i18n/metadata"
 
 import { Badge } from "@toth/ui/components/badge"
+
+import { getTranslations } from "next-intl/server"
 
 import { requirePermission } from "@/auth/dal"
 import { companyUsers } from "@/composition-root"
@@ -18,23 +20,24 @@ import {
   setMemberActiveAction,
 } from "./actions"
 
-export const metadata: Metadata = { title: "Użytkownicy" }
+export const generateMetadata = translatedMetadata("users")
 
 export default async function Page() {
   const user = await requirePermission("users.view")
   const { members, invitations, seats } = await companyUsers.overview(
     toTenantContext(user)
   )
+  const t = await getTranslations("users")
   const canInvite = can(user.role, "users.invite")
   const canManage = can(user.role, "users.manage")
 
   return (
     <div className="flex flex-1 flex-col gap-8">
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="font-heading text-2xl font-semibold">Użytkownicy</h1>
+        <h1 className="font-heading text-2xl font-semibold">{t("title")}</h1>
         <Badge
           variant="secondary"
-          aria-label={`Wykorzystane miejsca: ${seats.used} z ${seats.limit}`}
+          aria-label={t("seats", { used: seats.used, limit: seats.limit })}
         >
           {seats.used} / {seats.limit}
         </Badge>
@@ -46,7 +49,7 @@ export default async function Page() {
           className="flex flex-col gap-3"
         >
           <h2 id="invite-heading" className="font-heading text-lg font-medium">
-            Zaproś osobę
+            {t("inviteHeading")}
           </h2>
           <InviteUserForm
             onInvite={inviteUserAction}
@@ -60,7 +63,7 @@ export default async function Page() {
         className="flex flex-col gap-3"
       >
         <h2 id="members-heading" className="font-heading text-lg font-medium">
-          Członkowie firmy
+          {t("membersHeading")}
         </h2>
         <MembersTable
           members={members.map((m) => ({
@@ -86,7 +89,7 @@ export default async function Page() {
           id="invitations-heading"
           className="font-heading text-lg font-medium"
         >
-          Oczekujące zaproszenia
+          {t("invitationsHeading")}
         </h2>
         <InvitationsTable
           invitations={invitations.map((i) => ({

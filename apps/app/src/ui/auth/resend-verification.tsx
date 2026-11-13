@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { useTranslations } from "next-intl"
 
 import { Alert, AlertDescription } from "@toth/ui/components/alert"
 import { Button } from "@toth/ui/components/button"
@@ -33,6 +34,7 @@ export function ResendVerification({
   const [availableAt, setAvailableAt] = useState<Date | null>(() =>
     startInCooldown ? cooldownEnd() : null
   )
+  const t = useTranslations()
   const [email, setEmail] = useState("")
   const [message, setMessage] = useState<ResendResult | null>(null)
   const [pending, startTransition] = useTransition()
@@ -57,7 +59,7 @@ export function ResendVerification({
     >
       {askForEmail && (
         <Field>
-          <FieldLabel htmlFor="resend-email">Email</FieldLabel>
+          <FieldLabel htmlFor="resend-email">{t("common.email")}</FieldLabel>
           <Input
             id="resend-email"
             type="email"
@@ -76,16 +78,14 @@ export function ResendVerification({
       >
         {pending && <Spinner data-icon="inline-start" />}
         {coolingDown
-          ? `Wyślij ponownie za ${formatCountdown(remaining)}`
-          : "Wyślij link ponownie"}
+          ? t("auth.checkEmail.resendIn", { time: formatCountdown(remaining) })
+          : t("auth.checkEmail.resend")}
       </Button>
       <div aria-live="polite">
         {message && (
           <Alert variant={message.ok ? "default" : "destructive"}>
             <AlertDescription>
-              {message.ok
-                ? "Jeśli konto czeka na potwierdzenie, wysłaliśmy nowy link."
-                : message.error}
+              {message.ok ? t("auth.checkEmail.resent") : message.error}
             </AlertDescription>
           </Alert>
         )}

@@ -5,19 +5,22 @@ import { failedPasswordRules } from "../domain/password-policy"
 /**
  * Input schemas shared by the client forms and the server (actions and use
  * cases re-validate — never trust the client).
+ *
+ * Messages are KEYS into the message catalog (src/i18n/messages), never
+ * user-facing text; forms and actions translate them.
  */
 
 export const emailSchema = z
   .string()
   .trim()
   .toLowerCase()
-  .min(1, "Podaj adres email")
-  .max(254, "Adres email jest za długi")
-  .pipe(z.email("Nieprawidłowy adres email"))
+  .min(1, "validation.email.required")
+  .max(254, "validation.email.tooLong")
+  .pipe(z.email("validation.email.invalid"))
 
 export const newPasswordSchema = z.string().superRefine((password, ctx) => {
   if (failedPasswordRules(password).length > 0) {
-    ctx.addIssue({ code: "custom", message: "Hasło nie spełnia wymagań" })
+    ctx.addIssue({ code: "custom", message: "validation.password.weak" })
   }
 })
 
@@ -25,14 +28,14 @@ const registerFields = z.object({
   companyName: z
     .string()
     .trim()
-    .min(2, "Podaj nazwę firmy")
-    .max(120, "Nazwa firmy jest za długa"),
+    .min(2, "validation.companyName.tooShort")
+    .max(120, "validation.companyName.tooLong"),
   email: emailSchema,
   password: newPasswordSchema,
-  confirmPassword: z.string().min(1, "Powtórz hasło"),
+  confirmPassword: z.string().min(1, "validation.password.confirmRequired"),
   acceptTerms: z
     .boolean()
-    .refine((accepted) => accepted, "Musisz zaakceptować regulamin"),
+    .refine((accepted) => accepted, "validation.terms.required"),
 })
 
 const passwordPair = registerFields.pick({
@@ -44,7 +47,7 @@ export const registerSchema = registerFields.refine(
   (data) => data.password === data.confirmPassword,
   {
     path: ["confirmPassword"],
-    message: "Hasła nie są identyczne",
+    message: "validation.password.mismatch",
     // Compare as soon as both password fields are valid, even if other
     // fields still have errors.
     when: (payload) => passwordPair.safeParse(payload.value).success,
@@ -62,25 +65,28 @@ export type ForgotPasswordInput = z.input<typeof forgotPasswordSchema>
 
 const newPasswordFields = z.object({
   password: newPasswordSchema,
-  confirmPassword: z.string().min(1, "Powtórz hasło"),
+  confirmPassword: z.string().min(1, "validation.password.confirmRequired"),
 })
 
 export const resetPasswordSchema = newPasswordFields.refine(
   (data) => data.password === data.confirmPassword,
-  { path: ["confirmPassword"], message: "Hasła nie są identyczne" }
+  { path: ["confirmPassword"], message: "validation.password.mismatch" }
 )
 
 export type ResetPasswordInput = z.input<typeof resetPasswordSchema>
 
 export const loginSchema = z.object({
   email: emailSchema,
-  password: z.string().min(1, "Podaj hasło").max(128, "Hasło jest za długie"),
+  password: z
+    .string()
+    .min(1, "validation.password.required")
+    .max(128, "validation.password.tooLong"),
 })
 
 export type LoginInput = z.input<typeof loginSchema>
 
 export const loginCodeSchema = z.object({
-  code: z.string().regex(/^\d{6}$/, "Kod składa się z 6 cyfr"),
+  code: z.string().regex(/^\d{6}$/, "validation.code.format"),
   remember: z.boolean(),
 })
 

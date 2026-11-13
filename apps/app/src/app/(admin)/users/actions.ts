@@ -1,11 +1,12 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { getTranslations } from "next-intl/server"
 
 import type { SubmitResult } from "@toth/form"
 
 import { requireTenantWith } from "@/auth/dal"
-import { RATE_LIMITED_ERROR, toFieldErrors } from "@/auth/form-errors"
+import { toFieldErrors } from "@/auth/form-errors"
 import { getRequestMeta } from "@/auth/request-meta"
 import { companyUsers } from "@/composition-root"
 import { isAuthError } from "@/core/auth/domain/errors"
@@ -15,26 +16,21 @@ import {
   inviteUserSchema,
   type InviteUserInput,
 } from "@/core/users/application/schemas"
-import type { MemberChangeError } from "@/core/users/domain/membership"
-
-const CHANGE_ERRORS: Record<MemberChangeError, string> = {
-  SELF_CHANGE: "Nie możesz zmienić roli ani wyłączyć własnego konta.",
-  LAST_ADMIN: "Firma musi mieć co najmniej jednego aktywnego administratora.",
-  NOT_FOUND: "Nie znaleziono użytkownika lub zaproszenia.",
-  USER_LIMIT_REACHED: "Osiągnięto limit użytkowników firmy.",
-}
 
 export type MemberActionResult = { error?: string }
 
-/** Maps expected refusals to messages; rethrows everything else. */
-function toActionError(error: unknown): MemberActionResult {
+/** Maps expected refusals to translated messages; rethrows everything else. */
+async function toActionError(error: unknown): Promise<MemberActionResult> {
+  const t = await getTranslations()
   if (error instanceof MemberChangeRefused) {
-    return { error: CHANGE_ERRORS[error.reason] }
+    return { error: t(`users.errors.${error.reason}`) }
   }
   if (isAuthError(error, "USER_LIMIT_REACHED")) {
-    return { error: CHANGE_ERRORS.USER_LIMIT_REACHED }
+    return { error: t("users.errors.USER_LIMIT_REACHED") }
   }
-  if (isAuthError(error, "RATE_LIMITED")) return { error: RATE_LIMITED_ERROR }
+  if (isAuthError(error, "RATE_LIMITED")) {
+    return { error: t("errors.rateLimited") }
+  }
   throw error
 }
 
@@ -53,9 +49,10 @@ export async function inviteUserAction(
     await companyUsers.invite(ctx, parsed.data, await getRequestMeta())
   } catch (error) {
     if (isAuthError(error, "EMAIL_TAKEN")) {
-      return { fieldErrors: { email: "Ten adres ma już konto w systemie." } }
+      // A message key; the form translates field errors.
+      return { fieldErrors: { email: "users.errors.EMAIL_TAKEN" } }
     }
-    const { error: message } = toActionError(error)
+    const { error: message } = await toActionError(error)
     return { formError: message }
   }
   revalidatePath("/users")
@@ -73,7 +70,7 @@ export async function revokeInvitationAction(
       await getRequestMeta()
     )
   } catch (error) {
-    return toActionError(error)
+    return await toActionError(error)
   }
   revalidatePath("/users")
   return {}
@@ -87,7 +84,7 @@ export async function changeRoleAction(
   try {
     await companyUsers.changeRole(ctx, userId, role, await getRequestMeta())
   } catch (error) {
-    return toActionError(error)
+    return await toActionError(error)
   }
   revalidatePath("/users")
   return {}
@@ -106,7 +103,7 @@ export async function setMemberActiveAction(
       await getRequestMeta()
     )
   } catch (error) {
-    return toActionError(error)
+    return await toActionError(error)
   }
   revalidatePath("/users")
   return {}

@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import { translatedMetadata } from "@/i18n/metadata"
 import { redirect } from "next/navigation"
 
 import { getLoginChallengeCookie } from "@/auth/cookies"
@@ -9,7 +9,7 @@ import { VerifyCodeForm } from "@/ui/auth/verify-code-form"
 
 import { resendCodeAction, verifyCodeAction } from "./actions"
 
-export const metadata: Metadata = { title: "Weryfikacja dwuetapowa" }
+export const generateMetadata = translatedMetadata("verify")
 
 export default async function Page({
   searchParams,

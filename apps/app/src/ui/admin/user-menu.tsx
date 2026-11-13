@@ -2,6 +2,7 @@
 
 import { useTransition } from "react"
 import { LogOutIcon, MoonIcon, SunIcon } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { useTheme } from "next-themes"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@toth/ui/components/avatar"
@@ -69,6 +70,7 @@ function UserMenu({
   user: User
   onLogout: () => Promise<void>
 }) {
+  const t = useTranslations("userMenu")
   const { resolvedTheme, setTheme } = useTheme()
   const [isLoggingOut, startLogout] = useTransition()
   const isDark = resolvedTheme === "dark"
@@ -80,7 +82,7 @@ function UserMenu({
           <Button
             variant="ghost"
             className="h-auto gap-2 px-2 py-1.5"
-            aria-label={`Account menu for ${user.name}`}
+            aria-label={t("trigger", { name: user.name })}
           />
         }
       >
@@ -96,7 +98,7 @@ function UserMenu({
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={() => setTheme(isDark ? "light" : "dark")}>
             {isDark ? <SunIcon /> : <MoonIcon />}
-            {isDark ? "Light mode" : "Dark mode"}
+            {isDark ? t("lightMode") : t("darkMode")}
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
@@ -105,7 +107,7 @@ function UserMenu({
           onClick={() => startLogout(onLogout)}
         >
           <LogOutIcon />
-          Log out
+          {t("logout")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

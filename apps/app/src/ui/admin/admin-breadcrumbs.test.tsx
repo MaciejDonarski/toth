@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { render, screen } from "@test/render"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { AdminBreadcrumbs } from "./admin-breadcrumbs"

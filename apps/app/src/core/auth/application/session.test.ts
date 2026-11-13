@@ -103,6 +103,7 @@ describe("validateSession", () => {
     return {
       id: "hash(sid)",
       createdAt: new Date(NOW.getTime() - 60 * MINUTE),
+      authenticatedAt: new Date(NOW.getTime() - 60 * MINUTE),
       lastSeenAt: new Date(NOW.getTime() - 10 * MINUTE),
       absoluteExpiresAt: new Date(NOW.getTime() + 60 * MINUTE),
       revokedAt: null,
@@ -142,6 +143,16 @@ describe("validateSession", () => {
     })
     expect(sessions.findById).toHaveBeenCalledWith("hash(sid)")
     expect(sessions.touch).toHaveBeenCalledWith("hash(sid)", NOW)
+  })
+
+  it("keeps a session re-authenticated after the password change", async () => {
+    const { run } = validate(
+      stored(
+        { authenticatedAt: new Date(NOW.getTime() - MINUTE) },
+        { passwordChangedAt: new Date(NOW.getTime() - 2 * MINUTE) }
+      )
+    )
+    await expect(run("sid")).resolves.not.toBeNull()
   })
 
   it("throttles lastSeenAt writes", async () => {

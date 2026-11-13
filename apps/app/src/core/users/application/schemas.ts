@@ -1,6 +1,10 @@
 import { z } from "zod"
 
-import { emailSchema, newPasswordSchema } from "@/core/auth/application/schemas"
+import {
+  emailSchema,
+  newPasswordSchema,
+  personNameSchema,
+} from "@/core/auth/application/schemas"
 import { ROLES } from "@/core/auth/domain/role"
 
 export const roleSchema = z.enum(ROLES, "validation.role.invalid")
@@ -13,11 +17,7 @@ export const inviteUserSchema = z.object({
 export type InviteUserInput = z.input<typeof inviteUserSchema>
 
 const acceptFields = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(2, "validation.name.tooShort")
-    .max(100, "validation.name.tooLong"),
+  name: personNameSchema,
   password: newPasswordSchema,
   confirmPassword: z.string().min(1, "validation.password.confirmRequired"),
   acceptTerms: z

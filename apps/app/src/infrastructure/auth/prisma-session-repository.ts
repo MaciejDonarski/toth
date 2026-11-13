@@ -25,6 +25,7 @@ export class PrismaSessionRepository implements SessionRepository {
         absoluteExpiresAt: input.absoluteExpiresAt,
         viaTrustedDevice: input.viaTrustedDevice,
         createdAt: input.now,
+        authenticatedAt: input.now,
         lastSeenAt: input.now,
         ip: input.ip,
         userAgent: input.userAgent,
@@ -38,6 +39,7 @@ export class PrismaSessionRepository implements SessionRepository {
       select: {
         id: true,
         createdAt: true,
+        authenticatedAt: true,
         lastSeenAt: true,
         absoluteExpiresAt: true,
         revokedAt: true,

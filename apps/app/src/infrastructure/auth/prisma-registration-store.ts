@@ -20,6 +20,7 @@ export class PrismaRegistrationStore implements RegistrationStore {
           users: {
             create: {
               email: input.email,
+              name: input.name,
               passwordHash: input.passwordHash,
               role: "ADMIN",
               termsVersion: input.termsVersion,

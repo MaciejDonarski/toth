@@ -46,6 +46,8 @@ model User {
   /// Always stored normalized (trimmed, lowercase). Unique across all companies.
   email             String     @unique
   name              String?
+  /// E.164, e.g. +48600100200.
+  phone             String?
   passwordHash      String
   role              Role
   status            UserStatus @default(ACTIVE)
@@ -64,6 +66,7 @@ model User {
   loginChallenges LoginChallenge[]
   authTokens      AuthToken[]
   invitationsSent Invitation[]     @relation("InvitedBy")
+  workingHours    WorkingHours[]
 
   @@index([companyId])
 }
@@ -73,6 +76,19 @@ model User {
 // Secrets are never stored in plain text: only SHA-256 / HMAC hashes.
 // -----------------------------------------------------------------------------
 
+/// Weekly working hours: one range per weekday; no row = day off.
+/// Wall-clock minutes since midnight, no time zone.
+model WorkingHours {
+  userId      String
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// ISO weekday: 1 = Monday … 7 = Sunday.
+  weekday     Int
+  startMinute Int
+  endMinute   Int
+
+  @@id([userId, weekday])
+}
+
 /// Server-side session. The Auth.js JWT only carries this row's id.
 model Session {
   id                String    @id
@@ -81,6 +97,9 @@ model Session {
   /// Denormalized for RLS and auditing.
   companyId         String
   createdAt         DateTime  @default(now())
+  /// Last time the owner proved their credentials in this session (sign-in
+  /// or password change). Sessions older than passwordChangedAt are invalid.
+  authenticatedAt   DateTime  @default(now())
   lastSeenAt        DateTime  @default(now())
   absoluteExpiresAt DateTime
   revokedAt         DateTime?

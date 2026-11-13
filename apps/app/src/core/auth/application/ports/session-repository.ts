@@ -4,6 +4,8 @@ import type { Role } from "../../domain/role"
 export type StoredSession = Readonly<{
   id: string
   createdAt: Date
+  /** Last time credentials were proven in this session (see validateSession). */
+  authenticatedAt: Date
   lastSeenAt: Date
   absoluteExpiresAt: Date
   revokedAt: Date | null

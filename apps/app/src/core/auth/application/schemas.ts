@@ -24,7 +24,15 @@ export const newPasswordSchema = z.string().superRefine((password, ctx) => {
   }
 })
 
+/** A person's full name, as one field ("Jan Kowalski"). */
+export const personNameSchema = z
+  .string()
+  .trim()
+  .min(2, "validation.name.tooShort")
+  .max(100, "validation.name.tooLong")
+
 const registerFields = z.object({
+  name: personNameSchema,
   companyName: z
     .string()
     .trim()

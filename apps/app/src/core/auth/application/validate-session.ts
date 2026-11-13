@@ -51,7 +51,8 @@ export function makeValidateSession(deps: ValidateSessionDeps) {
       session.absoluteExpiresAt > now &&
       idleFor < AUTH_POLICY.sessionIdleTimeoutMs &&
       user.status === "ACTIVE" &&
-      user.passwordChangedAt <= session.createdAt
+      // A password change ends every session not re-authenticated after it.
+      user.passwordChangedAt <= session.authenticatedAt
     if (!valid) return null
 
     if (idleFor >= AUTH_POLICY.sessionTouchThrottleMs) {

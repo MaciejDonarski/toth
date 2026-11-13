@@ -14,8 +14,8 @@ const fontSans = Outfit({ subsets: ["latin"], variable: "--font-sans" })
 const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" })
 
 export const metadata: Metadata = {
-  title: "Toth",
-  description: "Hello world",
+  title: { default: "Toth", template: "%s · Toth" },
+  description: "Toth admin",
 }
 
 export default function RootLayout({

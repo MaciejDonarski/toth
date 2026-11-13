@@ -1,0 +1,40 @@
+# Local dev stack. Prod: Supabase (Postgres 17) + Resend.
+# Host ports are non-default so they do not clash with other local stacks;
+# override with TOTH_DB_PORT / TOTH_SMTP_PORT / TOTH_MAIL_UI_PORT.
+name: toth
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: toth
+      POSTGRES_PASSWORD: toth
+      POSTGRES_DB: toth
+    ports:
+      - "127.0.0.1:${TOTH_DB_PORT:-5433}:5432"
+    volumes:
+      - toth-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U toth -d toth"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mail:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+    ports:
+      - "127.0.0.1:${TOTH_SMTP_PORT:-1026}:1025" # SMTP
+      - "127.0.0.1:${TOTH_MAIL_UI_PORT:-8026}:8025" # Web UI + API
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  toth-db:

@@ -12,7 +12,11 @@
     "build-storybook": "turbo build-storybook",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "stack:up": "docker compose up -d --wait",
+    "stack:down": "docker compose down",
+    "stack:logs": "docker compose logs -f",
+    "stack:reset": "docker compose down -v"
   },
   "devDependencies": {
     "@toth/eslint-config": "workspace:*",

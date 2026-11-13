@@ -23,6 +23,7 @@ function setup(consumed: { userId: string } | null = { userId: "user-1" }) {
   const authTokens: AuthTokenRepository = {
     issue: vi.fn(),
     consume: vi.fn(async () => consumed),
+    isActive: vi.fn(async () => false),
     latestIssuedAt: vi.fn(),
   }
   const deps = {

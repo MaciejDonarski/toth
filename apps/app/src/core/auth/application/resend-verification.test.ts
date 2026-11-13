@@ -31,6 +31,7 @@ function setup({
   const authTokens: AuthTokenRepository = {
     issue: vi.fn(async () => undefined),
     consume: vi.fn(),
+    isActive: vi.fn(async () => false),
     latestIssuedAt: vi.fn(async () => lastSent),
   }
   const deps = {

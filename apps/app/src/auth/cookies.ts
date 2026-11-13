@@ -73,3 +73,7 @@ export async function setTrustedDeviceCookie(token: string, maxAgeMs: number) {
 export async function getTrustedDeviceCookie(): Promise<string | undefined> {
   return (await cookies()).get(TRUSTED_DEVICE)?.value || undefined
 }
+
+export async function clearTrustedDeviceCookie() {
+  ;(await cookies()).delete(TRUSTED_DEVICE)
+}

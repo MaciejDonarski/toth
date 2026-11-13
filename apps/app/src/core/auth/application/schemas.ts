@@ -56,6 +56,22 @@ export type RegisterData = z.output<typeof registerSchema>
 
 export const resendVerificationSchema = z.object({ email: emailSchema })
 
+export const forgotPasswordSchema = z.object({ email: emailSchema })
+
+export type ForgotPasswordInput = z.input<typeof forgotPasswordSchema>
+
+const newPasswordFields = z.object({
+  password: newPasswordSchema,
+  confirmPassword: z.string().min(1, "Powtórz hasło"),
+})
+
+export const resetPasswordSchema = newPasswordFields.refine(
+  (data) => data.password === data.confirmPassword,
+  { path: ["confirmPassword"], message: "Hasła nie są identyczne" }
+)
+
+export type ResetPasswordInput = z.input<typeof resetPasswordSchema>
+
 export const loginSchema = z.object({
   email: emailSchema,
   password: z.string().min(1, "Podaj hasło").max(128, "Hasło jest za długie"),

@@ -51,6 +51,17 @@ export class PrismaAuthTokenRepository implements AuthTokenRepository {
     })
   }
 
+  async isActive(
+    tokenHash: string,
+    type: AuthTokenType,
+    now: Date
+  ): Promise<boolean> {
+    const count = await this.db.authToken.count({
+      where: { tokenHash, type, consumedAt: null, expiresAt: { gt: now } },
+    })
+    return count === 1
+  }
+
   async latestIssuedAt(
     userId: string,
     type: AuthTokenType

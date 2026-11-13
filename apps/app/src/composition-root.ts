@@ -6,6 +6,7 @@ import type { AuthNotifier } from "@/core/auth/application/ports/auth-notifier"
 import type { Clock } from "@/core/auth/application/ports/clock"
 import type { LoginChallengeRepository } from "@/core/auth/application/ports/login-challenge-repository"
 import type { PasswordHasher } from "@/core/auth/application/ports/password-hasher"
+import type { PasswordResetStore } from "@/core/auth/application/ports/password-reset-store"
 import type { RateLimiter } from "@/core/auth/application/ports/rate-limiter"
 import type { RegistrationStore } from "@/core/auth/application/ports/registration-store"
 import type { SessionRepository } from "@/core/auth/application/ports/session-repository"
@@ -13,6 +14,11 @@ import type { TokenService } from "@/core/auth/application/ports/token-service"
 import type { TrustedDeviceRepository } from "@/core/auth/application/ports/trusted-device-repository"
 import type { UserAccountRepository } from "@/core/auth/application/ports/user-account-repository"
 import { makeGetLoginChallenge } from "@/core/auth/application/login-challenge-view"
+import {
+  makeCheckPasswordResetToken,
+  makeRequestPasswordReset,
+  makeResetPassword,
+} from "@/core/auth/application/password-reset"
 import { makeRedeemLoginGrant } from "@/core/auth/application/redeem-login-grant"
 import { makeRegisterCompany } from "@/core/auth/application/register-company"
 import { makeResendLoginCode } from "@/core/auth/application/resend-login-code"
@@ -31,6 +37,7 @@ import { NodeCryptoTokenService } from "@/infrastructure/auth/node-crypto-token-
 import { PrismaAuthEventLog } from "@/infrastructure/auth/prisma-auth-event-log"
 import { PrismaAuthTokenRepository } from "@/infrastructure/auth/prisma-auth-token-repository"
 import { PrismaLoginChallengeRepository } from "@/infrastructure/auth/prisma-login-challenge-repository"
+import { PrismaPasswordResetStore } from "@/infrastructure/auth/prisma-password-reset-store"
 import { PrismaRateLimiter } from "@/infrastructure/auth/prisma-rate-limiter"
 import { PrismaRegistrationStore } from "@/infrastructure/auth/prisma-registration-store"
 import { PrismaSessionRepository } from "@/infrastructure/auth/prisma-session-repository"
@@ -71,6 +78,7 @@ export type AuthInfrastructure = Readonly<{
   challenges: LoginChallengeRepository
   trustedDevices: TrustedDeviceRepository
   sessions: SessionRepository
+  passwordResets: PasswordResetStore
 }>
 
 let authInfrastructure: AuthInfrastructure | undefined
@@ -110,6 +118,7 @@ export function getAuthInfrastructure(): AuthInfrastructure {
     challenges: new PrismaLoginChallengeRepository(db),
     trustedDevices: new PrismaTrustedDeviceRepository(db),
     sessions: new PrismaSessionRepository(db),
+    passwordResets: new PrismaPasswordResetStore(db),
   })
   return authInfrastructure
 }
@@ -166,6 +175,19 @@ function createAuthUseCases() {
       sessions: infra.sessions,
     }),
     revokeSession: makeRevokeSession({ ...common, sessions: infra.sessions }),
+    requestPasswordReset: makeRequestPasswordReset({
+      ...common,
+      authTokens: infra.authTokens,
+    }),
+    checkPasswordResetToken: makeCheckPasswordResetToken({
+      ...common,
+      authTokens: infra.authTokens,
+    }),
+    resetPassword: makeResetPassword({
+      ...common,
+      resets: infra.passwordResets,
+      passwordHasher: infra.passwordHasher,
+    }),
   }
 }
 
@@ -207,3 +229,14 @@ export const validateSession: UseCases["validateSession"] = (...args) =>
 
 export const revokeSession: UseCases["revokeSession"] = (...args) =>
   getAuthUseCases().revokeSession(...args)
+
+export const requestPasswordReset: UseCases["requestPasswordReset"] = (
+  ...args
+) => getAuthUseCases().requestPasswordReset(...args)
+
+export const checkPasswordResetToken: UseCases["checkPasswordResetToken"] = (
+  ...args
+) => getAuthUseCases().checkPasswordResetToken(...args)
+
+export const resetPassword: UseCases["resetPassword"] = (...args) =>
+  getAuthUseCases().resetPassword(...args)

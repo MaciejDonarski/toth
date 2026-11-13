@@ -15,6 +15,7 @@ export const metadata: Metadata = { title: "Logowanie" }
 type SearchParams = Promise<{
   verified?: string
   expired?: string
+  reset?: string
   callbackUrl?: string
 }>
 
@@ -23,7 +24,7 @@ export default async function Page({
 }: {
   searchParams: SearchParams
 }) {
-  const { verified, expired, callbackUrl } = await searchParams
+  const { verified, expired, reset, callbackUrl } = await searchParams
   const target = safeRedirectPath(callbackUrl)
 
   // Validated against the DB, so a stale cookie cannot cause a redirect loop.
@@ -41,6 +42,15 @@ export default async function Page({
           <CircleCheckIcon />
           <AlertDescription>
             Adres email potwierdzony. Możesz się zalogować.
+          </AlertDescription>
+        </Alert>
+      )}
+      {reset === "1" && (
+        <Alert>
+          <CircleCheckIcon />
+          <AlertDescription>
+            Hasło zostało zmienione, a wszystkie sesje wylogowane. Zaloguj się
+            nowym hasłem.
           </AlertDescription>
         </Alert>
       )}

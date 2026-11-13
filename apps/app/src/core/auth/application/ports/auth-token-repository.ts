@@ -23,6 +23,9 @@ export interface AuthTokenRepository {
     now: Date
   ): Promise<{ userId: string } | null>
 
+  /** Whether an active token exists, without consuming it (to render a form). */
+  isActive(tokenHash: string, type: AuthTokenType, now: Date): Promise<boolean>
+
   /** When the latest token of this type was issued, for resend cooldowns. */
   latestIssuedAt(userId: string, type: AuthTokenType): Promise<Date | null>
 }

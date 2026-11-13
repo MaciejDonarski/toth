@@ -28,6 +28,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - The client is generated into `apps/app/src/generated/prisma` (gitignored, created on `postinstall`). Import it as `@/generated/prisma/client`, and only from `src/infrastructure/`. ESLint enforces this.
 - Local stack is `compose.yaml` (`pnpm stack:up`). Ports are 5433/1026/8026, because the defaults clash with other local projects.
 
+## Auth (apps/app)
+
+- next-auth works in hybrid mode. The JWT carries only `sid`, and the `Session` table is the source of truth. Get the user with `getCurrentUser()` / `requireUser()` / `requireTenant()` from `src/auth/dal.ts`. Never read `auth()` directly in pages or actions.
+- Every page **and** every server action checks auth itself. Layouts and `src/proxy.ts` are not enough: the proxy only checks that a cookie exists.
+- `companyId` always comes from the session (`requireTenant()`), never from input. Tenant repositories filter every query by it. Each one needs an A/B isolation test in `test:integration`.
+- Exports of `"use server"` files are public endpoints. Keep internal helpers such as `completeSignIn` in `server-only` modules under `src/auth/`.
+- Security tunables (TTLs, limits, rate limits) live only in `src/core/auth/domain/auth-policy.ts`.
+- Base UI `Button` with `render={<Link/>}` is `role="button"` in tests.
+
 ## shadcn / @toth/ui gotchas
 
 - The preset `bgmJ1SHMW` resolves to style `base-vega`, so components use **Base UI** (`@base-ui/react`), not Radix. Use the `render` prop instead of `asChild`.

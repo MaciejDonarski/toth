@@ -39,3 +39,37 @@ export async function getPendingEmail(): Promise<string | undefined> {
 export async function clearPendingEmail() {
   ;(await cookies()).delete(PENDING_EMAIL)
 }
+
+// --- Login challenge (second step) ------------------------------------------
+
+const LOGIN_CHALLENGE = cookieName("lc")
+
+export async function setLoginChallengeCookie(token: string, maxAgeMs: number) {
+  ;(await cookies()).set(LOGIN_CHALLENGE, token, {
+    ...baseOptions,
+    maxAge: Math.floor(maxAgeMs / 1_000),
+  })
+}
+
+export async function getLoginChallengeCookie(): Promise<string | undefined> {
+  return (await cookies()).get(LOGIN_CHALLENGE)?.value || undefined
+}
+
+export async function clearLoginChallengeCookie() {
+  ;(await cookies()).delete(LOGIN_CHALLENGE)
+}
+
+// --- Trusted device ("remember this browser") -------------------------------
+
+const TRUSTED_DEVICE = cookieName("td")
+
+export async function setTrustedDeviceCookie(token: string, maxAgeMs: number) {
+  ;(await cookies()).set(TRUSTED_DEVICE, token, {
+    ...baseOptions,
+    maxAge: Math.floor(maxAgeMs / 1_000),
+  })
+}
+
+export async function getTrustedDeviceCookie(): Promise<string | undefined> {
+  return (await cookies()).get(TRUSTED_DEVICE)?.value || undefined
+}

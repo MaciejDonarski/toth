@@ -46,6 +46,8 @@ export const AUTH_POLICY = Object.freeze({
     registrationAttemptMailPerEmail: { limit: 3, windowMs: 1 * HOUR },
     verificationResendPerIp: { limit: 10, windowMs: 1 * HOUR },
     verificationResendPerEmail: { limit: 5, windowMs: 1 * HOUR },
+    loginPerIp: { limit: 20, windowMs: 15 * MINUTE },
+    loginPerEmail: { limit: 10, windowMs: 15 * MINUTE },
   }),
 })
 

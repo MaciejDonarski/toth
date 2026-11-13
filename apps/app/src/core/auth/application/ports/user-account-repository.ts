@@ -24,4 +24,20 @@ export interface UserAccountRepository {
   findById(id: string): Promise<UserAccount | null>
   /** Sets `emailVerifiedAt` unless it is already set. */
   markEmailVerified(userId: string, at: Date): Promise<void>
+
+  /**
+   * Atomically counts a failed password and locks the account once the count
+   * reaches `maxAttempts` (resetting the counter). Reports a fresh lock.
+   */
+  recordFailedLogin(input: {
+    userId: string
+    now: Date
+    maxAttempts: number
+    lockoutMs: number
+  }): Promise<{ lockedUntil: Date | null }>
+
+  /** Clears the failed-login counter after a correct password. */
+  resetFailedLogins(userId: string): Promise<void>
+
+  recordLogin(userId: string, at: Date): Promise<void>
 }

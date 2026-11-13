@@ -41,4 +41,6 @@ if (hasDom) {
   Element.prototype.hasPointerCapture ??= vi.fn(() => false)
   Element.prototype.setPointerCapture ??= vi.fn()
   Element.prototype.releasePointerCapture ??= vi.fn()
+  // input-otp (InputOTP) probes the caret position.
+  document.elementFromPoint ??= () => null
 }

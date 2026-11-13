@@ -8,11 +8,13 @@ import {
   CardTitle,
 } from "@toth/ui/components/card"
 
+import { requireUser } from "@/auth/dal"
 import { getGreeting } from "@/composition-root"
 
 export const metadata: Metadata = { title: "Dashboard" }
 
 export default async function Page() {
+  await requireUser()
   const greeting = await getGreeting()
 
   return (

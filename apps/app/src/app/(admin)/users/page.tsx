@@ -1,8 +1,12 @@
 import type { Metadata } from "next"
 
+import { requireUser } from "@/auth/dal"
+
 export const metadata: Metadata = { title: "Users" }
 
-export default function Page() {
+export default async function Page() {
+  await requireUser()
+
   return (
     <div className="flex flex-1 flex-col gap-4">
       <h1 className="font-heading text-2xl font-semibold">Users</h1>

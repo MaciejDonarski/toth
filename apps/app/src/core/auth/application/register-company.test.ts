@@ -7,6 +7,7 @@ import {
   fakePasswordHasher,
   fakeRateLimiter,
   fakeTokenService,
+  fakeUserAccounts,
   NOW,
   userAccount,
 } from "../../../../test/fakes/auth-fakes"
@@ -31,6 +32,7 @@ function setup({
   blocked = [] as string[],
 } = {}) {
   const users: UserAccountRepository = {
+    ...fakeUserAccounts(),
     findByEmail: vi.fn(async () => existing),
     findById: vi.fn(),
     markEmailVerified: vi.fn(),

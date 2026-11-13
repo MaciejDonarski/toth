@@ -4,6 +4,7 @@ import {
   fakeClock,
   fakeEventLog,
   fakeTokenService,
+  fakeUserAccounts,
   NOW,
   userAccount,
 } from "../../../../test/fakes/auth-fakes"
@@ -14,6 +15,7 @@ import { makeVerifyEmail } from "./verify-email"
 
 function setup(consumed: { userId: string } | null = { userId: "user-1" }) {
   const users: UserAccountRepository = {
+    ...fakeUserAccounts(),
     findByEmail: vi.fn(),
     findById: vi.fn(async () => userAccount({ emailVerifiedAt: null })),
     markEmailVerified: vi.fn(async () => undefined),

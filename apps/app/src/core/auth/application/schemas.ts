@@ -55,3 +55,17 @@ export type RegisterInput = z.input<typeof registerSchema>
 export type RegisterData = z.output<typeof registerSchema>
 
 export const resendVerificationSchema = z.object({ email: emailSchema })
+
+export const loginSchema = z.object({
+  email: emailSchema,
+  password: z.string().min(1, "Podaj hasło").max(128, "Hasło jest za długie"),
+})
+
+export type LoginInput = z.input<typeof loginSchema>
+
+export const loginCodeSchema = z.object({
+  code: z.string().regex(/^\d{6}$/, "Kod składa się z 6 cyfr"),
+  remember: z.boolean(),
+})
+
+export type LoginCodeInput = z.input<typeof loginCodeSchema>

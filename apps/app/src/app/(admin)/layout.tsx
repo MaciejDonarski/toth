@@ -6,7 +6,8 @@ import { AdminShell } from "@/ui/admin/admin-shell"
 import { logout } from "./actions"
 
 // Layouts do not re-run on client navigation, so every page also calls
-// requireUser() itself. This check only provides the user for the shell.
+// requirePermission() itself. This check only provides the user (and the
+// permissions that filter the navigation) for the shell.
 export default async function Layout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -17,6 +18,7 @@ export default async function Layout({
     <AdminShell
       defaultOpen={defaultOpen}
       user={{ name: user.name ?? user.email, email: user.email }}
+      permissions={user.permissions}
       onLogout={logout}
     >
       {children}

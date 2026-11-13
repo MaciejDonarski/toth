@@ -5,6 +5,8 @@ import {
   SidebarTrigger,
 } from "@toth/ui/components/sidebar"
 
+import type { Permission } from "@/core/auth/domain/permissions"
+
 import { AdminBreadcrumbs } from "./admin-breadcrumbs"
 import { AppSidebar } from "./app-sidebar"
 import { UserMenu, type User } from "./user-menu"
@@ -13,16 +15,18 @@ function AdminShell({
   children,
   defaultOpen = true,
   user,
+  permissions,
   onLogout,
 }: {
   children: React.ReactNode
   defaultOpen?: boolean
   user: User
+  permissions: readonly Permission[]
   onLogout: () => Promise<void>
 }) {
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
-      <AppSidebar />
+      <AppSidebar permissions={permissions} />
       <SidebarInset>
         <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4">
           <SidebarTrigger className="-ml-1" />

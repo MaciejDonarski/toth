@@ -8,13 +8,13 @@ import {
   CardTitle,
 } from "@toth/ui/components/card"
 
-import { requireUser } from "@/auth/dal"
+import { requirePermission } from "@/auth/dal"
 import { getGreeting } from "@/composition-root"
 
-export const metadata: Metadata = { title: "Dashboard" }
+export const metadata: Metadata = { title: "Pulpit" }
 
 export default async function Page() {
-  await requireUser()
+  await requirePermission("dashboard.view")
   const greeting = await getGreeting()
 
   return (

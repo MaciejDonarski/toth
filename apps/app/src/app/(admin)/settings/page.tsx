@@ -1,15 +1,15 @@
 import type { Metadata } from "next"
 
-import { requireUser } from "@/auth/dal"
+import { requirePermission } from "@/auth/dal"
 
-export const metadata: Metadata = { title: "Settings" }
+export const metadata: Metadata = { title: "Ustawienia" }
 
 export default async function Page() {
-  await requireUser()
+  await requirePermission("settings.view")
 
   return (
     <div className="flex flex-1 flex-col gap-4">
-      <h1 className="font-heading text-2xl font-semibold">Settings</h1>
+      <h1 className="font-heading text-2xl font-semibold">Ustawienia</h1>
       <div className="min-h-64 flex-1 rounded-xl bg-muted/50" />
     </div>
   )

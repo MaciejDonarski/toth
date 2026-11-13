@@ -31,7 +31,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Auth (apps/app)
 
 - next-auth works in hybrid mode. The JWT carries only `sid`, and the `Session` table is the source of truth. Get the user with `getCurrentUser()` / `requireUser()` / `requireTenant()` from `src/auth/dal.ts`. Never read `auth()` directly in pages or actions.
-- Every page **and** every server action checks auth itself. Layouts and `src/proxy.ts` are not enough: the proxy only checks that a cookie exists.
+- Every page **and** every server action checks auth itself with `await requirePermission("…")` (or `requireTenantWith`). Layouts and `src/proxy.ts` are not enough: the proxy only checks that a cookie exists. `src/app/(admin)/authorization-guard.test.ts` fails for any `(admin)` page that skips this check.
+- Permissions, not roles: the matrix is `ROLE_PERMISSIONS` in `core/auth/domain/permissions.ts`. Nav items declare a `permission`, and the sidebar filters by the user's permissions. Hiding an item is UX only.
+- A missing permission → `forbidden()` → `app/forbidden.tsx` (HTTP 403, needs `experimental.authInterrupts`). In dev, the 403 page logs a harmless "Encountered a script tag" warning from next-themes.
 - `companyId` always comes from the session (`requireTenant()`), never from input. Tenant repositories filter every query by it. Each one needs an A/B isolation test in `test:integration`.
 - Exports of `"use server"` files are public endpoints. Keep internal helpers such as `completeSignIn` in `server-only` modules under `src/auth/`.
 - Security tunables (TTLs, limits, rate limits) live only in `src/core/auth/domain/auth-policy.ts`.

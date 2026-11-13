@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest"
 import Page from "./page"
 
 vi.mock("@/auth/dal", () => ({
-  requireUser: vi.fn(async () => ({ id: "u1", role: "ADMIN" })),
+  requirePermission: vi.fn(async () => ({ id: "u1", role: "ADMIN" })),
 }))
 
 describe("Dashboard page", () => {

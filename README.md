@@ -90,3 +90,20 @@ ui/                               app-level React components
 
 ESLint enforces the boundaries. `core/` cannot import adapters, Next or React, and
 `infrastructure/` cannot import driving adapters.
+
+## Before going live (TODO)
+
+Auth works end to end, but these are still open and must be done before production:
+
+- [ ] **Cleanup of expired auth data.** Nothing deletes old rows yet. Add a daily job, for example
+      `/api/cron/cleanup` behind a `CRON_SECRET` and triggered by Vercel Cron or another scheduler, that removes:
+  - expired `LoginChallenge` and `AuthToken` rows
+  - revoked or expired `Session` and `TrustedDevice` rows
+  - stale `RateLimitBucket` rows
+  - `AuthEvent` rows older than the chosen retention period
+- [ ] **Terms of service.** Replace the placeholder at `/regulamin`, and bump
+      `AUTH_POLICY.termsVersion` (`apps/app/src/core/auth/domain/auth-policy.ts`) whenever the terms change.
+- [ ] **Production mail.** Set `MAIL_TRANSPORT=resend`, `RESEND_API_KEY` and a verified `MAIL_FROM`.
+- [ ] **Public URL.** Set `APP_URL` to the production URL (it is used in email links).
+- [ ] _(optional)_ **"My sessions" page.** List the user's active sessions and remembered browsers,
+      with sign-out and forget actions. The permission `sessions.manage-own` already exists.

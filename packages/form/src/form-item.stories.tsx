@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { z } from "zod"
 
 import { Form } from "./form"
+import { FormActions } from "./form-actions"
 import { FormDefaultsProvider } from "./form-defaults"
 import { FormItem, type FormItemProps } from "./form-item"
 import { DATE_PRESETS, DATE_RANGE_PRESETS } from "./lib/date-presets"
@@ -116,4 +117,32 @@ export const PolishDateRange: Story = {
       </FormDefaultsProvider>
     ),
   ],
+}
+
+const keyedSchema = z.object({
+  email: z.email("validation.email.invalid"),
+})
+const dictionary: Record<string, string> = {
+  "validation.email.invalid": "Nieprawidłowy adres email",
+}
+
+/**
+ * Schemas (and servers) return message keys; `translateError` on
+ * `FormDefaultsProvider` turns them into text. Submit to see the error.
+ */
+export const TranslatedErrors: Story = {
+  args: { type: "email", name: "email", label: "Email" },
+  render: (args) => (
+    <FormDefaultsProvider translateError={(key) => dictionary[key] ?? key}>
+      <Form
+        schema={keyedSchema}
+        defaultValues={{ email: "not-an-email" }}
+        onSubmit={() => {}}
+        className="w-80"
+      >
+        <FormItem {...args} />
+        <FormActions actions={[{ kind: "submit", label: "Zapisz" }]} />
+      </Form>
+    </FormDefaultsProvider>
+  ),
 }

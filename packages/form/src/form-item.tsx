@@ -21,6 +21,7 @@ import { InputField } from "./fields/input-field"
 import { RadioField } from "./fields/radio-field"
 import { SelectField } from "./fields/select-field"
 import { TextareaField } from "./fields/textarea-field"
+import { useFormLocale } from "./form-context"
 import { colSpanClassName } from "./lib/grid"
 import type { FormItemConfig, FormItemType } from "./types"
 
@@ -99,7 +100,18 @@ function FormItem<TValues extends FieldValues = FieldValues>(
   const descriptionNode = description && (
     <FieldDescription id={descriptionId}>{description}</FieldDescription>
   )
-  const errorNode = <FieldError id={errorId} errors={[fieldState.error]} />
+  const { translateError } = useFormLocale()
+  const errorMessage = fieldState.error?.message
+  const errorNode = (
+    <FieldError
+      id={errorId}
+      errors={[
+        errorMessage === undefined
+          ? fieldState.error
+          : { message: translateError(errorMessage) },
+      ]}
+    />
+  )
   const fieldProps = {
     "data-invalid": fieldState.invalid || undefined,
     "data-disabled": props.disabled || undefined,

@@ -212,3 +212,70 @@ describe("FormDefaultsProvider", () => {
     ).toBeInTheDocument()
   })
 })
+
+describe("translateError", () => {
+  const keyed = z.object({
+    name: z.string().min(1, "validation.required"),
+  })
+  const dictionary: Record<string, string> = {
+    "validation.required": "To pole jest wymagane",
+    "errors.server": "Coś poszło nie tak",
+  }
+  const translate = (key: string) => dictionary[key] ?? key
+
+  function renderKeyed(
+    onSubmit: FormProps<typeof keyed>["onSubmit"],
+    wrap: (node: ReactNode) => ReactNode = (node) => node,
+    formProps: { translateError?: (m: string) => string } = {}
+  ) {
+    render(
+      wrap(
+        <Form
+          schema={keyed}
+          defaultValues={{ name: "" }}
+          onSubmit={onSubmit}
+          {...formProps}
+        >
+          <FormItem type="text" name="name" label="Name" />
+          <FormActions actions={[{ kind: "submit", label: "Save" }]} />
+        </Form>
+      )
+    )
+  }
+
+  it("shows messages as is by default", async () => {
+    renderKeyed(vi.fn())
+    await userEvent.click(screen.getByRole("button", { name: "Save" }))
+    expect(await screen.findByText("validation.required")).toBeInTheDocument()
+  })
+
+  it("translates field errors and form errors from the provider", async () => {
+    const onSubmit = vi.fn().mockResolvedValue({ formError: "errors.server" })
+    renderKeyed(onSubmit, (node) => (
+      <FormDefaultsProvider translateError={translate}>
+        {node}
+      </FormDefaultsProvider>
+    ))
+
+    await userEvent.click(screen.getByRole("button", { name: "Save" }))
+    expect(await screen.findByText("To pole jest wymagane")).toBeInTheDocument()
+
+    await userEvent.type(screen.getByLabelText("Name"), "x")
+    await userEvent.click(screen.getByRole("button", { name: "Save" }))
+    expect(await screen.findByText("Coś poszło nie tak")).toBeInTheDocument()
+  })
+
+  it("lets a form override the provider", async () => {
+    renderKeyed(
+      vi.fn(),
+      (node) => (
+        <FormDefaultsProvider translateError={translate}>
+          {node}
+        </FormDefaultsProvider>
+      ),
+      { translateError: (key) => `[${key}]` }
+    )
+    await userEvent.click(screen.getByRole("button", { name: "Save" }))
+    expect(await screen.findByText("[validation.required]")).toBeInTheDocument()
+  })
+})

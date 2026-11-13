@@ -53,6 +53,7 @@ function Form<TSchema extends z.ZodType>({
   locale,
   dateFormat,
   messages,
+  translateError,
   className,
   children,
   ...props
@@ -80,8 +81,9 @@ function Form<TSchema extends z.ZodType>({
       locale,
       dateFormat,
       messages,
+      translateError,
     }),
-    [linkComponent, formError, locale, dateFormat, messages]
+    [linkComponent, formError, locale, dateFormat, messages, translateError]
   )
 
   return (

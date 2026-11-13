@@ -11,6 +11,7 @@
         "DATABASE_URL",
         "DIRECT_URL",
         "AUTH_*",
+        "APP_URL",
         "MAIL_*",
         "SMTP_*",
         "RESEND_API_KEY"
@@ -22,7 +23,9 @@
     "typecheck": {
       "dependsOn": ["^typecheck"]
     },
-    "test": {},
+    "test": {
+      "env": ["TEST_*"]
+    },
     "build-storybook": {
       "outputs": ["storybook-static/**"]
     },

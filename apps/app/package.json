@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
@@ -19,18 +20,22 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
-    "@auth/prisma-adapter": "^2.11.3",
+    "@node-rs/argon2": "^2.2.2",
     "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
+    "@toth/form": "workspace:*",
     "@toth/ui": "workspace:*",
     "lucide-react": "^1.72.0",
     "next": "16.4.4",
     "next-auth": "5.0.0-beta.32",
     "next-themes": "^0.4.6",
+    "nodemailer": "^8.0.11",
     "pg": "^8.23.1",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "server-only": "^0.0.1"
+    "resend": "^6.38.0",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -40,6 +45,7 @@
     "@toth/eslint-config": "workspace:^",
     "@toth/typescript-config": "workspace:*",
     "@types/node": "^22",
+    "@types/nodemailer": "^8.0.2",
     "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",

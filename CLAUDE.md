@@ -12,7 +12,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - One workspace: `pnpm --filter @toth/ui test` (or `test:watch`).
 - One file / one test: `pnpm --filter @toth/ui exec vitest run src/components/button.test.tsx -t "name"`.
-- Tests must match `src/**/*.test.{ts,tsx}` (jsdom, Vitest globals, `css: false`).
+- Tests must match `src/**/*.test.{ts,tsx}` (jsdom, Vitest globals, `css: false`). Add `// @vitest-environment node` for native/Node-only code (e.g. argon2).
+- Integration tests are `src/**/*.int.test.ts`. Run them with `pnpm --filter @toth/app test:integration`. They use a real Postgres `toth_test` database on the compose stack (created and migrated by `test/integration/global-setup.ts`) plus Mailpit, and `pnpm test` excludes them.
 
 ## Monorepo wiring
 
@@ -23,6 +24,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Database (Prisma 7)
 
 - Schema: `apps/app/prisma/schema.prisma`. CLI config: `apps/app/prisma.config.ts` (uses `DIRECT_URL`). The runtime client is in `src/infrastructure/db/prisma-client.ts` (`@prisma/adapter-pg`, `DATABASE_URL`).
+- Get the client with `getPrisma()` (lazy). The composition root also builds env-dependent adapters lazily (`getAuthInfrastructure()`), so importing it needs no env.
 - The client is generated into `apps/app/src/generated/prisma` (gitignored, created on `postinstall`). Import it as `@/generated/prisma/client`, and only from `src/infrastructure/`. ESLint enforces this.
 - Local stack is `compose.yaml` (`pnpm stack:up`). Ports are 5433/1026/8026, because the defaults clash with other local projects.
 

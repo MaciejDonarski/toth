@@ -13,6 +13,10 @@ export type AuthEventType =
   | "password_reset"
   | "invitation_sent"
   | "invitation_accepted"
+  | "invitation_revoked"
+  | "member_role_changed"
+  | "member_disabled"
+  | "member_enabled"
 
 export type AuthEvent = Readonly<{
   type: AuthEventType

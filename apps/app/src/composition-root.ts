@@ -31,6 +31,10 @@ import {
 import { makeVerifyEmail } from "@/core/auth/application/verify-email"
 import { makeVerifyLoginCode } from "@/core/auth/application/verify-login-code"
 import { makeGetGreeting } from "@/core/greeting/application/get-greeting"
+import {
+  makeCompanyUsers,
+  makeInvitationAcceptance,
+} from "@/core/users/application/company-users"
 import type { Mailer } from "@/core/notifications/application/ports/mailer"
 import { Argon2PasswordHasher } from "@/infrastructure/auth/argon2-password-hasher"
 import { NodeCryptoTokenService } from "@/infrastructure/auth/node-crypto-token-service"
@@ -48,6 +52,8 @@ import { getServerEnv } from "@/infrastructure/config/env"
 import { getPrisma } from "@/infrastructure/db/prisma-client"
 import { InMemoryGreetingRepository } from "@/infrastructure/greeting/in-memory-greeting-repository"
 import { MailAuthNotifier } from "@/infrastructure/mail/mail-auth-notifier"
+import { PrismaCompanyUsersRepository } from "@/infrastructure/users/prisma-company-users-repository"
+import { PrismaInvitationAcceptanceStore } from "@/infrastructure/users/prisma-invitation-acceptance-store"
 import { ResendMailer } from "@/infrastructure/mail/resend-mailer"
 import { SmtpMailer } from "@/infrastructure/mail/smtp-mailer"
 
@@ -240,3 +246,52 @@ export const checkPasswordResetToken: UseCases["checkPasswordResetToken"] = (
 
 export const resetPassword: UseCases["resetPassword"] = (...args) =>
   getAuthUseCases().resetPassword(...args)
+
+// --- Company users (tenant-scoped) ----------------------------------------------
+
+function createUserUseCases() {
+  const infra = getAuthInfrastructure()
+  return {
+    companyUsers: makeCompanyUsers({
+      companyUsers: new PrismaCompanyUsersRepository(),
+      tokenService: infra.tokenService,
+      rateLimiter: infra.rateLimiter,
+      notifier: infra.authNotifier,
+      events: infra.authEventLog,
+      clock: infra.clock,
+    }),
+    invitationAcceptance: makeInvitationAcceptance({
+      acceptances: new PrismaInvitationAcceptanceStore(getPrisma()),
+      passwordHasher: infra.passwordHasher,
+      tokenService: infra.tokenService,
+      events: infra.authEventLog,
+      clock: infra.clock,
+    }),
+  }
+}
+
+let userUseCases: ReturnType<typeof createUserUseCases> | undefined
+
+function getUserUseCases() {
+  userUseCases ??= createUserUseCases()
+  return userUseCases
+}
+
+type CompanyUsersApi = ReturnType<typeof createUserUseCases>["companyUsers"]
+type InvitationApi = ReturnType<
+  typeof createUserUseCases
+>["invitationAcceptance"]
+
+export const companyUsers: CompanyUsersApi = {
+  overview: (...args) => getUserUseCases().companyUsers.overview(...args),
+  invite: (...args) => getUserUseCases().companyUsers.invite(...args),
+  revokeInvitation: (...args) =>
+    getUserUseCases().companyUsers.revokeInvitation(...args),
+  changeRole: (...args) => getUserUseCases().companyUsers.changeRole(...args),
+  setActive: (...args) => getUserUseCases().companyUsers.setActive(...args),
+}
+
+export const invitationAcceptance: InvitationApi = {
+  find: (...args) => getUserUseCases().invitationAcceptance.find(...args),
+  accept: (...args) => getUserUseCases().invitationAcceptance.accept(...args),
+}

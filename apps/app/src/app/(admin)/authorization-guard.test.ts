@@ -35,4 +35,31 @@ describe("(admin) authorization guard", () => {
       )
     }
   )
+
+  /** Server actions that intentionally need no permission. */
+  const PUBLIC_ACTIONS = new Set(["actions.ts#logout"])
+
+  const actions = files(ADMIN_DIR, /^actions\.ts$/).flatMap((path) => {
+    const source = readFileSync(path, "utf8")
+    return source
+      .split(/(?=export async function )/)
+      .slice(1)
+      .map((chunk) => {
+        const name = /export async function (\w+)/.exec(chunk)?.[1] ?? "?"
+        return [`${relative(ADMIN_DIR, path)}#${name}`, chunk] as const
+      })
+  })
+
+  it("finds the admin server actions", () => {
+    expect(actions.length).toBeGreaterThanOrEqual(5)
+  })
+
+  it.each(actions.filter(([id]) => !PUBLIC_ACTIONS.has(id)))(
+    "%s authorizes before doing anything",
+    (_id, body) => {
+      expect(body).toMatch(
+        /await require(TenantWith|Permission)\(\s*"[a-z.-]+"\s*\)/
+      )
+    }
+  )
 })

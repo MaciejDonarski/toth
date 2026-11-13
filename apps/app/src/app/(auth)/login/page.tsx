@@ -16,6 +16,7 @@ type SearchParams = Promise<{
   verified?: string
   expired?: string
   reset?: string
+  invited?: string
   callbackUrl?: string
 }>
 
@@ -24,7 +25,7 @@ export default async function Page({
 }: {
   searchParams: SearchParams
 }) {
-  const { verified, expired, reset, callbackUrl } = await searchParams
+  const { verified, expired, reset, invited, callbackUrl } = await searchParams
   const target = safeRedirectPath(callbackUrl)
 
   // Validated against the DB, so a stale cookie cannot cause a redirect loop.
@@ -42,6 +43,14 @@ export default async function Page({
           <CircleCheckIcon />
           <AlertDescription>
             Adres email potwierdzony. Możesz się zalogować.
+          </AlertDescription>
+        </Alert>
+      )}
+      {invited === "1" && (
+        <Alert>
+          <CircleCheckIcon />
+          <AlertDescription>
+            Konto zostało utworzone. Zaloguj się, aby dołączyć do firmy.
           </AlertDescription>
         </Alert>
       )}

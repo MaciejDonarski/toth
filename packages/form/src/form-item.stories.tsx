@@ -46,6 +46,7 @@ export const Text: Story = {
   },
 }
 export const Email: Story = { args: { type: "email", label: "Email" } }
+export const Time: Story = { args: { type: "time", label: "Start", step: 900 } }
 export const Password: Story = { args: { type: "password", label: "Password" } }
 export const NumberInput: Story = {
   args: { type: "number", label: "Quantity", min: 0, step: 1 },

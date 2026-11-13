@@ -27,7 +27,9 @@ export interface FormOption {
   disabled?: boolean
 }
 
-export type InputType = "text" | "email" | "password" | "number" | "tel" | "url"
+/** Native input types. `time` holds a `"HH:MM"` string. */
+export type InputType =
+  "text" | "email" | "password" | "number" | "tel" | "url" | "time"
 
 interface BaseItem<TValues extends FieldValues> {
   name: FieldPath<TValues>

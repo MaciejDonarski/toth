@@ -34,6 +34,7 @@ const RENDERERS = {
   number: InputField,
   tel: InputField,
   url: InputField,
+  time: InputField,
   textarea: TextareaField,
   select: SelectField,
   multiselect: SelectField,

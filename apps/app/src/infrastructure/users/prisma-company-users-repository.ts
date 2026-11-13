@@ -65,6 +65,7 @@ export class PrismaCompanyUsersRepository implements CompanyUsersRepository {
           id: true,
           email: true,
           name: true,
+          phone: true,
           role: true,
           status: true,
           lastLoginAt: true,

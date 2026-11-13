@@ -7,6 +7,8 @@ export type Member = Readonly<{
   id: string
   email: string
   name: string | null
+  /** E.164, or null. */
+  phone: string | null
   role: Role
   status: "ACTIVE" | "DISABLED"
   lastLoginAt: Date | null

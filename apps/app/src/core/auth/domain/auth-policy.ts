@@ -51,6 +51,7 @@ export const AUTH_POLICY = Object.freeze({
     passwordResetPerIp: { limit: 5, windowMs: 1 * HOUR },
     passwordResetPerEmail: { limit: 3, windowMs: 1 * HOUR },
     invitationsPerCompany: { limit: 20, windowMs: 1 * HOUR },
+    passwordChangePerUser: { limit: 5, windowMs: 15 * MINUTE },
   }),
 })
 

@@ -12,6 +12,7 @@ export const PERMISSIONS = [
   "settings.view",
   "company.manage",
   "sessions.manage-own",
+  "profile.edit-own",
 ] as const
 
 export type Permission = (typeof PERMISSIONS)[number]
@@ -24,8 +25,9 @@ export const ROLE_PERMISSIONS: Readonly<Record<Role, readonly Permission[]>> =
       "users.view",
       "settings.view",
       "sessions.manage-own",
+      "profile.edit-own",
     ],
-    WORKER: ["dashboard.view", "sessions.manage-own"],
+    WORKER: ["dashboard.view", "sessions.manage-own", "profile.edit-own"],
   })
 
 export function permissionsFor(role: Role): readonly Permission[] {

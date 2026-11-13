@@ -139,7 +139,11 @@ describe("validateSession", () => {
       email: "jan@firma.pl",
       name: null,
       role: "WORKER",
-      permissions: ["dashboard.view", "sessions.manage-own"],
+      permissions: [
+        "dashboard.view",
+        "sessions.manage-own",
+        "profile.edit-own",
+      ],
     })
     expect(sessions.findById).toHaveBeenCalledWith("hash(sid)")
     expect(sessions.touch).toHaveBeenCalledWith("hash(sid)", NOW)

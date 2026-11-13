@@ -6,13 +6,12 @@ import type { z } from "zod"
  */
 export function toFieldErrors<T extends object>(
   error: z.ZodError<T>
-): Partial<Record<Extract<keyof T, string>, string>> {
+): Partial<Record<string, string>> {
   const result: Partial<Record<string, string>> = {}
   for (const issue of error.issues) {
-    const key = issue.path[0]
-    if (typeof key === "string" && !(key in result)) {
-      result[key] = issue.message
-    }
+    // Nested fields use react-hook-form paths, e.g. "days.1.end".
+    const key = issue.path.map(String).join(".")
+    if (key && !(key in result)) result[key] = issue.message
   }
-  return result as Partial<Record<Extract<keyof T, string>, string>>
+  return result
 }

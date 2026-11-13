@@ -9,11 +9,11 @@ import type { RequestMeta } from "@/core/auth/application/request-meta"
 import { AUTH_POLICY } from "@/core/auth/domain/auth-policy"
 import { normalizeEmail } from "@/core/auth/domain/email"
 import { AuthError } from "@/core/auth/domain/errors"
-import { can, type Permission } from "@/core/auth/domain/permissions"
 import type { Role } from "@/core/auth/domain/role"
 import type { TenantContext } from "@/core/auth/domain/tenant-context"
 
 import type { MemberChangeError } from "../domain/membership"
+import { assertCan } from "./assert-can"
 import type {
   CompanyUsersRepository,
   Member,
@@ -31,11 +31,6 @@ import {
   type AcceptInvitationInput,
   type InviteUserInput,
 } from "./schemas"
-
-/** Defense in depth: use cases re-check the permission, not only the caller. */
-function assertCan(ctx: TenantContext, permission: Permission) {
-  if (!can(ctx.role, permission)) throw new AuthError("FORBIDDEN")
-}
 
 export class MemberChangeRefused extends Error {
   constructor(readonly reason: MemberChangeError) {

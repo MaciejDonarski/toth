@@ -9,6 +9,7 @@ import { companyUsers } from "@/composition-root"
 import { toTenantContext } from "@/core/auth/application/validate-session"
 import { can } from "@/core/auth/domain/permissions"
 import { hasFreeSeat } from "@/core/users/domain/membership"
+import { formatPhone } from "@/core/users/domain/profile"
 import { InvitationsTable } from "@/ui/users/invitations-table"
 import { InviteUserForm } from "@/ui/users/invite-user-form"
 import { MembersTable } from "@/ui/users/members-table"
@@ -70,6 +71,7 @@ export default async function Page() {
             id: m.id,
             email: m.email,
             name: m.name,
+            phone: m.phone ? formatPhone(m.phone) : null,
             role: m.role,
             status: m.status,
             lastLoginAt: m.lastLoginAt?.getTime() ?? null,

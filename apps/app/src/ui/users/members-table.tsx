@@ -28,6 +28,8 @@ export type MemberRow = {
   id: string
   email: string
   name: string | null
+  /** Formatted for display, or null. */
+  phone: string | null
   role: Role
   status: "ACTIVE" | "DISABLED"
   /** Epoch ms, or null if the user never signed in. */
@@ -79,6 +81,7 @@ export function MembersTable(props: MembersTableProps) {
         <TableHeader>
           <TableRow>
             <TableHead>{t("users.columns.user")}</TableHead>
+            <TableHead>{t("users.columns.phone")}</TableHead>
             <TableHead>{t("users.columns.role")}</TableHead>
             <TableHead>{t("users.columns.status")}</TableHead>
             <TableHead>{t("users.columns.lastLogin")}</TableHead>
@@ -110,6 +113,9 @@ export function MembersTable(props: MembersTableProps) {
                       {member.email}
                     </div>
                   )}
+                </TableCell>
+                <TableCell className="text-sm whitespace-nowrap text-muted-foreground">
+                  {member.phone ?? "—"}
                 </TableCell>
                 <TableCell>
                   {editable ? (

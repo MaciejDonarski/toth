@@ -20,16 +20,19 @@ describe("role permissions", () => {
           "settings.view",
           "company.manage",
           "sessions.manage-own",
+          "profile.edit-own",
         ],
         "MANAGER": [
           "dashboard.view",
           "users.view",
           "settings.view",
           "sessions.manage-own",
+          "profile.edit-own",
         ],
         "WORKER": [
           "dashboard.view",
           "sessions.manage-own",
+          "profile.edit-own",
         ],
       }
     `)

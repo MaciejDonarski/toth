@@ -35,6 +35,7 @@ import {
   makeCompanyUsers,
   makeInvitationAcceptance,
 } from "@/core/users/application/company-users"
+import { makeProfile } from "@/core/users/application/profile"
 import type { Mailer } from "@/core/notifications/application/ports/mailer"
 import { Argon2PasswordHasher } from "@/infrastructure/auth/argon2-password-hasher"
 import { NodeCryptoTokenService } from "@/infrastructure/auth/node-crypto-token-service"
@@ -54,6 +55,10 @@ import { InMemoryGreetingRepository } from "@/infrastructure/greeting/in-memory-
 import { MailAuthNotifier } from "@/infrastructure/mail/mail-auth-notifier"
 import { PrismaCompanyUsersRepository } from "@/infrastructure/users/prisma-company-users-repository"
 import { PrismaInvitationAcceptanceStore } from "@/infrastructure/users/prisma-invitation-acceptance-store"
+import {
+  PrismaPasswordChangeStore,
+  PrismaProfileRepository,
+} from "@/infrastructure/users/prisma-profile-repository"
 import { ResendMailer } from "@/infrastructure/mail/resend-mailer"
 import { SmtpMailer } from "@/infrastructure/mail/smtp-mailer"
 
@@ -260,6 +265,17 @@ function createUserUseCases() {
       events: infra.authEventLog,
       clock: infra.clock,
     }),
+    profile: makeProfile({
+      profiles: new PrismaProfileRepository(),
+      passwordChanges: new PrismaPasswordChangeStore(),
+      users: infra.users,
+      passwordHasher: infra.passwordHasher,
+      tokenService: infra.tokenService,
+      rateLimiter: infra.rateLimiter,
+      notifier: infra.authNotifier,
+      events: infra.authEventLog,
+      clock: infra.clock,
+    }),
     invitationAcceptance: makeInvitationAcceptance({
       acceptances: new PrismaInvitationAcceptanceStore(getPrisma()),
       passwordHasher: infra.passwordHasher,
@@ -294,4 +310,13 @@ export const companyUsers: CompanyUsersApi = {
 export const invitationAcceptance: InvitationApi = {
   find: (...args) => getUserUseCases().invitationAcceptance.find(...args),
   accept: (...args) => getUserUseCases().invitationAcceptance.accept(...args),
+}
+
+type ProfileApi = ReturnType<typeof createUserUseCases>["profile"]
+
+export const profile: ProfileApi = {
+  get: (...args) => getUserUseCases().profile.get(...args),
+  update: (...args) => getUserUseCases().profile.update(...args),
+  changePassword: (...args) =>
+    getUserUseCases().profile.changePassword(...args),
 }

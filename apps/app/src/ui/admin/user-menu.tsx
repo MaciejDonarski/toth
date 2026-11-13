@@ -1,7 +1,8 @@
 "use client"
 
 import { useTransition } from "react"
-import { LogOutIcon, MoonIcon, SunIcon } from "lucide-react"
+import { LogOutIcon, MoonIcon, SunIcon, UserIcon } from "lucide-react"
+import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { useTheme } from "next-themes"
 
@@ -96,6 +97,10 @@ function UserMenu({
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
+          <DropdownMenuItem render={<Link href="/profile" />}>
+            <UserIcon />
+            {t("profile")}
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setTheme(isDark ? "light" : "dark")}>
             {isDark ? <SunIcon /> : <MoonIcon />}
             {isDark ? t("lightMode") : t("darkMode")}

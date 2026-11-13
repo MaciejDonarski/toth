@@ -246,7 +246,9 @@
       "tooLong": "Hasło jest za długie",
       "weak": "Hasło nie spełnia wymagań",
       "confirmRequired": "Powtórz hasło",
-      "mismatch": "Hasła nie są identyczne"
+      "mismatch": "Hasła nie są identyczne",
+      "currentInvalid": "Obecne hasło jest nieprawidłowe",
+      "sameAsCurrent": "Nowe hasło musi się różnić od obecnego"
     },
     "companyName": {
       "tooShort": "Podaj nazwę firmy",
@@ -277,6 +279,14 @@
       "invalid_element": "Nieprawidłowy element",
       "invalid_value": "Nieprawidłowa wartość",
       "custom": "Nieprawidłowa wartość"
+    },
+    "phone": {
+      "invalid": "Nieprawidłowy numer telefonu",
+      "tooLong": "Numer telefonu jest za długi"
+    },
+    "workingHours": {
+      "invalidTime": "Podaj godzinę w formacie GG:MM",
+      "order": "Koniec musi być później niż początek"
     }
   },
   "mail": {
@@ -329,6 +339,40 @@
       "intro": "Zostałeś zaproszony do firmy {company}. Ustaw hasło, aby aktywować konto.",
       "button": "Przyjmij zaproszenie",
       "validity": "Zaproszenie jest ważne przez {duration}."
+    }
+  },
+  "profile": {
+    "title": "Profil",
+    "detailsHeading": "Twoje dane",
+    "email": "Email",
+    "role": "Rola",
+    "phone": "Telefon",
+    "phonePlaceholder": "600 100 200",
+    "phoneDescription": "Numer zagraniczny wpisz z prefiksem kraju, np. +49.",
+    "hoursHeading": "Czas pracy",
+    "hoursDescription": "Zaznacz dni, w które pracujesz, i podaj godziny. Niezaznaczony dzień jest wolny.",
+    "worksOn": "Pracuje w: {day}",
+    "from": "Od",
+    "to": "Do",
+    "fromFor": "Od ({day})",
+    "toFor": "Do ({day})",
+    "save": "Zapisz zmiany",
+    "saved": "Zapisano zmiany.",
+    "passwordHeading": "Zmiana hasła",
+    "passwordDescription": "Po zmianie hasła pozostałe sesje i zapamiętane przeglądarki zostaną wylogowane. Ta sesja pozostanie aktywna.",
+    "currentPassword": "Obecne hasło",
+    "newPassword": "Nowe hasło",
+    "confirmPassword": "Powtórz nowe hasło",
+    "changePassword": "Zmień hasło",
+    "passwordChanged": "Hasło zostało zmienione. Pozostałe sesje wylogowano.",
+    "weekdays": {
+      "1": "Poniedziałek",
+      "2": "Wtorek",
+      "3": "Środa",
+      "4": "Czwartek",
+      "5": "Piątek",
+      "6": "Sobota",
+      "7": "Niedziela"
     }
   }
 }

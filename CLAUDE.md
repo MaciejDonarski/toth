@@ -32,6 +32,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - next-auth works in hybrid mode. The JWT carries only `sid`, and the `Session` table is the source of truth. Get the user with `getCurrentUser()` / `requireUser()` / `requireTenant()` from `src/auth/dal.ts`. Never read `auth()` directly in pages or actions.
 - Every page **and** every server action checks auth itself with `await requirePermission("…")` (or `requireTenantWith`). Layouts and `src/proxy.ts` are not enough: the proxy only checks that a cookie exists. `src/app/(admin)/authorization-guard.test.ts` fails for any `(admin)` page or exported server action that skips this check.
+- Profile: `/profile` (permission `profile.edit-own`, all roles) edits only `ctx.userId`. A password change keeps the current session (`Session.authenticatedAt`) and revokes the others.
 - Permissions, not roles: the matrix is `ROLE_PERMISSIONS` in `core/auth/domain/permissions.ts`. Nav items declare a `permission`, and the sidebar filters by the user's permissions. Hiding an item is UX only.
 - A missing permission → `forbidden()` → `app/forbidden.tsx` (HTTP 403, needs `experimental.authInterrupts`). In dev, the 403 page logs a harmless "Encountered a script tag" warning from next-themes.
 - `companyId` always comes from the session (`requireTenant()`), never from input. Tenant repositories filter every query by it. Each one needs an A/B isolation test in `test:integration`.
@@ -43,6 +44,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Exports of `"use server"` files are public endpoints. Keep internal helpers such as `completeSignIn` in `server-only` modules under `src/auth/`.
 - Security tunables (TTLs, limits, rate limits) live only in `src/core/auth/domain/auth-policy.ts`.
 - Base UI `Button` with `render={<Link/>}` is `role="button"` in tests.
+
+## i18n (apps/app)
+
+- next-intl runs without locale routing. The locale comes from the `locale` cookie and falls back to `pl`; configuration lives in `src/i18n/`.
+- All UI text is in `src/i18n/messages/pl.json`; code only holds keys. `t("…")` keys are type-checked (`AppConfig` in `src/i18n/global.d.ts`).
+- Where each kind of text gets translated:
+  - Zod schemas (including those in `core/`) return message keys, and `@toth/form` translates them via `translateError` (wired in `AppFormDefaults`).
+  - Server actions translate `formError` with `getTranslations()`. Field errors stay keys.
+  - Emails use `createTranslator` (`infrastructure/mail/templates/auth-templates.ts`).
+  - Page titles use `generateMetadata = translatedMetadata("<key>")`.
+- Guards: `src/i18n/no-hardcoded-text.test.ts` (no Polish letters, JSX text or literal UI props in `src/`) and `src/i18n/messages.test.ts` (every schema/runtime key exists; every locale has the same keys).
+- Component tests: `import { render, screen } from "@test/render"`, which wraps components in the real catalog. Server components and actions in tests: `vi.mock("next-intl/server", async () => (await import("@test/intl-server")).intlServerMock())`.
+- Vendored `@toth/ui` (shadcn) components still contain English screen-reader text, e.g. "Toggle Sidebar".
 
 ## shadcn / @toth/ui gotchas
 

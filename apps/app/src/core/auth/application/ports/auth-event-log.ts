@@ -11,6 +11,8 @@ export type AuthEventType =
   | "trusted_device_added"
   | "password_reset_requested"
   | "password_reset"
+  | "password_changed"
+  | "profile_updated"
   | "invitation_sent"
   | "invitation_accepted"
   | "invitation_revoked"

@@ -5,7 +5,6 @@ import { describe, expect, it, vi } from "vitest"
 import { RegisterForm } from "./register-form"
 
 async function fillValid(user: ReturnType<typeof userEvent.setup>) {
-  await user.type(screen.getByLabelText(/Imię i nazwisko/), "Jan Kowalski")
   await user.type(screen.getByLabelText(/Nazwa firmy/), "Acme")
   await user.type(screen.getByLabelText(/^Email/), "jan@firma.pl")
   await user.type(screen.getByLabelText(/^Hasło/), "Zaq1@wsx")
@@ -25,7 +24,6 @@ describe("RegisterForm", () => {
     await user.click(screen.getByRole("button", { name: "Zarejestruj" }))
 
     expect(onRegister).toHaveBeenCalledWith({
-      name: "Jan Kowalski",
       companyName: "Acme",
       email: "jan@firma.pl",
       password: "Zaq1@wsx",
@@ -39,7 +37,6 @@ describe("RegisterForm", () => {
     const onRegister = vi.fn()
     render(<RegisterForm onRegister={onRegister} />)
 
-    await user.type(screen.getByLabelText(/Imię i nazwisko/), "Jan Kowalski")
     await user.type(screen.getByLabelText(/Nazwa firmy/), "Acme")
     await user.type(screen.getByLabelText(/^Email/), "jan@firma.pl")
     await user.type(screen.getByLabelText(/^Hasło/), "Zaq1@wsx")

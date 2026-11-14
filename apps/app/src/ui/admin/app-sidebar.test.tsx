@@ -23,10 +23,10 @@ describe("AppSidebar", () => {
     expect(screen.getByText("Toth")).toBeInTheDocument()
     expect(screen.getByText("Przegląd")).toBeInTheDocument()
     expect(screen.getByText("Zarządzanie")).toBeInTheDocument()
-    expect(screen.getByText("Konto")).toBeInTheDocument()
+    expect(screen.queryByText("Konto")).not.toBeInTheDocument()
     expect(
       container.querySelectorAll("[data-slot=sidebar-separator]")
-    ).toHaveLength(2)
+    ).toHaveLength(1)
   })
 
   it("marks the link for the current path as active", () => {
@@ -48,11 +48,10 @@ describe("AppSidebar", () => {
     expect(
       screen.queryByRole("link", { name: "Ustawienia" })
     ).not.toBeInTheDocument()
-    expect(screen.getByRole("link", { name: "Profil" })).toBeInTheDocument()
     // The emptied group and its separator disappear too.
     expect(screen.queryByText("Zarządzanie")).not.toBeInTheDocument()
     expect(
       container.querySelectorAll("[data-slot=sidebar-separator]")
-    ).toHaveLength(1)
+    ).toHaveLength(0)
   })
 })

@@ -38,20 +38,20 @@
   "nav": {
     "groups": {
       "overview": "Przegląd",
-      "management": "Zarządzanie",
-      "account": "Konto"
+      "management": "Zarządzanie"
     },
     "items": {
       "dashboard": "Pulpit",
       "users": "Użytkownicy",
-      "settings": "Ustawienia",
+      "settings": "Ustawienia"
+    },
+    "pages": {
       "profile": "Profil"
     }
   },
   "userMenu": {
     "trigger": "Menu konta: {name}",
     "profile": "Profil",
-    "lightMode": "Tryb jasny",
     "darkMode": "Tryb ciemny",
     "logout": "Wyloguj"
   },
@@ -287,6 +287,9 @@
     "workingHours": {
       "invalidTime": "Podaj godzinę w formacie GG:MM",
       "order": "Koniec musi być później niż początek"
+    },
+    "color": {
+      "invalid": "Wybierz kolor z listy"
     }
   },
   "mail": {
@@ -342,8 +345,8 @@
     }
   },
   "profile": {
-    "title": "Profil",
     "detailsHeading": "Twoje dane",
+    "detailsDescription": "Dane kontaktowe i godziny pracy widoczne w Twoim koncie.",
     "email": "Email",
     "role": "Rola",
     "phone": "Telefon",
@@ -373,6 +376,27 @@
       "5": "Piątek",
       "6": "Sobota",
       "7": "Niedziela"
+    },
+    "color": "Kolor avatara",
+    "colorDescription": "Wybierz kolor, którym oznaczamy Cię w aplikacji.",
+    "colors": {
+      "red": "Czerwony",
+      "orange": "Pomarańczowy",
+      "amber": "Bursztynowy",
+      "yellow": "Żółty",
+      "lime": "Limonkowy",
+      "green": "Zielony",
+      "emerald": "Szmaragdowy",
+      "teal": "Morski",
+      "cyan": "Cyjanowy",
+      "sky": "Niebieski jasny",
+      "blue": "Niebieski",
+      "indigo": "Indygo",
+      "violet": "Fioletowy",
+      "purple": "Purpurowy",
+      "fuchsia": "Fuksja",
+      "pink": "Różowy",
+      "rose": "Różany"
     }
   }
 }

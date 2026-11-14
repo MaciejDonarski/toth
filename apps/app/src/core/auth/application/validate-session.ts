@@ -14,6 +14,7 @@ export type CurrentUser = Readonly<{
   companyId: string
   email: string
   name: string | null
+  color: string
   role: Role
   permissions: readonly Permission[]
 }>
@@ -64,6 +65,7 @@ export function makeValidateSession(deps: ValidateSessionDeps) {
       companyId: user.companyId,
       email: user.email,
       name: user.name,
+      color: user.color,
       role: user.role,
       permissions: permissionsFor(user.role),
     }

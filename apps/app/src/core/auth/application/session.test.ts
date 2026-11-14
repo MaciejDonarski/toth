@@ -112,6 +112,7 @@ describe("validateSession", () => {
         companyId: "company-1",
         email: "jan@firma.pl",
         name: null,
+        color: "blue",
         role: "WORKER",
         status: "ACTIVE",
         passwordChangedAt: new Date(NOW.getTime() - 24 * 60 * MINUTE),
@@ -138,6 +139,7 @@ describe("validateSession", () => {
       companyId: "company-1",
       email: "jan@firma.pl",
       name: null,
+      color: "blue",
       role: "WORKER",
       permissions: [
         "dashboard.view",

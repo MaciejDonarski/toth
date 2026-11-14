@@ -11,10 +11,10 @@ const hrefs = (role: "ADMIN" | "MANAGER" | "WORKER") =>
 
 describe("filterNav", () => {
   it("shows each role only the pages it may open", () => {
-    const all = ["/dashboard", "/users", "/settings", "/profile"]
+    const all = ["/dashboard", "/users", "/settings"]
     expect(hrefs("ADMIN")).toEqual(all)
     expect(hrefs("MANAGER")).toEqual(all)
-    expect(hrefs("WORKER")).toEqual(["/dashboard", "/profile"])
+    expect(hrefs("WORKER")).toEqual(["/dashboard"])
   })
 
   it("drops groups without visible items", () => {

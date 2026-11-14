@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest"
 import { emailSchema, registerSchema } from "./schemas"
 
 const valid = {
-  name: "Jan Kowalski",
   companyName: "  Acme Sp. z o.o. ",
   email: " Jan@Firma.PL ",
   password: "Zaq1@wsx",

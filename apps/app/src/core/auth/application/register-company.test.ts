@@ -17,7 +17,6 @@ import type { UserAccountRepository } from "./ports/user-account-repository"
 import { makeRegisterCompany } from "./register-company"
 
 const input = {
-  name: " Jan Kowalski ",
   companyName: "Acme",
   email: "Jan@Firma.pl",
   password: "Zaq1@wsx",
@@ -61,7 +60,6 @@ describe("registerCompany", () => {
 
     expect(deps.registrations.registerCompanyWithAdmin).toHaveBeenCalledWith({
       companyName: "Acme",
-      name: "Jan Kowalski",
       userLimit: 5,
       email: "jan@firma.pl",
       passwordHash: "argon(Zaq1@wsx)",

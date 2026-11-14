@@ -2,11 +2,13 @@ import type { Role } from "@/core/auth/domain/role"
 import type { TenantContext } from "@/core/auth/domain/tenant-context"
 
 import type { WeeklySchedule } from "../../domain/profile"
+import type { UserColor } from "../../domain/user-color"
 
 export type OwnProfile = Readonly<{
   name: string | null
   email: string
   phone: string | null
+  color: UserColor
   role: Role
   schedule: WeeklySchedule
 }>
@@ -14,6 +16,7 @@ export type OwnProfile = Readonly<{
 export type ProfileUpdate = Readonly<{
   name: string
   phone: string | null
+  color: UserColor
   schedule: WeeklySchedule
 }>
 
@@ -24,7 +27,7 @@ export type ProfileUpdate = Readonly<{
 export interface ProfileRepository {
   getOwn(ctx: TenantContext): Promise<OwnProfile | null>
 
-  /** Replaces name, phone and the whole weekly schedule in one transaction. */
+  /** Replaces name, phone, color and the whole weekly schedule in one transaction. */
   updateOwn(ctx: TenantContext, update: ProfileUpdate): Promise<boolean>
 }
 

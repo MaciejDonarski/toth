@@ -2,6 +2,7 @@ import type {
   NewCompanyRegistration,
   RegistrationStore,
 } from "@/core/auth/application/ports/registration-store"
+import { randomUserColor } from "@/core/users/domain/user-color"
 import { Prisma, type PrismaClient } from "@/generated/prisma/client"
 
 export class PrismaRegistrationStore implements RegistrationStore {
@@ -20,9 +21,9 @@ export class PrismaRegistrationStore implements RegistrationStore {
           users: {
             create: {
               email: input.email,
-              name: input.name,
               passwordHash: input.passwordHash,
               role: "ADMIN",
+              color: randomUserColor(),
               termsVersion: input.termsVersion,
               termsAcceptedAt: input.termsAcceptedAt,
               authTokens: {

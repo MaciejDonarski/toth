@@ -26,6 +26,7 @@ describe("profileSchema", () => {
       profileSchema.parse({
         name: " Jan Kowalski ",
         phone: "600 100 200",
+        color: "teal",
         days: week({
           1: { enabled: true, start: "08:00", end: "16:00" },
           5: { enabled: true, start: "08:00", end: "14:30" },
@@ -36,6 +37,7 @@ describe("profileSchema", () => {
     expect(parsed).toEqual({
       name: "Jan Kowalski",
       phone: "+48600100200",
+      color: "teal",
       schedule: { 1: { start: 480, end: 960 }, 5: { start: 480, end: 870 } },
     })
   })
@@ -43,11 +45,17 @@ describe("profileSchema", () => {
   it("allows an empty phone and a week without work", () => {
     expect(
       toProfileUpdate(
-        profileSchema.parse({ name: "Ewa", phone: "", days: week() })
+        profileSchema.parse({
+          name: "Ewa",
+          phone: "",
+          color: "teal",
+          days: week(),
+        })
       )
     ).toEqual({
       name: "Ewa",
       phone: null,
+      color: "teal",
       schedule: {},
     })
   })
@@ -57,6 +65,7 @@ describe("profileSchema", () => {
       issues({
         name: "",
         phone: "123",
+        color: "teal",
         days: week({
           2: { enabled: true, start: "16:00", end: "08:00" },
           3: { enabled: true, start: "", end: "25:00" },
@@ -111,5 +120,13 @@ describe("changePasswordSchema", () => {
       path: ["newPassword"],
       message: "validation.password.sameAsCurrent",
     })
+  })
+})
+
+describe("profileSchema color", () => {
+  it("rejects a color outside the palette", () => {
+    expect(
+      issues({ name: "Ewa", phone: "", color: "brown", days: week() })
+    ).toEqual({ color: "validation.color.invalid" })
   })
 })

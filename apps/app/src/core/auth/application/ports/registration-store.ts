@@ -1,8 +1,6 @@
 export type NewCompanyRegistration = Readonly<{
   companyName: string
   userLimit: number
-  /** The admin's full name. */
-  name: string
   email: string
   passwordHash: string
   termsVersion: string

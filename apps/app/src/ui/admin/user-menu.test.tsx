@@ -27,20 +27,30 @@ describe("UserMenu", () => {
     expect(trigger).toHaveTextContent("jane@example.com")
   })
 
-  it("toggles from light to dark mode", async () => {
+  it("switches to dark mode without closing the menu", async () => {
     const u = userEvent.setup()
     render(<UserMenu user={user} onLogout={vi.fn()} />)
     await u.click(screen.getByRole("button", { name: /Menu konta/ }))
-    await u.click(await screen.findByRole("menuitem", { name: "Tryb ciemny" }))
+    const row = await screen.findByRole("menuitemcheckbox", {
+      name: "Tryb ciemny",
+    })
+    expect(row).toHaveAttribute("aria-checked", "false")
+    await u.click(row)
     expect(theme.setTheme).toHaveBeenCalledWith("dark")
+    // The menu stays open so the switch visibly flips.
+    expect(screen.getByRole("menu")).toBeInTheDocument()
   })
 
-  it("toggles from dark to light mode", async () => {
+  it("switches back to light mode", async () => {
     theme.resolvedTheme = "dark"
     const u = userEvent.setup()
     render(<UserMenu user={user} onLogout={vi.fn()} />)
     await u.click(screen.getByRole("button", { name: /Menu konta/ }))
-    await u.click(await screen.findByRole("menuitem", { name: "Tryb jasny" }))
+    const row = await screen.findByRole("menuitemcheckbox", {
+      name: "Tryb ciemny",
+    })
+    expect(row).toHaveAttribute("aria-checked", "true")
+    await u.click(row)
     expect(theme.setTheme).toHaveBeenCalledWith("light")
   })
 

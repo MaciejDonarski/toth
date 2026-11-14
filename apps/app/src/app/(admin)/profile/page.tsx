@@ -39,22 +39,18 @@ export default async function Page() {
   const t = await getTranslations()
 
   return (
-    <div className="flex max-w-3xl flex-1 flex-col gap-10">
-      <div className="flex flex-col gap-1">
-        <h1 className="font-heading text-2xl font-semibold">
-          {t("profile.title")}
-        </h1>
-        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
-          <dt className="text-muted-foreground">{t("profile.email")}</dt>
-          <dd>{own.email}</dd>
-          <dt className="text-muted-foreground">{t("profile.role")}</dt>
-          <dd>{t(`roles.${own.role}`)}</dd>
-        </dl>
-      </div>
+    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6">
+      <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+        <dt className="text-muted-foreground">{t("profile.email")}</dt>
+        <dd>{own.email}</dd>
+        <dt className="text-muted-foreground">{t("profile.role")}</dt>
+        <dd>{t(`roles.${own.role}`)}</dd>
+      </dl>
       <ProfileForm
         defaultValues={{
           name: own.name ?? "",
           phone: own.phone ? formatPhone(own.phone) : "",
+          color: own.color,
           days: toFormDays(own.schedule),
         }}
         onSave={updateProfileAction}

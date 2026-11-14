@@ -1,7 +1,6 @@
 import {
   LayoutDashboardIcon,
   SettingsIcon,
-  UserIcon,
   UsersIcon,
   type LucideIcon,
 } from "lucide-react"
@@ -10,7 +9,7 @@ import type { Permission } from "@/core/auth/domain/permissions"
 
 type NavItem = {
   /** Message key: `nav.items.<key>`. */
-  key: "dashboard" | "users" | "settings" | "profile"
+  key: "dashboard" | "users" | "settings"
   href: string
   icon: LucideIcon
   /**
@@ -22,7 +21,7 @@ type NavItem = {
 
 type NavGroup = {
   /** Message key: `nav.groups.<key>`. */
-  key: "overview" | "management" | "account"
+  key: "overview" | "management"
   items: NavItem[]
 }
 
@@ -52,17 +51,6 @@ const navGroups: NavGroup[] = [
         href: "/settings",
         icon: SettingsIcon,
         permission: "settings.view",
-      },
-    ],
-  },
-  {
-    key: "account",
-    items: [
-      {
-        key: "profile",
-        href: "/profile",
-        icon: UserIcon,
-        permission: "profile.edit-own",
       },
     ],
   },

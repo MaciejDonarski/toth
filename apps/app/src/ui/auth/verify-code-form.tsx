@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl"
 import { CircleAlertIcon } from "lucide-react"
 
 import { Alert, AlertDescription } from "@toth/ui/components/alert"
+import { toast } from "@toth/ui/components/toast"
 import { Button } from "@toth/ui/components/button"
 import { Checkbox } from "@toth/ui/components/checkbox"
 import { Field, FieldLabel } from "@toth/ui/components/field"
@@ -60,7 +61,6 @@ export function VerifyCodeForm(props: VerifyCodeFormProps) {
   const [resendAt, setResendAt] = useState(() => new Date(props.nextResendAt))
   const [resendsLeft, setResendsLeft] = useState(props.resendsLeft)
   const [error, setError] = useState<string | null>(null)
-  const [notice, setNotice] = useState<string | null>(null)
   const [restart, setRestart] = useState(false)
   const [verifying, startVerify] = useTransition()
   const [resending, startResend] = useTransition()
@@ -71,7 +71,6 @@ export function VerifyCodeForm(props: VerifyCodeFormProps) {
 
   function verify(value: string) {
     if (value.length !== CODE_LENGTH || expired || restart) return
-    setNotice(null)
     startVerify(async () => {
       const result = await onVerify({ code: value, remember })
       if (!result) return
@@ -83,7 +82,6 @@ export function VerifyCodeForm(props: VerifyCodeFormProps) {
 
   function resend() {
     setError(null)
-    setNotice(null)
     startResend(async () => {
       const result = await onResend()
       if (result.ok) {
@@ -91,7 +89,7 @@ export function VerifyCodeForm(props: VerifyCodeFormProps) {
         setResendAt(new Date(result.nextResendAt))
         setResendsLeft(result.resendsLeft)
         setCode("")
-        setNotice(t("newCodeSent"))
+        toast.add({ type: "success", title: t("newCodeSent") })
         return
       }
       setError(result.error)
@@ -179,11 +177,6 @@ export function VerifyCodeForm(props: VerifyCodeFormProps) {
           <Alert variant="destructive">
             <CircleAlertIcon />
             <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-        {notice && (
-          <Alert>
-            <AlertDescription>{notice}</AlertDescription>
           </Alert>
         )}
       </div>

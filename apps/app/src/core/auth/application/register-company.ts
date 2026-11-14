@@ -68,7 +68,6 @@ export function makeRegisterCompany(deps: RegisterCompanyDeps) {
     const token = deps.tokenService.generateToken()
     const result = await deps.registrations.registerCompanyWithAdmin({
       companyName: data.companyName,
-      name: data.name,
       userLimit: AUTH_POLICY.defaultCompanyUserLimit,
       email: data.email,
       passwordHash,

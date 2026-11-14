@@ -3,14 +3,16 @@
 import { useState } from "react"
 import { useTranslations } from "next-intl"
 
+import { Form, FormActions, FormItem, type SubmitResult } from "@toth/form"
 import {
-  Form,
-  FormActions,
-  FormItem,
-  FormSection,
-  type SubmitResult,
-} from "@toth/form"
-import { Alert, AlertDescription } from "@toth/ui/components/alert"
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@toth/ui/components/card"
+import { toast } from "@toth/ui/components/toast"
 
 import {
   changePasswordSchema,
@@ -34,7 +36,6 @@ export type ChangePasswordFormProps = {
 
 export function ChangePasswordForm({ onChange }: ChangePasswordFormProps) {
   const t = useTranslations("profile")
-  const [changed, setChanged] = useState(false)
   // Remount after a successful change to clear the password fields.
   const [formKey, setFormKey] = useState(0)
 
@@ -45,59 +46,50 @@ export function ChangePasswordForm({ onChange }: ChangePasswordFormProps) {
         schema={changePasswordSchema}
         defaultValues={EMPTY}
         onSubmit={async (values) => {
-          setChanged(false)
           const result = await onChange(values)
           if (result?.changed) {
-            setChanged(true)
+            toast.add({ type: "success", title: t("passwordChanged") })
             setFormKey((k) => k + 1)
           }
           return result
         }}
       >
-        <FormSection
-          title={t("passwordHeading")}
-          description={t("passwordDescription")}
-        >
-          <FormItem
-            type="password"
-            name="currentPassword"
-            label={t("currentPassword")}
-            autoComplete="current-password"
-            required
-            colSpan={{ base: 12, md: 6 }}
-          />
-          <div className="col-span-12" />
-          <FormItem
-            type="password"
-            name="newPassword"
-            label={t("newPassword")}
-            autoComplete="new-password"
-            required
-            colSpan={{ base: 12, md: 6 }}
-          />
-          <FormItem
-            type="password"
-            name="confirmPassword"
-            label={t("confirmPassword")}
-            autoComplete="new-password"
-            required
-            colSpan={{ base: 12, md: 6 }}
-          />
-          <div className="col-span-12 pt-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("passwordHeading")}</CardTitle>
+            <CardDescription>{t("passwordDescription")}</CardDescription>
+          </CardHeader>
+          <CardContent className="flex max-w-sm flex-col gap-6">
+            <FormItem
+              type="password"
+              name="newPassword"
+              label={t("newPassword")}
+              autoComplete="new-password"
+              required
+            />
             <PasswordChecklist name="newPassword" />
-          </div>
-        </FormSection>
-        <FormActions
-          actions={[{ kind: "submit", label: t("changePassword") }]}
-        />
+            <FormItem
+              type="password"
+              name="confirmPassword"
+              label={t("confirmPassword")}
+              autoComplete="new-password"
+              required
+            />
+            <FormItem
+              type="password"
+              name="currentPassword"
+              label={t("currentPassword")}
+              autoComplete="current-password"
+              required
+            />
+          </CardContent>
+          <CardFooter>
+            <FormActions
+              actions={[{ kind: "submit", label: t("changePassword") }]}
+            />
+          </CardFooter>
+        </Card>
       </Form>
-      <div aria-live="polite">
-        {changed && (
-          <Alert>
-            <AlertDescription>{t("passwordChanged")}</AlertDescription>
-          </Alert>
-        )}
-      </div>
     </div>
   )
 }

@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { useTheme } from "next-themes"
 
+import { userColorStyle } from "@/core/users/domain/user-color"
 import { Avatar, AvatarFallback, AvatarImage } from "@toth/ui/components/avatar"
 import { Button } from "@toth/ui/components/button"
 import {
@@ -17,11 +18,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@toth/ui/components/dropdown-menu"
+import { Switch } from "@toth/ui/components/switch"
 import { cn } from "@toth/ui/lib/utils"
 
 type User = {
   name: string
   email: string
+  color?: string
   avatar?: string
 }
 
@@ -45,7 +48,11 @@ function UserIdentity({
     <>
       <Avatar>
         {user.avatar && <AvatarImage src={user.avatar} alt="" />}
-        <AvatarFallback>{initials(user.name)}</AvatarFallback>
+        <AvatarFallback
+          style={user.color ? userColorStyle(user.color) : undefined}
+        >
+          {initials(user.name)}
+        </AvatarFallback>
       </Avatar>
       <span
         className={cn(
@@ -97,13 +104,29 @@ function UserMenu({
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
+          <DropdownMenuItem
+            closeOnClick={false}
+            role="menuitemcheckbox"
+            aria-checked={isDark}
+            onClick={() => setTheme(isDark ? "light" : "dark")}
+          >
+            {isDark ? <MoonIcon /> : <SunIcon />}
+            <span className="flex-1">{t("darkMode")}</span>
+            <Switch
+              size="sm"
+              checked={isDark}
+              tabIndex={-1}
+              aria-hidden="true"
+              // The row handles the click and exposes the state.
+              className="pointer-events-none"
+            />
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
           <DropdownMenuItem render={<Link href="/profile" />}>
             <UserIcon />
             {t("profile")}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setTheme(isDark ? "light" : "dark")}>
-            {isDark ? <SunIcon /> : <MoonIcon />}
-            {isDark ? t("lightMode") : t("darkMode")}
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

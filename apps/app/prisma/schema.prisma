@@ -48,6 +48,8 @@ model User {
   name              String?
   /// E.164, e.g. +48600100200.
   phone             String?
+  /// Key of the Tailwind-500 palette (core/users/domain/user-color.ts); avatar background.
+  color             String
   passwordHash      String
   role              Role
   status            UserStatus @default(ACTIVE)

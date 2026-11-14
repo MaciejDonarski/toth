@@ -4,6 +4,7 @@ import { getLocale, getTranslations } from "next-intl/server"
 import { Geist_Mono, Noto_Sans, Outfit } from "next/font/google"
 
 import "@toth/ui/globals.css"
+import { Toaster } from "@toth/ui/components/toast"
 import { cn } from "@toth/ui/lib/utils"
 
 import "@/ui/zod-locale"
@@ -45,7 +46,9 @@ export default async function RootLayout({
       <body>
         <NextIntlClientProvider>
           <ThemeProvider>
-            <AppFormDefaults>{children}</AppFormDefaults>
+            <Toaster>
+              <AppFormDefaults>{children}</AppFormDefaults>
+            </Toaster>
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

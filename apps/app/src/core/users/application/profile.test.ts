@@ -45,6 +45,7 @@ function setup({
       name: "Jan",
       email: "jan@firma.pl",
       phone: null,
+      color: "blue" as const,
       role: "WORKER" as const,
       schedule: {},
     })),
@@ -86,6 +87,7 @@ describe("profile use cases", () => {
       {
         name: " Jan Kowalski ",
         phone: "600 100 200",
+        color: "teal",
         days: week.map((d) =>
           d.weekday === 1
             ? { ...d, enabled: true, start: "08:00", end: "16:00" }
@@ -97,6 +99,7 @@ describe("profile use cases", () => {
     expect(deps.profiles.updateOwn).toHaveBeenCalledWith(ctxFor(), {
       name: "Jan Kowalski",
       phone: "+48600100200",
+      color: "teal",
       schedule: { 1: { start: 480, end: 960 } },
     })
     expect(deps.events.record).toHaveBeenCalledWith(
@@ -107,7 +110,11 @@ describe("profile use cases", () => {
   it("rejects invalid input on the server too", async () => {
     const { deps, profile } = setup()
     await expect(
-      profile.update(ctxFor(), { name: "", phone: "123", days: week }, meta)
+      profile.update(
+        ctxFor(),
+        { name: "", phone: "123", color: "teal", days: week },
+        meta
+      )
     ).rejects.toThrow()
     expect(deps.profiles.updateOwn).not.toHaveBeenCalled()
   })

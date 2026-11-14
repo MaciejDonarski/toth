@@ -20,7 +20,6 @@ import { AuthHeading } from "./auth-heading"
 import { PasswordChecklist } from "./password-checklist"
 
 const DEFAULT_VALUES: RegisterInput = {
-  name: "",
   companyName: "",
   email: "",
   password: "",
@@ -48,13 +47,6 @@ export function RegisterForm({ onRegister }: RegisterFormProps) {
         onSubmit={onRegister}
         linkComponent={Link as LinkComponent}
       >
-        <FormItem
-          type="text"
-          name="name"
-          label={t("common.name")}
-          autoComplete="name"
-          required
-        />
         <FormItem
           type="text"
           name="companyName"

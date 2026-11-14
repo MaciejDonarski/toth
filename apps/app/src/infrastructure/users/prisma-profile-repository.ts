@@ -11,6 +11,7 @@ import {
   type Weekday,
   type WeeklySchedule,
 } from "@/core/users/domain/profile"
+import { isUserColor } from "@/core/users/domain/user-color"
 import { withTenant } from "@/infrastructure/db/with-tenant"
 
 /** The caller, and only the caller: user id AND company id from the session. */
@@ -32,6 +33,7 @@ export class PrismaProfileRepository implements ProfileRepository {
           name: true,
           email: true,
           phone: true,
+          color: true,
           role: true,
           workingHours: {
             select: { weekday: true, startMinute: true, endMinute: true },
@@ -50,6 +52,7 @@ export class PrismaProfileRepository implements ProfileRepository {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        color: isUserColor(user.color) ? user.color : "blue",
         role: user.role,
         schedule: schedule as WeeklySchedule,
       }
@@ -61,7 +64,11 @@ export class PrismaProfileRepository implements ProfileRepository {
       db.$transaction(async (tx) => {
         const { count } = await tx.user.updateMany({
           where: self(ctx),
-          data: { name: update.name, phone: update.phone },
+          data: {
+            name: update.name,
+            phone: update.phone,
+            color: update.color,
+          },
         })
         if (count !== 1) return false
 

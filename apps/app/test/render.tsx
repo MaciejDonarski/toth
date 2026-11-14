@@ -6,6 +6,8 @@ import {
 import { NextIntlClientProvider } from "next-intl"
 import type { ReactElement, ReactNode } from "react"
 
+import { Toaster } from "@toth/ui/components/toast"
+
 import { DEFAULT_LOCALE, TIME_ZONE } from "@/i18n/config"
 import { MESSAGES } from "@/i18n/messages"
 import { AppFormDefaults } from "@/ui/components/app-form-defaults"
@@ -18,7 +20,9 @@ export function IntlProviders({ children }: { children: ReactNode }) {
       messages={MESSAGES[DEFAULT_LOCALE]}
       timeZone={TIME_ZONE}
     >
-      <AppFormDefaults>{children}</AppFormDefaults>
+      <Toaster>
+        <AppFormDefaults>{children}</AppFormDefaults>
+      </Toaster>
     </NextIntlClientProvider>
   )
 }

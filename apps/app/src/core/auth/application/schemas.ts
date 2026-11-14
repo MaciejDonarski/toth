@@ -32,7 +32,6 @@ export const personNameSchema = z
   .max(100, "validation.name.tooLong")
 
 const registerFields = z.object({
-  name: personNameSchema,
   companyName: z
     .string()
     .trim()

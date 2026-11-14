@@ -20,6 +20,7 @@ async function seed(email = "jan@firma.pl") {
         create: {
           email,
           passwordHash: "old-hash",
+          color: "blue",
           role: "ADMIN",
           emailVerifiedAt: null,
           failedLoginCount: 3,

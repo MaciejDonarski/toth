@@ -30,6 +30,7 @@ async function seedCompany(
         ...u,
         companyId: company.id,
         passwordHash: "x",
+        color: "blue",
         emailVerifiedAt: NOW,
       },
       select: { id: true },

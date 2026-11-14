@@ -11,14 +11,24 @@ import {
   BreadcrumbSeparator,
 } from "@toth/ui/components/breadcrumb"
 
-import { findNavTrail } from "./nav-config"
+import { findNavTrail, isActiveHref } from "./nav-config"
 
 function AdminBreadcrumbs() {
   const t = useTranslations("nav")
-  const trail = findNavTrail(usePathname())
+  const pathname = usePathname()
+  const trail = findNavTrail(pathname)
 
+  // Pages outside the sidebar (reached from the user menu): title only.
   if (!trail) {
-    return null
+    return isActiveHref(pathname, "/profile") ? (
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbPage>{t("pages.profile")}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+    ) : null
   }
 
   return (

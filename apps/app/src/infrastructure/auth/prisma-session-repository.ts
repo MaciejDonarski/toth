@@ -49,6 +49,7 @@ export class PrismaSessionRepository implements SessionRepository {
             companyId: true,
             email: true,
             name: true,
+            color: true,
             role: true,
             status: true,
             passwordChangedAt: true,

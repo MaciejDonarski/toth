@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl"
 
 import { Form, FormActions, FormItem, type SubmitResult } from "@toth/form"
 import { Alert, AlertDescription } from "@toth/ui/components/alert"
+import { toast } from "@toth/ui/components/toast"
 
 import { AUTH_POLICY } from "@/core/auth/domain/auth-policy"
 import { ROLES } from "@/core/auth/domain/role"
@@ -32,7 +33,6 @@ export function InviteUserForm({
     value: role,
     label: t(`roles.${role}`),
   }))
-  const [sentTo, setSentTo] = useState<string | null>(null)
   // Remount the form after a successful invite to clear it.
   const [formKey, setFormKey] = useState(0)
 
@@ -51,7 +51,13 @@ export function InviteUserForm({
         onSubmit={async (values) => {
           const result = await onInvite(values)
           if (result?.sent) {
-            setSentTo(values.email)
+            toast.add({
+              type: "success",
+              title: t("users.invite.sent", {
+                email: values.email,
+                hours: INVITATION_HOURS,
+              }),
+            })
             setFormKey((k) => k + 1)
           }
           return result
@@ -83,18 +89,6 @@ export function InviteUserForm({
           ]}
         />
       </Form>
-      <div aria-live="polite">
-        {sentTo && (
-          <Alert>
-            <AlertDescription>
-              {t("users.invite.sent", {
-                email: sentTo,
-                hours: INVITATION_HOURS,
-              })}
-            </AlertDescription>
-          </Alert>
-        )}
-      </div>
     </div>
   )
 }

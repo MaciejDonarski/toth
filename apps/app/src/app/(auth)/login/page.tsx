@@ -1,13 +1,14 @@
 import { translatedMetadata } from "@/i18n/metadata"
 import { redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
-import { CircleAlertIcon, CircleCheckIcon } from "lucide-react"
+import { CircleAlertIcon } from "lucide-react"
 
 import { Alert, AlertDescription } from "@toth/ui/components/alert"
 
 import { getCurrentUser } from "@/auth/dal"
 import { safeRedirectPath } from "@/auth/safe-redirect"
 import { LoginForm } from "@/ui/auth/login-form"
+import { LoginNotices } from "@/ui/auth/login-notices"
 
 import { loginAction } from "./actions"
 
@@ -33,13 +34,13 @@ export default async function Page({
   if (await getCurrentUser()) redirect(target)
 
   const t = await getTranslations("auth.login")
-  // Status banners after redirects to /login (?verified=1, ?reset=1, …).
-  const notices = [
-    { show: verified === "1", text: t("verified"), error: false },
-    { show: invited === "1", text: t("invited"), error: false },
-    { show: reset === "1", text: t("reset"), error: false },
-    { show: expired === "1", text: t("expired"), error: true },
-  ].filter((notice) => notice.show)
+  // Status messages after redirects to /login (?verified=1, ?reset=1, …):
+  // successes become toasts, the expired-session error stays an alert.
+  const successes = [
+    verified === "1" && t("verified"),
+    invited === "1" && t("invited"),
+    reset === "1" && t("reset"),
+  ].filter((text): text is string => !!text)
 
   async function login(values: Parameters<typeof loginAction>[0]) {
     "use server"
@@ -48,15 +49,13 @@ export default async function Page({
 
   return (
     <div className="flex flex-col gap-6">
-      {notices.map((notice) => (
-        <Alert
-          key={notice.text}
-          variant={notice.error ? "destructive" : "default"}
-        >
-          {notice.error ? <CircleAlertIcon /> : <CircleCheckIcon />}
-          <AlertDescription>{notice.text}</AlertDescription>
+      <LoginNotices messages={successes} />
+      {expired === "1" && (
+        <Alert variant="destructive">
+          <CircleAlertIcon />
+          <AlertDescription>{t("expired")}</AlertDescription>
         </Alert>
-      ))}
+      )}
       <LoginForm onLogin={login} />
     </div>
   )

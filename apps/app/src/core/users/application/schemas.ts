@@ -16,6 +16,7 @@ import {
   type Weekday,
   type WeeklySchedule,
 } from "../domain/profile"
+import { USER_COLOR_KEYS, type UserColor } from "../domain/user-color"
 
 export const roleSchema = z.enum(ROLES, "validation.role.invalid")
 
@@ -100,6 +101,7 @@ export const profileSchema = z.object({
       (phone) => !phone || normalizePhone(phone) !== null,
       "validation.phone.invalid"
     ),
+  color: z.enum(USER_COLOR_KEYS, "validation.color.invalid"),
   days: z.array(workingDaySchema).length(WEEKDAYS.length),
 })
 
@@ -109,6 +111,7 @@ export type ProfileInput = z.input<typeof profileSchema>
 export function toProfileUpdate(data: ProfileInput): {
   name: string
   phone: string | null
+  color: UserColor
   schedule: WeeklySchedule
 } {
   const schedule: Partial<Record<Weekday, TimeRange>> = {}
@@ -122,6 +125,7 @@ export function toProfileUpdate(data: ProfileInput): {
   return {
     name: data.name.trim(),
     phone: data.phone.trim() ? normalizePhone(data.phone) : null,
+    color: data.color,
     schedule: schedule as WeeklySchedule,
   }
 }

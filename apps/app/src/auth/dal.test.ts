@@ -32,6 +32,7 @@ function user(role: Role): CurrentUser {
     companyId: "c1",
     email: "jan@firma.pl",
     name: null,
+    color: "blue",
     role,
     permissions: permissionsFor(role),
   }

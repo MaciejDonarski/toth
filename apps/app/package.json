@@ -24,6 +24,7 @@
     "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
     "@toth/form": "workspace:*",
+    "@toth/table": "workspace:*",
     "@toth/ui": "workspace:*",
     "libphonenumber-js": "^1.13.16",
     "lucide-react": "^1.72.0",

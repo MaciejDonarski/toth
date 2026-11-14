@@ -24,6 +24,7 @@ async function seed(companyName: string, email: string) {
           email,
           name: "Old Name",
           passwordHash: "old",
+          color: "blue",
           role: "WORKER",
           emailVerifiedAt: NOW,
           workingHours: {
@@ -48,6 +49,7 @@ describe("own profile (Postgres)", () => {
     const saved = await profiles.updateOwn(ctx, {
       name: "Jan Kowalski",
       phone: "+48600100200",
+      color: "rose",
       schedule: { 2: { start: 480, end: 960 }, 5: { start: 480, end: 840 } },
     })
     expect(saved).toBe(true)
@@ -55,6 +57,7 @@ describe("own profile (Postgres)", () => {
       name: "Jan Kowalski",
       email: "jan@a.pl",
       phone: "+48600100200",
+      color: "rose",
       role: "WORKER",
       // Monday (from the seed) became a day off.
       schedule: { 2: { start: 480, end: 960 }, 5: { start: 480, end: 840 } },
@@ -68,7 +71,12 @@ describe("own profile (Postgres)", () => {
     // User id of B, company of A: matches nobody.
     const forged: TenantContext = { ...a.ctx, userId: b.userId }
     await expect(
-      profiles.updateOwn(forged, { name: "Hacked", phone: null, schedule: {} })
+      profiles.updateOwn(forged, {
+        name: "Hacked",
+        phone: null,
+        color: "red",
+        schedule: {},
+      })
     ).resolves.toBe(false)
     await expect(profiles.getOwn(forged)).resolves.toBeNull()
 

@@ -14,6 +14,7 @@ export type StoredSession = Readonly<{
     companyId: string
     email: string
     name: string | null
+    color: string
     role: Role
     status: "ACTIVE" | "DISABLED"
     passwordChangedAt: Date

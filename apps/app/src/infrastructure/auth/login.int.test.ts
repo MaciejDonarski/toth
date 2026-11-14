@@ -23,6 +23,7 @@ async function seedUser(passwordChangedAt = at(-60 * MINUTE)) {
         create: {
           email: "jan@firma.pl",
           passwordHash: "x",
+          color: "blue",
           role: "ADMIN",
           emailVerifiedAt: NOW,
           passwordChangedAt,

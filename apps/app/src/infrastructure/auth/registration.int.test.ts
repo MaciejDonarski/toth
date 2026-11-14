@@ -15,7 +15,6 @@ const tokens = new PrismaAuthTokenRepository(testDb)
 function registration(email: string, tokenHash = `vt-${email}`) {
   return {
     companyName: "Acme",
-    name: "Jan Kowalski",
     userLimit: 5,
     email,
     passwordHash: "argon-hash",

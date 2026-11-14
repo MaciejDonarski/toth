@@ -10,6 +10,7 @@ import { ProfileForm } from "./profile-form"
 const defaults: ProfileInput = {
   name: "Jan Kowalski",
   phone: "",
+  color: "blue",
   days: [1, 2, 3, 4, 5, 6, 7].map((weekday) => ({
     weekday: weekday as 1,
     enabled: weekday === 1,

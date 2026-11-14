@@ -4,6 +4,7 @@ import { useState, useTransition } from "react"
 import { useTranslations } from "next-intl"
 
 import { Alert, AlertDescription } from "@toth/ui/components/alert"
+import { toast } from "@toth/ui/components/toast"
 import { Button } from "@toth/ui/components/button"
 import { Field, FieldLabel } from "@toth/ui/components/field"
 import { Input } from "@toth/ui/components/input"
@@ -36,7 +37,7 @@ export function ResendVerification({
   )
   const t = useTranslations()
   const [email, setEmail] = useState("")
-  const [message, setMessage] = useState<ResendResult | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
   const remaining = useCountdown(availableAt)
   const coolingDown = remaining > 0
@@ -44,8 +45,13 @@ export function ResendVerification({
   function resend() {
     startTransition(async () => {
       const result = await onResend(askForEmail ? email : undefined)
-      setMessage(result)
-      if (result.ok) setAvailableAt(cooldownEnd())
+      if (result.ok) {
+        setError(null)
+        setAvailableAt(cooldownEnd())
+        toast.add({ type: "success", title: t("auth.checkEmail.resent") })
+      } else {
+        setError(result.error)
+      }
     })
   }
 
@@ -82,11 +88,9 @@ export function ResendVerification({
           : t("auth.checkEmail.resend")}
       </Button>
       <div aria-live="polite">
-        {message && (
-          <Alert variant={message.ok ? "default" : "destructive"}>
-            <AlertDescription>
-              {message.ok ? t("auth.checkEmail.resent") : message.error}
-            </AlertDescription>
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
       </div>

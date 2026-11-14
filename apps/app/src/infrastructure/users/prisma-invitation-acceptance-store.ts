@@ -3,6 +3,7 @@ import type {
   InvitationAcceptanceStore,
   OpenInvitation,
 } from "@/core/users/application/ports/invitation-acceptance-store"
+import { randomUserColor } from "@/core/users/domain/user-color"
 import { Prisma, type PrismaClient } from "@/generated/prisma/client"
 
 export class PrismaInvitationAcceptanceStore implements InvitationAcceptanceStore {
@@ -94,6 +95,7 @@ export class PrismaInvitationAcceptanceStore implements InvitationAcceptanceStor
             name: input.name,
             passwordHash: input.passwordHash,
             role: invitation.role,
+            color: randomUserColor(),
             // The invitation link went to this address.
             emailVerifiedAt: now,
             passwordChangedAt: now,

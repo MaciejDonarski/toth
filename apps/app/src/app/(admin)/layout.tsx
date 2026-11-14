@@ -17,7 +17,11 @@ export default async function Layout({
   return (
     <AdminShell
       defaultOpen={defaultOpen}
-      user={{ name: user.name ?? user.email, email: user.email }}
+      user={{
+        name: user.name ?? user.email,
+        email: user.email,
+        color: user.color,
+      }}
       permissions={user.permissions}
       onLogout={logout}
     >

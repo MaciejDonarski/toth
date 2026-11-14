@@ -1445,6 +1445,59 @@ describe("DataTable", () => {
         await screen.findByRole("menuitem", { name: "Archive widget" })
       ).toBeInTheDocument()
     })
+
+    it("asks before running an action with confirm, and runs it on yes", async () => {
+      const onClick = vi.fn()
+      setup({
+        rowActions: [
+          {
+            label: "Delete",
+            variant: "destructive",
+            onClick,
+            confirm: (row: Order) => ({ title: `Delete ${row.sku}?` }),
+          },
+        ],
+      })
+
+      await userEvent.click(
+        screen.getAllByRole("button", { name: "Row actions" })[1]!
+      )
+      await userEvent.click(
+        await screen.findByRole("menuitem", { name: "Delete" })
+      )
+
+      const dialog = await screen.findByRole("dialog")
+      expect(dialog).toHaveTextContent(`Delete ${rows[1]!.sku}?`)
+      expect(onClick).not.toHaveBeenCalled()
+
+      await userEvent.click(
+        within(dialog).getByRole("button", { name: "Delete" })
+      )
+
+      expect(onClick).toHaveBeenCalledWith(rows[1])
+    })
+
+    it("does nothing when the confirmation is cancelled", async () => {
+      const onClick = vi.fn()
+      setup({
+        rowActions: [
+          { label: "Reset", onClick, confirm: { title: "Reset it?" } },
+        ],
+      })
+
+      await userEvent.click(
+        screen.getAllByRole("button", { name: "Row actions" })[0]!
+      )
+      await userEvent.click(
+        await screen.findByRole("menuitem", { name: "Reset" })
+      )
+      const dialog = await screen.findByRole("dialog")
+      await userEvent.click(
+        within(dialog).getByRole("button", { name: "Cancel" })
+      )
+
+      expect(onClick).not.toHaveBeenCalled()
+    })
   })
 
   // The actions column is pinned to the trailing edge, so it is always the last `<col>`. jsdom has

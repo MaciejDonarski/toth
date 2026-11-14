@@ -1,5 +1,7 @@
 import * as React from "react"
 
+import { Dialog } from "@toth/ui/components/dialog"
+
 import { useTableMessages } from "../../hooks/use-table-locale"
 import {
   Actions,
@@ -9,7 +11,12 @@ import {
   type ActionStandalone,
 } from "../../internal/actions"
 import type { ButtonSize, ButtonVariant } from "../../internal/button"
+import {
+  ConfirmationDialogContent,
+  DeleteDialogContent,
+} from "../../internal/confirmation-dialog"
 import type { IconSource } from "../../internal/icon"
+import type { DataTableActionConfirm } from "../data-table/data-table.types"
 import type { PlainTableCellProps } from "../plain-table/types"
 
 // The trailing cell of every row: what can be done to that row, behind one three-dots trigger.
@@ -61,6 +68,13 @@ export interface DataTableRowAction<TRow> {
    */
   size?: ButtonSize
   title?: string
+  /**
+   * Ask before running `onClick`. The dialog is the table's one shared confirmation dialog, so a
+   * 500-row table mounts one, not 500. A `variant: 'destructive'` action gets the destructive
+   * dialog (red confirm), anything else the plain one. A function of the row, so the question can
+   * name it: "Delete Anna Kowalska?".
+   */
+  confirm?: PerRow<TRow, DataTableActionConfirm>
 }
 
 /** One action, or a nested array of them — nesting draws a separator, as in `Actions`. */
@@ -139,11 +153,36 @@ function countRowActionControls<TRow>(
   return standalone + (hasMenu ? 1 : 0)
 }
 
+/** A confirmation waiting on the user: what to ask, and what to run on yes. */
+interface PendingConfirmation {
+  confirm: DataTableActionConfirm
+  destructive: boolean
+  run: () => void
+}
+
+type AskConfirmation = (pending: PendingConfirmation) => void
+
 /** One row's descriptors, flattened into what `Actions` takes. */
 function resolveRowActions<TRow>(
   entries: readonly DataTableRowActionEntry<TRow>[],
-  row: TRow
+  row: TRow,
+  ask?: AskConfirmation
 ): ActionsEntry[] {
+  const resolveOnClick = (action: DataTableRowAction<TRow>) => {
+    const onClick = action.onClick
+    if (!onClick) return undefined
+
+    const confirm = resolve(action.confirm, row)
+    if (!confirm || !ask) return () => onClick(row)
+
+    return () =>
+      ask({
+        confirm,
+        destructive: action.variant === "destructive",
+        run: () => onClick(row),
+      })
+  }
+
   const resolveOne = (action: DataTableRowAction<TRow>): Action => ({
     label: resolve(action.label, row),
     key: action.key,
@@ -159,7 +198,7 @@ function resolveRowActions<TRow>(
     standalone: isPromotable(action) ? action.standalone : undefined,
     size: action.size,
     title: action.title,
-    onClick: action.onClick ? () => action.onClick?.(row) : undefined,
+    onClick: resolveOnClick(action),
   })
 
   return entries.map((entry) =>
@@ -182,7 +221,12 @@ const RowActionsContext = React.createContext<RowActionsContextValue | null>(
   null
 )
 
-/** Makes the row actions available to the cells in the actions column. */
+const RowConfirmationContext = React.createContext<AskConfirmation | null>(null)
+
+/**
+ * Makes the row actions available to the cells in the actions column, and owns the one dialog
+ * every row's `confirm` opens.
+ */
 function DataTableRowActionsProvider({
   value,
   children,
@@ -190,7 +234,40 @@ function DataTableRowActionsProvider({
   value: RowActionsContextValue
   children: React.ReactNode
 }) {
-  return <RowActionsContext value={value}>{children}</RowActionsContext>
+  const [pending, setPending] = React.useState<PendingConfirmation | null>(null)
+  const [open, setOpen] = React.useState(false)
+
+  const ask = React.useCallback((next: PendingConfirmation) => {
+    setPending(next)
+    setOpen(true)
+  }, [])
+
+  const Content = pending?.destructive
+    ? DeleteDialogContent
+    : ConfirmationDialogContent
+
+  return (
+    <RowActionsContext value={value}>
+      <RowConfirmationContext value={ask}>
+        {children}
+        {/* Stays mounted with its last question while it animates out; only `open` changes. */}
+        <Dialog open={open} onOpenChange={setOpen}>
+          {pending ? (
+            <Content
+              title={pending.confirm.title}
+              description={pending.confirm.description}
+              confirmLabel={pending.confirm.confirmLabel}
+              cancelLabel={pending.confirm.cancelLabel}
+              onConfirm={() => {
+                setOpen(false)
+                pending.run()
+              }}
+            />
+          ) : null}
+        </Dialog>
+      </RowConfirmationContext>
+    </RowActionsContext>
+  )
 }
 
 /**
@@ -206,6 +283,7 @@ function DataTableRowActionsProvider({
  */
 function DataTableRowActionsCell<TRow>({ row }: PlainTableCellProps<TRow>) {
   const context = React.use(RowActionsContext)
+  const ask = React.use(RowConfirmationContext) ?? undefined
   const messages = useTableMessages()
 
   if (!context || context.actions.length === 0) {
@@ -218,7 +296,7 @@ function DataTableRowActionsCell<TRow>({ row }: PlainTableCellProps<TRow>) {
       size="icon-sm"
       variant="ghost"
       triggerLabel={messages.rowActions.trigger}
-      actions={resolveRowActions(context.actions, row as unknown)}
+      actions={resolveRowActions(context.actions, row as unknown, ask)}
     />
   )
 }

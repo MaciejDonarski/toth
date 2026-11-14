@@ -114,5 +114,18 @@ export function authTemplates(locale: AppLocale) {
         },
       ])
     },
+
+    invitationExistingAccount(company: string, loginUrl: string): RenderedMail {
+      return render(t("invitationExistingAccount.subject", { company }), [
+        { kind: "p", text: t("invitationExistingAccount.intro", { company }) },
+        { kind: "p", text: t("invitationExistingAccount.explain") },
+        {
+          kind: "button",
+          label: t("invitationExistingAccount.login"),
+          href: loginUrl,
+        },
+        { kind: "muted", text: t("notYou") },
+      ])
+    },
   }
 }

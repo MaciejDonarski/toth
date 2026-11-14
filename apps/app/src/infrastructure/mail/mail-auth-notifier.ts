@@ -94,6 +94,16 @@ export class MailAuthNotifier implements AuthNotifier {
     )
   }
 
+  sendInvitationToExistingAccount(
+    to: string,
+    { companyName }: { companyName: string }
+  ) {
+    return this.#send(
+      to,
+      this.#mail.invitationExistingAccount(companyName, this.#url("/login"))
+    )
+  }
+
   #url(path: string, token?: string): string {
     const url = new URL(path, this.appUrl)
     if (token) url.searchParams.set("token", token)

@@ -74,6 +74,7 @@ export function fakeNotifier(): {
     sendPasswordChanged: vi.fn(async () => undefined),
     sendAccountLocked: vi.fn(async () => undefined),
     sendInvitation: vi.fn(async () => undefined),
+    sendInvitationToExistingAccount: vi.fn(async () => undefined),
   }
 }
 

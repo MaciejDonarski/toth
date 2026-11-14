@@ -73,6 +73,28 @@ describe("PrismaPasswordResetStore (Postgres)", () => {
   beforeEach(truncateAll)
   afterAll(() => testDb.$disconnect())
 
+  it("refuses a disabled account and leaves it untouched", async () => {
+    const { userId } = await seed()
+    await testDb.user.update({
+      where: { id: userId },
+      data: { status: "DISABLED" },
+    })
+    await expect(
+      store.resetWithToken({
+        tokenHash: "jan@firma.pl-reset",
+        passwordHash: "new-hash",
+        now: at(MINUTE),
+      })
+    ).resolves.toBeNull()
+    await expect(
+      testDb.user.findUniqueOrThrow({ where: { id: userId } })
+    ).resolves.toMatchObject({
+      passwordHash: "old-hash",
+      failedLoginCount: 3,
+      lockedUntil: at(10 * MINUTE),
+    })
+  })
+
   it("changes the password and revokes every way back in, atomically", async () => {
     const { userId, companyId } = await seed()
     const result = await store.resetWithToken({

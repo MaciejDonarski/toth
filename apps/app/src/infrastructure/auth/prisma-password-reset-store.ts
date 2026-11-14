@@ -19,6 +19,8 @@ export class PrismaPasswordResetStore implements PasswordResetStore {
           type: "PASSWORD_RESET",
           consumedAt: null,
           expiresAt: { gt: now },
+          // A disabled account cannot change its password or clear its lockout.
+          user: { status: "ACTIVE" },
         },
         data: { consumedAt: now },
       })

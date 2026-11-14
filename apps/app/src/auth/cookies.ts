@@ -20,6 +20,15 @@ const baseOptions = {
   path: "/",
 } as const
 
+/**
+ * `cookies().delete()` emits no `Secure` attribute, and browsers ignore a
+ * `__Host-` Set-Cookie without it, so expire the cookie with the same
+ * attributes it was set with.
+ */
+async function expireCookie(name: string) {
+  ;(await cookies()).set(name, "", { ...baseOptions, maxAge: 0 })
+}
+
 // --- Email awaiting verification (drives "resend link" on /register/check-email)
 
 const PENDING_EMAIL = cookieName("pending-email")
@@ -37,7 +46,7 @@ export async function getPendingEmail(): Promise<string | undefined> {
 }
 
 export async function clearPendingEmail() {
-  ;(await cookies()).delete(PENDING_EMAIL)
+  await expireCookie(PENDING_EMAIL)
 }
 
 // --- Login challenge (second step) ------------------------------------------
@@ -56,7 +65,7 @@ export async function getLoginChallengeCookie(): Promise<string | undefined> {
 }
 
 export async function clearLoginChallengeCookie() {
-  ;(await cookies()).delete(LOGIN_CHALLENGE)
+  await expireCookie(LOGIN_CHALLENGE)
 }
 
 // --- Trusted device ("remember this browser") -------------------------------
@@ -75,5 +84,5 @@ export async function getTrustedDeviceCookie(): Promise<string | undefined> {
 }
 
 export async function clearTrustedDeviceCookie() {
-  ;(await cookies()).delete(TRUSTED_DEVICE)
+  await expireCookie(TRUSTED_DEVICE)
 }

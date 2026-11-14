@@ -38,6 +38,7 @@ function fakeRepo(
     createInvitation: vi.fn(async () => ({
       ok: true as const,
       companyName: "Acme",
+      existingAccount: false,
     })),
     revokeInvitation: vi.fn(async () => true),
     changeRole: vi.fn(async () => null),
@@ -89,6 +90,30 @@ describe("company users use cases", () => {
       companyName: "Acme",
       validForMs: 72 * 3_600_000,
     })
+  })
+
+  it("sends no link to an address with an account elsewhere, only a notice", async () => {
+    const { deps, users } = setup(
+      fakeRepo({
+        createInvitation: vi.fn(async () => ({
+          ok: true as const,
+          companyName: "Acme",
+          existingAccount: true,
+        })),
+      })
+    )
+    await expect(
+      users.invite(
+        ctxFor("ADMIN"),
+        { email: "taken@b.pl", role: "WORKER" },
+        meta
+      )
+    ).resolves.toBeUndefined()
+    expect(deps.notifier.sendInvitation).not.toHaveBeenCalled()
+    expect(deps.notifier.sendInvitationToExistingAccount).toHaveBeenCalledWith(
+      "taken@b.pl",
+      { companyName: "Acme" }
+    )
   })
 
   it("surfaces seat-limit and taken-email refusals", async () => {

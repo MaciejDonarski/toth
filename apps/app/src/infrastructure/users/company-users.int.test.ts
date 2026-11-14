@@ -214,15 +214,49 @@ describe("company users (Postgres)", () => {
       })
     })
 
-    it("refuses emails that already have an account anywhere", async () => {
+    it("refuses only emails of the inviting company's own users", async () => {
       const { ctx } = await seedCompany("A", [
         { email: "admin@a.pl", role: "ADMIN" },
       ])
-      await seedCompany("B", [{ email: "taken@b.pl", role: "ADMIN" }])
-      await expect(invite(ctx, "taken@b.pl")).resolves.toEqual({
+      await expect(invite(ctx, "admin@a.pl")).resolves.toEqual({
         ok: false,
         error: "EMAIL_TAKEN",
       })
+    })
+
+    it("treats an email of another company like a new one (no enumeration)", async () => {
+      const { ctx } = await seedCompany(
+        "A",
+        [{ email: "admin@a.pl", role: "ADMIN" }],
+        3
+      )
+      await seedCompany("B", [{ email: "taken@b.pl", role: "ADMIN" }])
+
+      await expect(invite(ctx, "taken@b.pl")).resolves.toEqual({
+        ok: true,
+        companyName: "A",
+        existingAccount: true,
+      })
+      await expect(invite(ctx, "free@a.pl")).resolves.toEqual({
+        ok: true,
+        companyName: "A",
+        existingAccount: false,
+      })
+      // Same footprint for the inviter: listed and holding a seat.
+      await expect(repo.listPendingInvitations(ctx, NOW)).resolves.toHaveLength(
+        2
+      )
+      await expect(repo.seatUsage(ctx, NOW)).resolves.toEqual({
+        used: 3,
+        limit: 3,
+      })
+      // With the seats full both answers are the same, too.
+      for (const email of ["admin@b.pl", "nobody@x.pl"]) {
+        await expect(invite(ctx, email)).resolves.toEqual({
+          ok: false,
+          error: "USER_LIMIT_REACHED",
+        })
+      }
     })
 
     it("needs a free seat to re-enable a user", async () => {
@@ -273,8 +307,32 @@ describe("company users (Postgres)", () => {
       await testDb.trustedDevice.create({
         data: { userId, tokenHash: "td", expiresAt: at(30 * DAY) },
       })
+      await testDb.loginChallenge.create({
+        data: {
+          id: "lc",
+          userId,
+          codeHash: "c",
+          codeExpiresAt: at(DAY),
+          expiresAt: at(DAY),
+          lastSentAt: NOW,
+        },
+      })
+      await testDb.authToken.create({
+        data: {
+          userId,
+          type: "PASSWORD_RESET",
+          tokenHash: "reset",
+          expiresAt: at(DAY),
+        },
+      })
 
       await expect(repo.setActive(ctx, userId, false, NOW)).resolves.toBeNull()
+      await expect(
+        testDb.loginChallenge.findUniqueOrThrow({ where: { id: "lc" } })
+      ).resolves.toMatchObject({ consumedAt: NOW })
+      await expect(
+        testDb.authToken.findUniqueOrThrow({ where: { tokenHash: "reset" } })
+      ).resolves.toMatchObject({ consumedAt: NOW })
       await expect(
         testDb.session.findUniqueOrThrow({ where: { id: "s" } })
       ).resolves.toMatchObject({

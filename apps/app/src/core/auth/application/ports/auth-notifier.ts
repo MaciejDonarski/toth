@@ -23,4 +23,9 @@ export interface AuthNotifier {
     to: string,
     input: { token: string; companyName: string; validForMs: number }
   ): Promise<void>
+  /** A company invited an email that already has an account elsewhere. */
+  sendInvitationToExistingAccount(
+    to: string,
+    input: { companyName: string }
+  ): Promise<void>
 }

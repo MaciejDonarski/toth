@@ -128,6 +128,22 @@ describe("password change (Postgres)", () => {
         { userId: b.userId, tokenHash: "td-b", expiresAt: at(30 * DAY) },
       ],
     })
+    await testDb.authToken.createMany({
+      data: [
+        {
+          userId: a.userId,
+          type: "PASSWORD_RESET",
+          tokenHash: "reset-a",
+          expiresAt: at(DAY),
+        },
+        {
+          userId: b.userId,
+          type: "PASSWORD_RESET",
+          tokenHash: "reset-b",
+          expiresAt: at(DAY),
+        },
+      ],
+    })
 
     await expect(
       passwords.change(a.ctx, {
@@ -153,6 +169,16 @@ describe("password change (Postgres)", () => {
     ).resolves.toEqual([
       { tokenHash: "td-a", revokedAt: NOW },
       { tokenHash: "td-b", revokedAt: null },
+    ])
+    // An earlier reset link must not undo the change.
+    await expect(
+      testDb.authToken.findMany({
+        select: { tokenHash: true, consumedAt: true },
+        orderBy: { tokenHash: "asc" },
+      })
+    ).resolves.toEqual([
+      { tokenHash: "reset-a", consumedAt: NOW },
+      { tokenHash: "reset-b", consumedAt: null },
     ])
     await expect(
       testDb.user.findUniqueOrThrow({ where: { id: a.userId } })

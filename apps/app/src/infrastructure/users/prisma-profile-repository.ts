@@ -130,6 +130,15 @@ export class PrismaPasswordChangeStore implements PasswordChangeStore {
           where: { userId: ctx.userId, consumedAt: null },
           data: { consumedAt: now },
         })
+        // A reset link issued before the change must not undo it.
+        await tx.authToken.updateMany({
+          where: {
+            userId: ctx.userId,
+            type: "PASSWORD_RESET",
+            consumedAt: null,
+          },
+          data: { consumedAt: now },
+        })
         return true
       })
     )

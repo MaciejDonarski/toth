@@ -119,13 +119,14 @@ export class PrismaCompanyUsersRepository implements CompanyUsersRepository {
       db.$transaction(async (tx) => {
         const company = await lockCompany(tx, ctx.companyId)
 
-        // Emails are unique across all companies.
-        if (
-          await tx.user.findUnique({
-            where: { email: input.email },
-            select: { id: true },
-          })
-        ) {
+        // Emails are unique across all companies, but only a member of THIS
+        // company may be reported: anything else would tell the tenant that
+        // the address has an account elsewhere (enumeration).
+        const owner = await tx.user.findUnique({
+          where: { email: input.email },
+          select: { companyId: true },
+        })
+        if (owner?.companyId === ctx.companyId) {
           return { ok: false, error: "EMAIL_TAKEN" } as const
         }
 
@@ -164,7 +165,11 @@ export class PrismaCompanyUsersRepository implements CompanyUsersRepository {
           create: { ...data, companyId: ctx.companyId, email: input.email },
           update: data,
         })
-        return { ok: true, companyName: company.name } as const
+        return {
+          ok: true,
+          companyName: company.name,
+          existingAccount: !!owner,
+        } as const
       })
     )
   }
@@ -256,6 +261,15 @@ export class PrismaCompanyUsersRepository implements CompanyUsersRepository {
               user: { companyId: ctx.companyId },
             },
             data: { revokedAt: now },
+          })
+          // No way back in through a pending second step or a reset link.
+          await tx.loginChallenge.updateMany({
+            where: { userId, consumedAt: null },
+            data: { consumedAt: now },
+          })
+          await tx.authToken.updateMany({
+            where: { userId, type: "PASSWORD_RESET", consumedAt: null },
+            data: { consumedAt: now },
           })
         }
         return null

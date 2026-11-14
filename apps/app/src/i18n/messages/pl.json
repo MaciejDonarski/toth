@@ -219,7 +219,7 @@
       "LAST_ADMIN": "Firma musi mieć co najmniej jednego aktywnego administratora.",
       "NOT_FOUND": "Nie znaleziono użytkownika lub zaproszenia.",
       "USER_LIMIT_REACHED": "Osiągnięto limit użytkowników firmy.",
-      "EMAIL_TAKEN": "Ten adres ma już konto w systemie."
+      "EMAIL_TAKEN": "Ta osoba jest już użytkownikiem Twojej firmy."
     }
   },
   "acceptInvite": {
@@ -342,6 +342,12 @@
       "intro": "Zostałeś zaproszony do firmy {company}. Ustaw hasło, aby aktywować konto.",
       "button": "Przyjmij zaproszenie",
       "validity": "Zaproszenie jest ważne przez {duration}."
+    },
+    "invitationExistingAccount": {
+      "subject": "Zaproszenie do {company}",
+      "intro": "Firma {company} zaprosiła Cię do swojego konta.",
+      "explain": "Twój adres email ma już konto w innej firmie, a jedno konto może należeć tylko do jednej firmy, więc nie możesz przyjąć tego zaproszenia. Jeśli chcesz dołączyć, poproś zapraszającego o zaproszenie na inny adres.",
+      "login": "Zaloguj się na swoje konto"
     }
   },
   "profile": {

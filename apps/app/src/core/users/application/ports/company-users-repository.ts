@@ -24,7 +24,13 @@ export type PendingInvitation = Readonly<{
 }>
 
 export type CreateInvitationResult =
-  | { ok: true; companyName: string }
+  /**
+   * `existingAccount`: the email belongs to a user of ANOTHER company. The
+   * invitation is still stored (and holds a seat) so the inviting tenant sees
+   * exactly the same outcome as for a new address; only the email differs.
+   */
+  | { ok: true; companyName: string; existingAccount: boolean }
+  /** EMAIL_TAKEN = already a user of the inviting company. */
   | { ok: false; error: "USER_LIMIT_REACHED" | "EMAIL_TAKEN" }
 
 /**

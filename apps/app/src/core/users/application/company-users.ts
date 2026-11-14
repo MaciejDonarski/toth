@@ -111,12 +111,24 @@ export function makeCompanyUsers(deps: CompanyUsersDeps) {
       })
       if (!result.ok) throw new AuthError(result.error)
 
-      await deps.notifier.sendInvitation(email, {
-        token,
-        companyName: result.companyName,
-        validForMs: AUTH_POLICY.invitationTtlMs,
+      if (result.existingAccount) {
+        // Accepting would fail (one account = one company), so no link. The
+        // owner is told instead; the inviter sees a normal pending invite.
+        await deps.notifier.sendInvitationToExistingAccount(email, {
+          companyName: result.companyName,
+        })
+      } else {
+        await deps.notifier.sendInvitation(email, {
+          token,
+          companyName: result.companyName,
+          validForMs: AUTH_POLICY.invitationTtlMs,
+        })
+      }
+      await record(ctx, "invitation_sent", meta, {
+        email,
+        role,
+        ...(result.existingAccount && { existingAccount: true }),
       })
-      await record(ctx, "invitation_sent", meta, { email, role })
     },
 
     async revokeInvitation(

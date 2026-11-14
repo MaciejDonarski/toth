@@ -17,9 +17,18 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "@base-ui/react": "^1.9.0",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/modifiers": "^9.0.0",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@toth/form": "workspace:*",
     "@toth/ui": "workspace:*",
-    "@toth/utils": "workspace:*"
+    "@toth/utils": "workspace:*",
+    "date-fns": "^4.4.0",
+    "lucide-react": "^1.72.0",
+    "react-hook-form": "^7.92.0",
+    "zod": "^4.6.7"
   },
   "peerDependencies": {
     "react": "^19",

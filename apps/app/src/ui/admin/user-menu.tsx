@@ -6,8 +6,6 @@ import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { useTheme } from "next-themes"
 
-import { userColorStyle } from "@/core/users/domain/user-color"
-import { Avatar, AvatarFallback, AvatarImage } from "@toth/ui/components/avatar"
 import { Button } from "@toth/ui/components/button"
 import {
   DropdownMenu,
@@ -21,20 +19,13 @@ import {
 import { Switch } from "@toth/ui/components/switch"
 import { cn } from "@toth/ui/lib/utils"
 
+import { UserAvatar } from "@/ui/users/user-avatar"
+
 type User = {
   name: string
   email: string
   color?: string
   avatar?: string
-}
-
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("")
 }
 
 function UserIdentity({
@@ -46,14 +37,7 @@ function UserIdentity({
 }) {
   return (
     <>
-      <Avatar>
-        {user.avatar && <AvatarImage src={user.avatar} alt="" />}
-        <AvatarFallback
-          style={user.color ? userColorStyle(user.color) : undefined}
-        >
-          {initials(user.name)}
-        </AvatarFallback>
-      </Avatar>
+      <UserAvatar name={user.name} color={user.color} src={user.avatar} />
       <span
         className={cn(
           "grid min-w-0 flex-1 text-left text-sm leading-tight",

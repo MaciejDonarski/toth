@@ -299,12 +299,16 @@ type InvitationApi = ReturnType<
 >["invitationAcceptance"]
 
 export const companyUsers: CompanyUsersApi = {
-  overview: (...args) => getUserUseCases().companyUsers.overview(...args),
+  listMembers: (...args) => getUserUseCases().companyUsers.listMembers(...args),
+  listInvitations: (...args) =>
+    getUserUseCases().companyUsers.listInvitations(...args),
+  seats: (...args) => getUserUseCases().companyUsers.seats(...args),
   invite: (...args) => getUserUseCases().companyUsers.invite(...args),
   revokeInvitation: (...args) =>
     getUserUseCases().companyUsers.revokeInvitation(...args),
   changeRole: (...args) => getUserUseCases().companyUsers.changeRole(...args),
   setActive: (...args) => getUserUseCases().companyUsers.setActive(...args),
+  remove: (...args) => getUserUseCases().companyUsers.remove(...args),
 }
 
 export const invitationAcceptance: InvitationApi = {

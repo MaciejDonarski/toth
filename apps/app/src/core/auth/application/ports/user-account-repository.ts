@@ -1,4 +1,5 @@
 import type { Role } from "../../domain/role"
+import type { UserStatus } from "../../domain/user-status"
 
 /**
  * A user's own account, as seen by authentication flows. These run before a
@@ -11,7 +12,7 @@ export type UserAccount = Readonly<{
   email: string
   name: string | null
   role: Role
-  status: "ACTIVE" | "DISABLED"
+  status: UserStatus
   passwordHash: string
   emailVerifiedAt: Date | null
   passwordChangedAt: Date

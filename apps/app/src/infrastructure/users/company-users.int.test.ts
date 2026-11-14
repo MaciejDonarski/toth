@@ -12,6 +12,7 @@ const DAY = 24 * 3_600_000
 const at = (ms: number) => new Date(NOW.getTime() + ms)
 
 const repo = new PrismaCompanyUsersRepository()
+const ALL = { page: 1, pageSize: 100, filters: {} }
 const acceptances = new PrismaInvitationAcceptanceStore(testDb)
 
 async function seedCompany(
@@ -81,8 +82,9 @@ describe("company users (Postgres)", () => {
 
     it("lists only the caller's members and invitations", async () => {
       const { a } = await twoCompanies()
-      const members = await repo.listMembers(a.ctx)
-      const invitations = await repo.listPendingInvitations(a.ctx, NOW)
+      const members = (await repo.listMembers(a.ctx, ALL)).items
+      const invitations = (await repo.listPendingInvitations(a.ctx, NOW, ALL))
+        .items
 
       expect(members.map((m) => m.email).sort()).toEqual([
         "admin@a.pl",
@@ -105,9 +107,16 @@ describe("company users (Postgres)", () => {
       await expect(repo.setActive(a.ctx, victim, false, NOW)).resolves.toBe(
         "NOT_FOUND"
       )
+      await expect(repo.anonymize(a.ctx, victim, NOW)).resolves.toBe(
+        "NOT_FOUND"
+      )
       await expect(
         testDb.user.findUniqueOrThrow({ where: { id: victim } })
-      ).resolves.toMatchObject({ role: "WORKER", status: "ACTIVE" })
+      ).resolves.toMatchObject({
+        role: "WORKER",
+        status: "ACTIVE",
+        email: "worker@b.pl",
+      })
     })
 
     it("cannot revoke another company's invitation", async () => {
@@ -148,7 +157,9 @@ describe("company users (Postgres)", () => {
         now: NOW,
       })
       expect(result).toMatchObject({ ok: true, companyId: a.companyId })
-      await expect(repo.listMembers(b.ctx)).resolves.toHaveLength(2)
+      await expect(repo.listMembers(b.ctx, ALL)).resolves.toMatchObject({
+        total: 2,
+      })
     })
   })
 
@@ -189,8 +200,8 @@ describe("company users (Postgres)", () => {
 
       await repo.setActive(ctx, userIds[1]!, false, NOW)
       await expect(
-        repo.listPendingInvitations(ctx, at(4 * DAY))
-      ).resolves.toEqual([]) // y expired by then
+        repo.listPendingInvitations(ctx, at(4 * DAY), ALL)
+      ).resolves.toEqual({ items: [], total: 0 }) // y expired by then
       await expect(repo.seatUsage(ctx, NOW)).resolves.toEqual({
         used: 2,
         limit: 3,
@@ -243,9 +254,9 @@ describe("company users (Postgres)", () => {
         existingAccount: false,
       })
       // Same footprint for the inviter: listed and holding a seat.
-      await expect(repo.listPendingInvitations(ctx, NOW)).resolves.toHaveLength(
-        2
-      )
+      await expect(
+        repo.listPendingInvitations(ctx, NOW, ALL)
+      ).resolves.toMatchObject({ total: 2 })
       await expect(repo.seatUsage(ctx, NOW)).resolves.toEqual({
         used: 3,
         limit: 3,
@@ -277,22 +288,34 @@ describe("company users (Postgres)", () => {
   })
 
   describe("admin guards", () => {
-    it("keeps at least one active admin", async () => {
+    it("never changes, disables or deletes an admin", async () => {
       const { ctx, userIds } = await seedCompany("A", [
         { email: "admin@a.pl", role: "ADMIN" },
         { email: "admin2@a.pl", role: "ADMIN" },
       ])
+      const admin2 = userIds[1]!
+      await expect(repo.changeRole(ctx, admin2, "WORKER")).resolves.toBe(
+        "ADMIN_PROTECTED"
+      )
+      await expect(repo.setActive(ctx, admin2, false, NOW)).resolves.toBe(
+        "ADMIN_PROTECTED"
+      )
+      await expect(repo.anonymize(ctx, admin2, NOW)).resolves.toBe(
+        "ADMIN_PROTECTED"
+      )
       await expect(
-        repo.changeRole(ctx, userIds[1]!, "WORKER")
-      ).resolves.toBeNull()
+        testDb.user.findUniqueOrThrow({ where: { id: admin2 } })
+      ).resolves.toMatchObject({ role: "ADMIN", status: "ACTIVE" })
+    })
 
-      const other: TenantContext = { ...ctx, userId: userIds[1]! }
+    it("may still promote a member to admin", async () => {
+      const { ctx, userIds } = await seedCompany("A", [
+        { email: "admin@a.pl", role: "ADMIN" },
+        { email: "w@a.pl", role: "WORKER" },
+      ])
       await expect(
-        repo.changeRole(other, userIds[0]!, "MANAGER")
-      ).resolves.toBe("LAST_ADMIN")
-      await expect(
-        repo.setActive(other, userIds[0]!, false, NOW)
-      ).resolves.toBe("LAST_ADMIN")
+        repo.changeRole(ctx, userIds[1]!, "ADMIN")
+      ).resolves.toBeNull()
     })
 
     it("disabling signs the user out everywhere", async () => {
@@ -422,6 +445,139 @@ describe("company users (Postgres)", () => {
           now: NOW,
         })
       ).resolves.toEqual({ ok: false, error: "USER_LIMIT_REACHED" })
+    })
+  })
+
+  describe("paged member list", () => {
+    async function seedTeam() {
+      return seedCompany("A", [
+        { email: "admin@a.pl", role: "ADMIN" },
+        { email: "zofia@a.pl", role: "WORKER" },
+        { email: "adam@a.pl", role: "MANAGER" },
+        { email: "bartek@a.pl", role: "WORKER" },
+      ]).then(async (seed) => {
+        const names = ["Admin Główny", "Zofia Zawada", "Adam Nowak", null]
+        const phones = [null, "+48600100200", "+48500200300", null]
+        for (const [i, id] of seed.userIds.entries()) {
+          await testDb.user.update({
+            where: { id },
+            data: { name: names[i], phone: phones[i] },
+          })
+        }
+        return seed
+      })
+    }
+
+    it("pages and counts the whole result", async () => {
+      const { ctx } = await seedTeam()
+      const page2 = await repo.listMembers(ctx, {
+        page: 2,
+        pageSize: 3,
+        filters: {},
+      })
+      expect(page2.total).toBe(4)
+      expect(page2.items).toHaveLength(1)
+    })
+
+    it("sorts by name with unnamed members last", async () => {
+      const { ctx } = await seedTeam()
+      const { items } = await repo.listMembers(ctx, {
+        ...ALL,
+        sort: { field: "name", dir: "asc" },
+      })
+      expect(items.map((m) => m.name)).toEqual([
+        "Adam Nowak",
+        "Admin Główny",
+        "Zofia Zawada",
+        null,
+      ])
+    })
+
+    it("filters by name, email, phone digits and roles", async () => {
+      const { ctx } = await seedTeam()
+      const emails = async (filters: object) =>
+        (await repo.listMembers(ctx, { ...ALL, filters })).items
+          .map((m) => m.email)
+          .sort()
+
+      await expect(emails({ name: "zAwA" })).resolves.toEqual(["zofia@a.pl"])
+      await expect(emails({ email: "BART" })).resolves.toEqual(["bartek@a.pl"])
+      await expect(emails({ phone: "600 100" })).resolves.toEqual([
+        "zofia@a.pl",
+      ])
+      await expect(emails({ role: ["MANAGER", "ADMIN"] })).resolves.toEqual([
+        "adam@a.pl",
+        "admin@a.pl",
+      ])
+    })
+  })
+
+  describe("deleting (anonymizing) a member", () => {
+    it("wipes personal data, signs out, frees the seat and the email", async () => {
+      const { ctx, companyId, userIds } = await seedCompany(
+        "A",
+        [
+          { email: "admin@a.pl", role: "ADMIN" },
+          { email: "w@a.pl", role: "WORKER" },
+        ],
+        2
+      )
+      const userId = userIds[1]!
+      await testDb.user.update({
+        where: { id: userId },
+        data: { name: "Wiktor", phone: "+48600100200" },
+      })
+      await testDb.session.create({
+        data: { id: "s", userId, companyId, absoluteExpiresAt: at(DAY) },
+      })
+      await testDb.workingHours.create({
+        data: { userId, weekday: 1, startMinute: 480, endMinute: 960 },
+      })
+
+      await expect(repo.anonymize(ctx, userId, NOW)).resolves.toBeNull()
+
+      await expect(
+        testDb.user.findUniqueOrThrow({ where: { id: userId } })
+      ).resolves.toMatchObject({
+        email: `deleted+${userId}@deleted.invalid`,
+        name: null,
+        phone: null,
+        status: "DELETED",
+        deletedAt: NOW,
+      })
+      await expect(
+        testDb.session.findUniqueOrThrow({ where: { id: "s" } })
+      ).resolves.toMatchObject({ revokedAt: NOW })
+      await expect(
+        testDb.workingHours.count({ where: { userId } })
+      ).resolves.toBe(0)
+
+      // Hidden from the list, seat freed, address usable for a new invite.
+      await expect(repo.listMembers(ctx, ALL)).resolves.toMatchObject({
+        total: 1,
+      })
+      await expect(repo.seatUsage(ctx, NOW)).resolves.toEqual({
+        used: 1,
+        limit: 2,
+      })
+      await expect(invite(ctx, "w@a.pl")).resolves.toMatchObject({
+        ok: true,
+        existingAccount: false,
+      })
+    })
+
+    it("treats an already deleted member as unknown", async () => {
+      const { ctx, userIds } = await seedCompany("A", [
+        { email: "admin@a.pl", role: "ADMIN" },
+        { email: "w@a.pl", role: "WORKER" },
+      ])
+      await repo.anonymize(ctx, userIds[1]!, NOW)
+      await expect(repo.anonymize(ctx, userIds[1]!, NOW)).resolves.toBe(
+        "NOT_FOUND"
+      )
+      await expect(repo.setActive(ctx, userIds[1]!, true, NOW)).resolves.toBe(
+        "NOT_FOUND"
+      )
     })
   })
 })

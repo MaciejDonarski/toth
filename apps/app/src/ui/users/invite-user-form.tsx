@@ -22,11 +22,17 @@ export type InviteUserFormProps = {
   ) => Promise<(SubmitResult<InviteUserInput> & { sent?: boolean }) | void>
   /** No free seat: the form is shown disabled with an explanation. */
   limitReached: boolean
+  /** After a successful invite (the toast is already shown). */
+  onSent?: () => void
+  /** Renders a Cancel button that calls it (e.g. to close a dialog). */
+  onCancel?: () => void
 }
 
 export function InviteUserForm({
   onInvite,
   limitReached,
+  onSent,
+  onCancel,
 }: InviteUserFormProps) {
   const t = useTranslations()
   const roleOptions = ROLES.map((role) => ({
@@ -47,7 +53,7 @@ export function InviteUserForm({
         key={formKey}
         schema={inviteUserSchema}
         defaultValues={{ email: "", role: "WORKER" }}
-        className="grid gap-4 sm:grid-cols-[1fr_12rem_auto] sm:items-start"
+        className="flex flex-col gap-4"
         onSubmit={async (values) => {
           const result = await onInvite(values)
           if (result?.sent) {
@@ -59,6 +65,7 @@ export function InviteUserForm({
               }),
             })
             setFormKey((k) => k + 1)
+            onSent?.()
           }
           return result
         }}
@@ -79,8 +86,17 @@ export function InviteUserForm({
           disabled={limitReached}
         />
         <FormActions
-          className="sm:pt-6"
           actions={[
+            ...(onCancel
+              ? [
+                  {
+                    kind: "button" as const,
+                    label: t("common.cancel"),
+                    variant: "outline" as const,
+                    onClick: onCancel,
+                  },
+                ]
+              : []),
             {
               kind: "submit",
               label: t("users.invite.submit"),

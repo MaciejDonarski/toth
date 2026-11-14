@@ -1,4 +1,5 @@
 import type { Role } from "../../domain/role"
+import type { UserStatus } from "../../domain/user-status"
 
 /** A server-side session together with the owner's current account state. */
 export type StoredSession = Readonly<{
@@ -16,7 +17,7 @@ export type StoredSession = Readonly<{
     name: string | null
     color: string
     role: Role
-    status: "ACTIVE" | "DISABLED"
+    status: UserStatus
     passwordChangedAt: Date
   }>
 }>

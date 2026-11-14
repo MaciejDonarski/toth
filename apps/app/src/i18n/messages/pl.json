@@ -11,10 +11,10 @@
     "readTerms": "Przeczytaj regulamin",
     "backToLogin": "Wróć do logowania",
     "goToLogin": "Przejdź do logowania",
-    "you": "(Ty)",
     "never": "Nigdy",
     "save": "Zapisz",
-    "saved": "Zapisano zmiany."
+    "saved": "Zapisano zmiany.",
+    "cancel": "Anuluj"
   },
   "metadata": {
     "appTitle": "Toth",
@@ -70,7 +70,14 @@
   },
   "errors": {
     "generic": "Coś poszło nie tak. Spróbuj ponownie za chwilę.",
-    "rateLimited": "Zbyt wiele prób. Odczekaj chwilę i spróbuj ponownie."
+    "rateLimited": "Zbyt wiele prób. Odczekaj chwilę i spróbuj ponownie.",
+    "forbidden": "Nie masz uprawnień do tej operacji.",
+    "tableLoad": "Nie udało się wczytać danych."
+  },
+  "rowActions": {
+    "activate": "Aktywuj",
+    "deactivate": "Dezaktywuj",
+    "delete": "Usuń"
   },
   "roles": {
     "ADMIN": "Administrator",
@@ -183,39 +190,59 @@
   "users": {
     "title": "Użytkownicy",
     "seats": "Wykorzystane miejsca: {used} z {limit}",
-    "inviteHeading": "Zaproś osobę",
     "membersHeading": "Członkowie firmy",
     "invitationsHeading": "Oczekujące zaproszenia",
+    "you": "Ty",
+    "itemsLabel": "użytkowników",
     "columns": {
-      "user": "Użytkownik",
+      "name": "Imię i nazwisko",
+      "email": "Email",
+      "phone": "Telefon",
       "role": "Rola",
       "status": "Status",
-      "phone": "Telefon",
-      "lastLogin": "Ostatnie logowanie",
-      "actions": "Akcje",
-      "email": "Email",
       "expiresAt": "Ważne do"
     },
     "status": {
       "ACTIVE": "Aktywny",
-      "DISABLED": "Wyłączony"
+      "DISABLED": "Nieaktywny",
+      "DELETED": "Usunięty"
     },
-    "roleFor": "Rola: {email}",
-    "disable": "Wyłącz",
-    "enable": "Włącz",
-    "disableFor": "Wyłącz {email}",
-    "enableFor": "Włącz {email}",
-    "revoke": "Odwołaj",
-    "revokeFor": "Odwołaj zaproszenie {email}",
-    "noInvitations": "Brak oczekujących zaproszeń.",
-    "invite": {
+    "actions": {
+      "changeRole": "Zmień rolę",
+      "activated": "Aktywowano konto {name}.",
+      "deactivated": "Dezaktywowano konto {name}. Wszystkie sesje zostały wylogowane.",
+      "deleted": "Usunięto użytkownika {name}.",
+      "roleChanged": "Zmieniono rolę użytkownika {name}."
+    },
+    "confirmDelete": {
+      "title": "Usunąć użytkownika {name}?",
+      "description": "Dane osobowe konta zostaną trwale zanonimizowane, a wszystkie sesje wylogowane. Tej operacji nie można cofnąć."
+    },
+    "changeRole": {
+      "title": "Zmień rolę: {name}",
+      "description": "Nowa rola obowiązuje od następnego odświeżenia strony przez użytkownika.",
       "role": "Rola",
-      "submit": "Zaproś",
-      "limitReached": "Wykorzystano wszystkie miejsca w firmie. Odwołaj zaproszenie lub wyłącz nieaktywnego użytkownika, aby zaprosić kolejną osobę.",
+      "submit": "Zapisz"
+    },
+    "invite": {
+      "open": "Zaproś użytkownika",
+      "title": "Zaproś użytkownika",
+      "description": "Wyślemy link z zaproszeniem na podany adres email.",
+      "role": "Rola",
+      "submit": "Wyślij zaproszenie",
+      "limitReached": "Wykorzystano wszystkie miejsca w firmie. Anuluj zaproszenie lub dezaktywuj użytkownika, aby zaprosić kolejną osobę.",
       "sent": "Wysłano zaproszenie na adres {email}. Jest ważne {hours} godziny."
     },
+    "invitations": {
+      "itemsLabel": "zaproszeń",
+      "revoke": "Anuluj zaproszenie",
+      "revoked": "Anulowano zaproszenie dla {email}.",
+      "confirmTitle": "Anulować zaproszenie dla {email}?",
+      "confirmDescription": "Link z zaproszenia przestanie działać, a miejsce w firmie zostanie zwolnione."
+    },
     "errors": {
-      "SELF_CHANGE": "Nie możesz zmienić roli ani wyłączyć własnego konta.",
+      "SELF_CHANGE": "Nie możesz zmienić roli, statusu ani usunąć własnego konta.",
+      "ADMIN_PROTECTED": "Nie można zmieniać ani usuwać kont administratorów.",
       "LAST_ADMIN": "Firma musi mieć co najmniej jednego aktywnego administratora.",
       "NOT_FOUND": "Nie znaleziono użytkownika lub zaproszenia.",
       "USER_LIMIT_REACHED": "Osiągnięto limit użytkowników firmy.",

@@ -21,6 +21,8 @@ enum Role {
 enum UserStatus {
   ACTIVE
   DISABLED
+  /// Anonymized: personal data wiped, no way back in. Hidden from member lists.
+  DELETED
 }
 
 enum AuthTokenType {
@@ -58,6 +60,8 @@ model User {
   lastLoginAt       DateTime?
   failedLoginCount  Int        @default(0)
   lockedUntil       DateTime?
+  /// Set when the account was anonymized (status DELETED).
+  deletedAt         DateTime?
   termsAcceptedAt   DateTime?
   termsVersion      String?
   createdAt         DateTime   @default(now())

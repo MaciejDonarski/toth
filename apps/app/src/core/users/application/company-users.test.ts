@@ -22,6 +22,7 @@ import type { CompanyUsersRepository } from "./ports/company-users-repository"
 import type { InvitationAcceptanceStore } from "./ports/invitation-acceptance-store"
 
 const meta = { ip: "1.2.3.4" }
+const query = { page: 1, pageSize: 25, filters: {} }
 const ctxFor = (role: Role): TenantContext => ({
   userId: "me",
   companyId: "c1",
@@ -32,8 +33,8 @@ function fakeRepo(
   overrides: Partial<CompanyUsersRepository> = {}
 ): CompanyUsersRepository {
   return {
-    listMembers: vi.fn(async () => []),
-    listPendingInvitations: vi.fn(async () => []),
+    listMembers: vi.fn(async () => ({ items: [], total: 0 })),
+    listPendingInvitations: vi.fn(async () => ({ items: [], total: 0 })),
     seatUsage: vi.fn(async () => ({ used: 1, limit: 5 })),
     createInvitation: vi.fn(async () => ({
       ok: true as const,
@@ -43,6 +44,7 @@ function fakeRepo(
     revokeInvitation: vi.fn(async () => true),
     changeRole: vi.fn(async () => null),
     setActive: vi.fn(async () => null),
+    anonymize: vi.fn(async () => null),
     ...overrides,
   }
 }
@@ -149,7 +151,10 @@ describe("company users use cases", () => {
     ["MANAGER", "invite", () => [{ email: "x@a.pl", role: "WORKER" }]],
     ["MANAGER", "changeRole", () => ["u2", "ADMIN"]],
     ["MANAGER", "setActive", () => ["u2", false]],
-    ["WORKER", "overview", () => []],
+    ["MANAGER", "remove", () => ["u2"]],
+    ["WORKER", "listMembers", () => [query]],
+    ["WORKER", "listInvitations", () => [query]],
+    ["WORKER", "seats", () => []],
     ["WORKER", "revokeInvitation", () => ["inv-1"]],
   ] as const)(
     "refuses %s calling %s even if the caller forgot to check",
@@ -174,8 +179,53 @@ describe("company users use cases", () => {
     await expect(
       codeOf(users.setActive(ctxFor("ADMIN"), "me", false, meta))
     ).resolves.toBe("SELF_CHANGE")
+    await expect(
+      codeOf(users.remove(ctxFor("ADMIN"), "me", meta))
+    ).resolves.toBe("SELF_CHANGE")
     expect(deps.companyUsers.changeRole).not.toHaveBeenCalled()
+    expect(deps.companyUsers.anonymize).not.toHaveBeenCalled()
   })
+
+  it("removes a member by anonymizing and records it", async () => {
+    const { deps, users } = setup()
+    await users.remove(ctxFor("ADMIN"), "u2", meta)
+    expect(deps.companyUsers.anonymize).toHaveBeenCalledWith(
+      ctxFor("ADMIN"),
+      "u2",
+      NOW
+    )
+    expect(deps.events.record).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "member_deleted",
+        meta: { memberId: "u2" },
+      })
+    )
+  })
+
+  it.each([
+    ["changeRole", () => ["u2", "WORKER"]],
+    ["setActive", () => ["u2", false]],
+    ["remove", () => ["u2"]],
+  ] as const)(
+    "passes ADMIN_PROTECTED through from %s",
+    async (method, args) => {
+      const refused = vi.fn(async () => "ADMIN_PROTECTED" as const)
+      const { deps, users } = setup(
+        fakeRepo({
+          changeRole: refused,
+          setActive: refused,
+          anonymize: refused,
+        })
+      )
+      const call = (users[method] as (...a: unknown[]) => Promise<unknown>)(
+        ctxFor("ADMIN"),
+        ...args(),
+        meta
+      )
+      await expect(codeOf(call)).resolves.toBe("ADMIN_PROTECTED")
+      expect(deps.events.record).not.toHaveBeenCalled()
+    }
+  )
 
   it("rejects unknown roles", async () => {
     const { users } = setup()

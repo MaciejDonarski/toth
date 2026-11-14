@@ -1,5 +1,7 @@
 import type { Role } from "@/core/auth/domain/role"
 import type { TenantContext } from "@/core/auth/domain/tenant-context"
+import type { UserStatus } from "@/core/auth/domain/user-status"
+import type { ListPage, ListQuery } from "@/core/shared/list-query"
 
 import type { MemberChangeError, SeatUsage } from "../../domain/membership"
 
@@ -9,11 +11,27 @@ export type Member = Readonly<{
   name: string | null
   /** E.164, or null. */
   phone: string | null
+  /** Avatar background, a key of `USER_COLORS`. */
+  color: string
   role: Role
-  status: "ACTIVE" | "DISABLED"
+  status: UserStatus
   lastLoginAt: Date | null
   createdAt: Date
 }>
+
+export const MEMBER_SORT_FIELDS = ["name", "email", "phone", "role"] as const
+export type MemberSortField = (typeof MEMBER_SORT_FIELDS)[number]
+
+export type MemberFilters = {
+  /** Case-insensitive substring. */
+  name: string
+  email: string
+  /** Digits only, matched as a substring of the stored E.164 number. */
+  phone: string
+  role: Role[]
+}
+
+export type MemberListQuery = ListQuery<MemberSortField, MemberFilters>
 
 export type PendingInvitation = Readonly<{
   id: string
@@ -22,6 +40,19 @@ export type PendingInvitation = Readonly<{
   expiresAt: Date
   createdAt: Date
 }>
+
+export const INVITATION_SORT_FIELDS = ["email", "role", "expiresAt"] as const
+export type InvitationSortField = (typeof INVITATION_SORT_FIELDS)[number]
+
+export type InvitationFilters = {
+  email: string
+  role: Role[]
+}
+
+export type InvitationListQuery = ListQuery<
+  InvitationSortField,
+  InvitationFilters
+>
 
 export type CreateInvitationResult =
   /**
@@ -42,12 +73,17 @@ export type CreateInvitationResult =
  * an unknown id (covered by the A/B isolation tests).
  */
 export interface CompanyUsersRepository {
-  listMembers(ctx: TenantContext): Promise<Member[]>
+  /** One page of members; DELETED (anonymized) accounts are never listed. */
+  listMembers(
+    ctx: TenantContext,
+    query: MemberListQuery
+  ): Promise<ListPage<Member>>
 
   listPendingInvitations(
     ctx: TenantContext,
-    now: Date
-  ): Promise<PendingInvitation[]>
+    now: Date,
+    query: InvitationListQuery
+  ): Promise<ListPage<PendingInvitation>>
 
   seatUsage(ctx: TenantContext, now: Date): Promise<SeatUsage>
 
@@ -74,7 +110,11 @@ export interface CompanyUsersRepository {
     now: Date
   ): Promise<boolean>
 
-  /** Keeps at least one active admin; refuses to change the caller. */
+  /**
+   * Admins are untouchable (ADMIN_PROTECTED) — this and the two methods below
+   * refuse any change to a member whose role is ADMIN. LAST_ADMIN stays as a
+   * second guard.
+   */
   changeRole(
     ctx: TenantContext,
     userId: string,
@@ -89,6 +129,16 @@ export interface CompanyUsersRepository {
     ctx: TenantContext,
     userId: string,
     active: boolean,
+    now: Date
+  ): Promise<MemberChangeError | null>
+
+  /**
+   * Anonymizes a member (status DELETED): personal data wiped, email freed,
+   * sessions and pending auth artefacts revoked. Same guards as `setActive`.
+   */
+  anonymize(
+    ctx: TenantContext,
+    userId: string,
     now: Date
   ): Promise<MemberChangeError | null>
 }

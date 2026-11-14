@@ -559,6 +559,11 @@ export const WithRowActions: Story = {
           variant: "destructive",
           // Per row: a shipped order is not one to delete.
           disabled: (row: Order) => row.status === "shipped",
+          // Per row, so the question can name it. Destructive → the red confirm.
+          confirm: (row: Order) => ({
+            title: `Delete ${row.reference}?`,
+            description: "This cannot be undone.",
+          }),
           onClick: fn(),
         },
       ],

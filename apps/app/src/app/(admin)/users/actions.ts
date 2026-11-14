@@ -16,23 +16,22 @@ import {
   inviteUserSchema,
   type InviteUserInput,
 } from "@/core/users/application/schemas"
+import type { RowActionResult } from "@/ui/data-table/row-actions"
 
-export type MemberActionResult = { error?: string }
+import { runRowAction, type RowActionErrorMapper } from "../_lib/row-action"
 
-/** Maps expected refusals to translated messages; rethrows everything else. */
-async function toActionError(error: unknown): Promise<MemberActionResult> {
-  const t = await getTranslations()
+/** Expected refusals of member/invitation changes → translated messages. */
+const mapError: RowActionErrorMapper = (error, t) => {
   if (error instanceof MemberChangeRefused) {
-    return { error: t(`users.errors.${error.reason}`) }
+    return t(`users.errors.${error.reason}`)
   }
   if (isAuthError(error, "USER_LIMIT_REACHED")) {
-    return { error: t("users.errors.USER_LIMIT_REACHED") }
+    return t("users.errors.USER_LIMIT_REACHED")
   }
-  if (isAuthError(error, "RATE_LIMITED")) {
-    return { error: t("errors.rateLimited") }
-  }
-  throw error
+  return null
 }
+
+const options = { mapError, revalidate: "/users" }
 
 export type InviteActionResult = SubmitResult<InviteUserInput> & {
   sent?: boolean
@@ -52,7 +51,11 @@ export async function inviteUserAction(
       // A message key; the form translates field errors.
       return { fieldErrors: { email: "users.errors.EMAIL_TAKEN" } }
     }
-    const { error: message } = await toActionError(error)
+    const t = await getTranslations()
+    const message =
+      mapError(error, t) ??
+      (isAuthError(error, "RATE_LIMITED") ? t("errors.rateLimited") : null)
+    if (message === null) throw error
     return { formError: message }
   }
   revalidatePath("/users")
@@ -61,50 +64,42 @@ export async function inviteUserAction(
 
 export async function revokeInvitationAction(
   invitationId: string
-): Promise<MemberActionResult> {
-  const ctx = await requireTenantWith("users.invite")
-  try {
-    await companyUsers.revokeInvitation(
-      ctx,
-      invitationId,
-      await getRequestMeta()
-    )
-  } catch (error) {
-    return await toActionError(error)
-  }
-  revalidatePath("/users")
-  return {}
+): Promise<RowActionResult> {
+  return runRowAction(
+    "users.invite",
+    (ctx, meta) => companyUsers.revokeInvitation(ctx, invitationId, meta),
+    options
+  )
 }
 
 export async function changeRoleAction(
   userId: string,
   role: Role
-): Promise<MemberActionResult> {
-  const ctx = await requireTenantWith("users.manage")
-  try {
-    await companyUsers.changeRole(ctx, userId, role, await getRequestMeta())
-  } catch (error) {
-    return await toActionError(error)
-  }
-  revalidatePath("/users")
-  return {}
+): Promise<RowActionResult> {
+  return runRowAction(
+    "users.manage",
+    (ctx, meta) => companyUsers.changeRole(ctx, userId, role, meta),
+    options
+  )
 }
 
 export async function setMemberActiveAction(
   userId: string,
   active: boolean
-): Promise<MemberActionResult> {
-  const ctx = await requireTenantWith("users.manage")
-  try {
-    await companyUsers.setActive(
-      ctx,
-      userId,
-      active === true,
-      await getRequestMeta()
-    )
-  } catch (error) {
-    return await toActionError(error)
-  }
-  revalidatePath("/users")
-  return {}
+): Promise<RowActionResult> {
+  return runRowAction(
+    "users.manage",
+    (ctx, meta) => companyUsers.setActive(ctx, userId, active === true, meta),
+    options
+  )
+}
+
+export async function deleteMemberAction(
+  userId: string
+): Promise<RowActionResult> {
+  return runRowAction(
+    "users.manage",
+    (ctx, meta) => companyUsers.remove(ctx, userId, meta),
+    options
+  )
 }

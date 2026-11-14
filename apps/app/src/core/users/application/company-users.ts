@@ -12,12 +12,12 @@ import { AuthError } from "@/core/auth/domain/errors"
 import type { Role } from "@/core/auth/domain/role"
 import type { TenantContext } from "@/core/auth/domain/tenant-context"
 
-import type { MemberChangeError } from "../domain/membership"
+import type { MemberChangeError, SeatUsage } from "../domain/membership"
 import { assertCan } from "./assert-can"
 import type {
   CompanyUsersRepository,
-  Member,
-  PendingInvitation,
+  InvitationListQuery,
+  MemberListQuery,
 } from "./ports/company-users-repository"
 import type {
   InvitationAcceptanceStore,
@@ -48,12 +48,6 @@ export type CompanyUsersDeps = Readonly<{
   clock: Clock
 }>
 
-export type CompanyUsersOverview = Readonly<{
-  members: Member[]
-  invitations: PendingInvitation[]
-  seats: { used: number; limit: number }
-}>
-
 export function makeCompanyUsers(deps: CompanyUsersDeps) {
   const { companyUsers: repo } = deps
 
@@ -74,16 +68,22 @@ export function makeCompanyUsers(deps: CompanyUsersDeps) {
   }
 
   return {
-    /** Members, pending invitations and seat usage of the caller's company. */
-    async overview(ctx: TenantContext): Promise<CompanyUsersOverview> {
+    /** One page of the caller's company members (anonymized ones excluded). */
+    async listMembers(ctx: TenantContext, query: MemberListQuery) {
       assertCan(ctx, "users.view")
-      const now = deps.clock.now()
-      const [members, invitations, seats] = await Promise.all([
-        repo.listMembers(ctx),
-        repo.listPendingInvitations(ctx, now),
-        repo.seatUsage(ctx, now),
-      ])
-      return { members, invitations, seats }
+      return repo.listMembers(ctx, query)
+    },
+
+    /** One page of pending (unexpired, unrevoked, unaccepted) invitations. */
+    async listInvitations(ctx: TenantContext, query: InvitationListQuery) {
+      assertCan(ctx, "users.view")
+      return repo.listPendingInvitations(ctx, deps.clock.now(), query)
+    },
+
+    /** Seats taken (active users + pending invitations) and the limit. */
+    async seats(ctx: TenantContext): Promise<SeatUsage> {
+      assertCan(ctx, "users.view")
+      return repo.seatUsage(ctx, deps.clock.now())
     },
 
     /** Throws USER_LIMIT_REACHED, EMAIL_TAKEN, RATE_LIMITED or FORBIDDEN. */
@@ -177,6 +177,17 @@ export function makeCompanyUsers(deps: CompanyUsersDeps) {
       await record(ctx, active ? "member_enabled" : "member_disabled", meta, {
         memberId: id,
       })
+    },
+
+    /** Deletes a member by anonymizing the account; the row stays for audit. */
+    async remove(ctx: TenantContext, userId: string, meta: RequestMeta) {
+      assertCan(ctx, "users.manage")
+      const id = memberIdSchema.parse(userId)
+      if (id === ctx.userId) throw new MemberChangeRefused("SELF_CHANGE")
+
+      const refused = await repo.anonymize(ctx, id, deps.clock.now())
+      if (refused) throw new MemberChangeRefused(refused)
+      await record(ctx, "member_deleted", meta, { memberId: id })
     },
   }
 }

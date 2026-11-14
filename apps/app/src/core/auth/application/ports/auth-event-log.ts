@@ -19,6 +19,7 @@ export type AuthEventType =
   | "member_role_changed"
   | "member_disabled"
   | "member_enabled"
+  | "member_deleted"
 
 export type AuthEvent = Readonly<{
   type: AuthEventType

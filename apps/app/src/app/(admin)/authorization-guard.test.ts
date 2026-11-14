@@ -57,9 +57,22 @@ describe("(admin) authorization guard", () => {
   it.each(actions.filter(([id]) => !PUBLIC_ACTIONS.has(id)))(
     "%s authorizes before doing anything",
     (_id, body) => {
+      // Either directly, or through `runRowAction(permission, …)`, which
+      // authorizes first (checked below).
       expect(body).toMatch(
-        /await require(TenantWith|Permission)\(\s*"[a-z.-]+"\s*\)/
+        /await require(TenantWith|Permission)\(\s*"[a-z.-]+"\s*\)|return runRowAction\(\s*"[a-z.-]+"/
       )
     }
   )
+
+  it("runRowAction authorizes before running anything", () => {
+    const source = readFileSync(join(ADMIN_DIR, "_lib/row-action.ts"), "utf8")
+    const body = source.slice(
+      source.indexOf("export async function runRowAction")
+    )
+    const firstStatement = body.slice(body.indexOf("> {") + 3).trimStart()
+    expect(firstStatement).toMatch(
+      /^const ctx = await requireTenantWith\(permission\)/
+    )
+  })
 })

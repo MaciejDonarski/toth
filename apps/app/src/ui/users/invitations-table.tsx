@@ -1,110 +1,149 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useMemo } from "react"
+import { useRouter } from "next/navigation"
 import { useFormatter, useTranslations } from "next-intl"
 
-import { Alert, AlertDescription } from "@toth/ui/components/alert"
-import { Button } from "@toth/ui/components/button"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@toth/ui/components/table"
+  AsyncDataTable,
+  type DataTableColumn,
+  type DataTableFilter,
+  type PlainTableCellProps,
+} from "@toth/table"
 
-import type { Role } from "@/core/auth/domain/role"
+import { ROLES } from "@/core/auth/domain/role"
+import {
+  useDeleteAction,
+  useRowMutation,
+  type RowActionResult,
+} from "@/ui/data-table/row-actions"
+import { useEndpointTable } from "@/ui/data-table/use-endpoint-table"
 
-export type InvitationRow = {
-  id: string
-  email: string
-  role: Role
-  /** Epoch ms. */
-  expiresAt: number
-}
+import type { InvitationRow } from "./rows"
 
 export type InvitationsTableProps = {
-  invitations: InvitationRow[]
+  currentUserId: string
+  /** The "Cancel invitation" row action (permission users.invite). */
   canRevoke: boolean
-  onRevoke: (invitationId: string) => Promise<{ error?: string }>
+  /** Change it to refetch — after an invite was sent from the users table. */
+  refreshKey: number
+  onRevoke: (invitationId: string) => Promise<RowActionResult>
 }
 
 const DATE_TIME = { dateStyle: "short", timeStyle: "short" } as const
 
+function EmailCell({ row }: PlainTableCellProps<InvitationRow>) {
+  return (
+    <a
+      href={`mailto:${row.email}`}
+      className="truncate underline-offset-4 hover:underline"
+    >
+      {row.email}
+    </a>
+  )
+}
+
+function RoleCell({ row }: PlainTableCellProps<InvitationRow>) {
+  const t = useTranslations("roles")
+  return t(row.role)
+}
+
+function ExpiresCell({ row }: PlainTableCellProps<InvitationRow>) {
+  const format = useFormatter()
+  return (
+    <span className="whitespace-nowrap text-muted-foreground">
+      {format.dateTime(row.expiresAt, DATE_TIME)}
+    </span>
+  )
+}
+
 export function InvitationsTable({
-  invitations,
+  currentUserId,
   canRevoke,
+  refreshKey,
   onRevoke,
 }: InvitationsTableProps) {
   const t = useTranslations()
-  const format = useFormatter()
-  const [error, setError] = useState<string | null>(null)
-  const [pending, startTransition] = useTransition()
+  const router = useRouter()
+  const table = useEndpointTable<InvitationRow>(
+    "/api/tables/invitations",
+    refreshKey
+  )
+  const mutation = useRowMutation(() => {
+    table.refresh()
+    router.refresh() // seat counter in the page header
+  })
 
-  if (invitations.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        {t("users.noInvitations")}
-      </p>
-    )
-  }
+  const revokeAction = useDeleteAction<InvitationRow>({
+    label: t("users.invitations.revoke"),
+    disabled: mutation.busy,
+    confirm: (row) => ({
+      title: t("users.invitations.confirmTitle", { email: row.email }),
+      description: t("users.invitations.confirmDescription"),
+    }),
+    onDelete: (row) =>
+      mutation.run(
+        row.id,
+        () => onRevoke(row.id),
+        t("users.invitations.revoked", { email: row.email })
+      ),
+  })
+
+  const columns = useMemo<DataTableColumn<InvitationRow>[]>(
+    () => [
+      {
+        id: "email",
+        label: t("users.columns.email"),
+        isSortable: true,
+        template: EmailCell,
+        minWidth: 220,
+      },
+      {
+        id: "role",
+        label: t("users.columns.role"),
+        isSortable: true,
+        template: RoleCell,
+      },
+      {
+        id: "expiresAt",
+        label: t("users.columns.expiresAt"),
+        isSortable: true,
+        template: ExpiresCell,
+      },
+    ],
+    [t]
+  )
+
+  const filters = useMemo<DataTableFilter[]>(
+    () => [
+      { field: "email", label: t("users.columns.email"), order: 10 },
+      {
+        field: "role",
+        label: t("users.columns.role"),
+        type: "multi-select",
+        order: 20,
+        options: ROLES.map((role) => ({
+          value: role,
+          label: t(`roles.${role}`),
+        })),
+      },
+    ],
+    [t]
+  )
 
   return (
-    <div className="flex flex-col gap-3">
-      <div aria-live="polite">
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-      </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>{t("users.columns.email")}</TableHead>
-            <TableHead>{t("users.columns.role")}</TableHead>
-            <TableHead>{t("users.columns.expiresAt")}</TableHead>
-            {canRevoke && (
-              <TableHead className="text-right">
-                {t("users.columns.actions")}
-              </TableHead>
-            )}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {invitations.map((invitation) => (
-            <TableRow key={invitation.id}>
-              <TableCell>{invitation.email}</TableCell>
-              <TableCell>{t(`roles.${invitation.role}`)}</TableCell>
-              <TableCell className="text-sm text-muted-foreground">
-                {format.dateTime(invitation.expiresAt, DATE_TIME)}
-              </TableCell>
-              {canRevoke && (
-                <TableCell className="text-right">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={pending}
-                    aria-label={t("users.revokeFor", {
-                      email: invitation.email,
-                    })}
-                    onClick={() => {
-                      setError(null)
-                      startTransition(async () => {
-                        const result = await onRevoke(invitation.id)
-                        if (result.error) setError(result.error)
-                      })
-                    }}
-                  >
-                    {t("users.revoke")}
-                  </Button>
-                </TableCell>
-              )}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+    <AsyncDataTable<InvitationRow>
+      id="invitations"
+      persistState
+      userId={currentUserId}
+      withPagination
+      itemsLabel={t("users.invitations.itemsLabel")}
+      columns={columns}
+      filters={filters}
+      getRowLabel={(row) => row.email}
+      {...table.tableProps}
+      error={table.error ? t("errors.tableLoad") : undefined}
+      rowActions={canRevoke ? [revokeAction] : undefined}
+    />
   )
 }

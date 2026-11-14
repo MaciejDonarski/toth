@@ -9,8 +9,8 @@ pnpm + Turborepo monorepo: React 19, TypeScript, Tailwind CSS v4, shadcn/ui (Bas
 | `@toth/app`               | `apps/app`                   | Next.js 16 app (App Router) in hexagonal architecture                        |
 | `@toth/ui`                | `packages/ui`                | All shadcn/ui components, styled with preset `bgmJ1SHMW` (style `base-vega`) |
 | `@toth/utils`             | `packages/utils`             | Shared utilities (`cn`)                                                      |
-| `@toth/form`              | `packages/form`              | Form tooling (react-hook-form + zod) on top of `@toth/ui`, empty for now     |
-| `@toth/table`             | `packages/table`             | Data table on top of `@toth/ui` and `@toth/form`, empty for now              |
+| `@toth/form`              | `packages/form`              | Declarative forms (react-hook-form + zod) on top of `@toth/ui`               |
+| `@toth/table`             | `packages/table`             | PlainTable, DataTable and AsyncDataTable on `@toth/ui` and `@toth/form`      |
 | `@toth/eslint-config`     | `packages/eslint-config`     | Shared ESLint flat configs                                                   |
 | `@toth/typescript-config` | `packages/typescript-config` | Shared tsconfigs                                                             |
 

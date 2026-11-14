@@ -5,32 +5,71 @@ import {
   type LucideIcon,
 } from "lucide-react"
 
+import type { Permission } from "@/core/auth/domain/permissions"
+
 type NavItem = {
-  title: string
+  /** Message key: `nav.items.<key>`. */
+  key: "dashboard" | "users" | "settings"
   href: string
   icon: LucideIcon
+  /**
+   * Needed to see the item. Hiding is UX only: the page itself must call
+   * `requirePermission` with the same permission.
+   */
+  permission: Permission
 }
 
 type NavGroup = {
-  label: string
+  /** Message key: `nav.groups.<key>`. */
+  key: "overview" | "management"
   items: NavItem[]
 }
 
 const navGroups: NavGroup[] = [
   {
-    label: "Overview",
+    key: "overview",
     items: [
-      { title: "Dashboard", href: "/dashboard", icon: LayoutDashboardIcon },
+      {
+        key: "dashboard",
+        href: "/dashboard",
+        icon: LayoutDashboardIcon,
+        permission: "dashboard.view",
+      },
     ],
   },
   {
-    label: "Management",
+    key: "management",
     items: [
-      { title: "Users", href: "/users", icon: UsersIcon },
-      { title: "Settings", href: "/settings", icon: SettingsIcon },
+      {
+        key: "users",
+        href: "/users",
+        icon: UsersIcon,
+        permission: "users.view",
+      },
+      {
+        key: "settings",
+        href: "/settings",
+        icon: SettingsIcon,
+        permission: "settings.view",
+      },
     ],
   },
 ]
+
+/** Only the items the user may open; groups left empty are dropped. */
+function filterNav(
+  groups: readonly NavGroup[],
+  permissions: readonly Permission[]
+): NavGroup[] {
+  return groups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) =>
+        permissions.includes(item.permission)
+      ),
+    }))
+    .filter((group) => group.items.length > 0)
+}
 
 function isActiveHref(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`)
@@ -46,5 +85,5 @@ function findNavTrail(pathname: string) {
   return null
 }
 
-export { findNavTrail, isActiveHref, navGroups }
+export { filterNav, findNavTrail, isActiveHref, navGroups }
 export type { NavGroup, NavItem }

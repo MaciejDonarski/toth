@@ -6,7 +6,9 @@ import {
   FormProvider,
   useForm,
   type DefaultValues,
+  type FieldValues,
   type UseFormProps,
+  type UseFormReturn,
 } from "react-hook-form"
 import type { z } from "zod"
 
@@ -18,10 +20,16 @@ import type { LinkComponent } from "./types"
 
 type Values<TSchema extends z.ZodType> = z.input<TSchema> & object
 
-export interface FormProps<TSchema extends z.ZodType>
+interface FormBaseProps
   extends
     Omit<ComponentProps<"form">, "onSubmit" | "children">,
     FormLocaleSettings {
+  /** Component used for `link` actions in `FormActions` (e.g. `next/link`). */
+  linkComponent?: LinkComponent
+  children: ReactNode
+}
+
+export interface FormProps<TSchema extends z.ZodType> extends FormBaseProps {
   /** Zod schema — validates input and produces the values passed to `onSubmit`. */
   schema: TSchema
   /** Initial values (schema input shape). */
@@ -39,23 +47,45 @@ export interface FormProps<TSchema extends z.ZodType>
     | Promise<void | SubmitResult<Values<TSchema>>>
   /** When validation runs. Defaults to `"onTouched"`. */
   mode?: UseFormProps["mode"]
-  /** Component used for `link` actions in `FormActions` (e.g. `next/link`). */
-  linkComponent?: LinkComponent
-  children: ReactNode
+  form?: never
 }
 
-function Form<TSchema extends z.ZodType>({
+/**
+ * A `<Form>` around a react-hook-form instance the caller owns: no schema, no
+ * resolver. For forms whose values are state rather than a submission that
+ * can fail, e.g. a filter panel that reads values with `useWatch`.
+ */
+export interface ProvidedFormProps<
+  TValues extends FieldValues = FieldValues,
+> extends FormBaseProps {
+  /** The caller's `useForm()` result. */
+  form: UseFormReturn<TValues>
+  /** Called with the current values when the form is submitted. */
+  onSubmit?: (
+    values: TValues
+  ) => void | SubmitResult<TValues> | Promise<void | SubmitResult<TValues>>
+  schema?: never
+  defaultValues?: never
+  mode?: never
+}
+
+function Form<
+  TSchema extends z.ZodType,
+  TValues extends FieldValues = FieldValues,
+>(props: FormProps<TSchema> | ProvidedFormProps<TValues>) {
+  if (props.form) {
+    const { form, onSubmit, ...rest } = props
+    return <FormShell form={form} onSubmit={onSubmit} {...rest} />
+  }
+  return <ManagedForm {...(props as FormProps<TSchema>)} />
+}
+
+function ManagedForm<TSchema extends z.ZodType>({
   schema,
   defaultValues,
   onSubmit,
   mode = "onTouched",
-  linkComponent,
-  locale,
-  dateFormat,
-  messages,
-  className,
-  children,
-  ...props
+  ...rest
 }: FormProps<TSchema>) {
   const form = useForm<Values<TSchema>, unknown, z.output<TSchema>>({
     // The resolver's generics are inferred from the schema, which TS cannot
@@ -64,11 +94,34 @@ function Form<TSchema extends z.ZodType>({
     defaultValues,
     mode,
   })
+  return (
+    <FormShell
+      form={form as unknown as UseFormReturn<FieldValues>}
+      onSubmit={
+        onSubmit as unknown as ProvidedFormProps<FieldValues>["onSubmit"]
+      }
+      {...rest}
+    />
+  )
+}
+
+function FormShell<TValues extends FieldValues>({
+  form,
+  onSubmit,
+  linkComponent,
+  locale,
+  dateFormat,
+  messages,
+  translateError,
+  className,
+  children,
+  ...props
+}: Omit<ProvidedFormProps<TValues>, "schema" | "defaultValues" | "mode">) {
   const [formError, setFormError] = useState<string>()
 
   const submit = form.handleSubmit(async (values) => {
     setFormError(undefined)
-    const result = await onSubmit(values)
+    const result = await onSubmit?.(values)
     setFormError(applySubmitResult(result, form.setError))
   })
 
@@ -80,8 +133,9 @@ function Form<TSchema extends z.ZodType>({
       locale,
       dateFormat,
       messages,
+      translateError,
     }),
-    [linkComponent, formError, locale, dateFormat, messages]
+    [linkComponent, formError, locale, dateFormat, messages, translateError]
   )
 
   return (

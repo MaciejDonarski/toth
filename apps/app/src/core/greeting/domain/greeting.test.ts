@@ -3,15 +3,14 @@ import { describe, expect, it } from "vitest"
 import { createGreeting, InvalidRecipientError } from "./greeting"
 
 describe("createGreeting", () => {
-  it("builds the greeting message for a recipient", () => {
+  it("builds the greeting for a recipient", () => {
     expect(createGreeting("world")).toEqual({
       recipient: "world",
-      message: "Hello, world!",
     })
   })
 
   it("trims the recipient", () => {
-    expect(createGreeting("  Ada ").message).toBe("Hello, Ada!")
+    expect(createGreeting("  Ada ").recipient).toBe("Ada")
   })
 
   it("rejects an empty recipient", () => {

@@ -14,7 +14,6 @@ describe("getGreeting use case", () => {
 
     await expect(getGreeting()).resolves.toEqual({
       recipient: "team",
-      message: "Hello, team!",
     })
     expect(greetingRepository.getDefaultRecipient).toHaveBeenCalledOnce()
   })
@@ -24,7 +23,7 @@ describe("getGreeting use case", () => {
     const getGreeting = makeGetGreeting({ greetingRepository })
 
     await expect(getGreeting("Ada")).resolves.toMatchObject({
-      message: "Hello, Ada!",
+      recipient: "Ada",
     })
     expect(greetingRepository.getDefaultRecipient).not.toHaveBeenCalled()
   })

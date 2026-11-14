@@ -1,8 +1,16 @@
 "use server"
 
-import { redirect } from "next/navigation"
+import { getCurrentUser, getSessionId } from "@/auth/dal"
+import { signOut } from "@/auth/next-auth"
+import { getRequestMeta } from "@/auth/request-meta"
+import { revokeSession } from "@/composition-root"
 
-// TODO: clear the session once authentication exists.
+/** Revokes the DB session (effective everywhere at once), then clears the cookie. */
 export async function logout() {
-  redirect("/login")
+  const [sessionId, user] = await Promise.all([
+    getSessionId(),
+    getCurrentUser(),
+  ])
+  await revokeSession(sessionId, user, await getRequestMeta())
+  await signOut({ redirectTo: "/login" })
 }

@@ -18,6 +18,8 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./test/setup.ts"],
     include: ["src/**/*.test.{ts,tsx}"],
+    // Integration tests need Postgres: `pnpm test:integration`.
+    exclude: ["src/**/*.int.test.ts"],
     css: false,
   },
 })

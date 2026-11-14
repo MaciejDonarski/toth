@@ -18,6 +18,7 @@ function FormDefaultsProvider({
   locale,
   dateFormat,
   messages,
+  translateError,
   children,
 }: FormDefaultsProviderProps) {
   const parent = use(FormDefaultsContext)
@@ -26,8 +27,9 @@ function FormDefaultsProvider({
       locale: locale ?? parent.locale,
       dateFormat: dateFormat ?? parent.dateFormat,
       messages: mergeMessages(parent.messages, messages),
+      translateError: translateError ?? parent.translateError,
     }),
-    [locale, dateFormat, messages, parent]
+    [locale, dateFormat, messages, translateError, parent]
   )
   return <FormDefaultsContext value={value}>{children}</FormDefaultsContext>
 }

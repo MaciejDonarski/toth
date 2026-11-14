@@ -1,0 +1,216 @@
+"use client"
+
+import { useId, useState, useTransition } from "react"
+import Link from "next/link"
+import { useTranslations } from "next-intl"
+import { CircleAlertIcon } from "lucide-react"
+
+import { Alert, AlertDescription } from "@toth/ui/components/alert"
+import { toast } from "@toth/ui/components/toast"
+import { Button } from "@toth/ui/components/button"
+import { Checkbox } from "@toth/ui/components/checkbox"
+import { Field, FieldLabel } from "@toth/ui/components/field"
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@toth/ui/components/input-otp"
+import { Spinner } from "@toth/ui/components/spinner"
+
+import { AUTH_POLICY } from "@/core/auth/domain/auth-policy"
+import { formatCountdown, useCountdown } from "@/ui/hooks/use-countdown"
+
+import { AuthHeading } from "./auth-heading"
+
+const CODE_LENGTH = AUTH_POLICY.loginCodeLength
+const TRUST_DAYS = Math.round(AUTH_POLICY.trustedDeviceTtlMs / 86_400_000)
+
+type VerifyResult = { error: string; restart?: boolean; expired?: boolean }
+type ResendResult =
+  | {
+      ok: true
+      codeExpiresAt: number
+      nextResendAt: number
+      resendsLeft: number
+    }
+  | { ok: false; error: string; restart?: boolean; retryAt?: number }
+
+export type VerifyCodeFormProps = {
+  maskedEmail: string
+  /** Epoch ms; numbers cross the server/client boundary safely. */
+  codeExpiresAt: number
+  nextResendAt: number
+  resendsLeft: number
+  onVerify: (input: {
+    code: string
+    remember: boolean
+  }) => Promise<VerifyResult | void>
+  onResend: () => Promise<ResendResult>
+}
+
+export function VerifyCodeForm(props: VerifyCodeFormProps) {
+  const { maskedEmail, onVerify, onResend } = props
+  const t = useTranslations("auth.verify")
+  const tCommon = useTranslations("common")
+  const rememberId = useId()
+  const [code, setCode] = useState("")
+  const [remember, setRemember] = useState(false)
+  const [expiresAt, setExpiresAt] = useState(
+    () => new Date(props.codeExpiresAt)
+  )
+  const [resendAt, setResendAt] = useState(() => new Date(props.nextResendAt))
+  const [resendsLeft, setResendsLeft] = useState(props.resendsLeft)
+  const [error, setError] = useState<string | null>(null)
+  const [restart, setRestart] = useState(false)
+  const [verifying, startVerify] = useTransition()
+  const [resending, startResend] = useTransition()
+
+  const codeLeft = useCountdown(expiresAt)
+  const resendLeft = useCountdown(resendAt)
+  const expired = codeLeft === 0
+
+  function verify(value: string) {
+    if (value.length !== CODE_LENGTH || expired || restart) return
+    startVerify(async () => {
+      const result = await onVerify({ code: value, remember })
+      if (!result) return
+      setError(result.error)
+      setRestart(!!result.restart)
+      setCode("")
+    })
+  }
+
+  function resend() {
+    setError(null)
+    startResend(async () => {
+      const result = await onResend()
+      if (result.ok) {
+        setExpiresAt(new Date(result.codeExpiresAt))
+        setResendAt(new Date(result.nextResendAt))
+        setResendsLeft(result.resendsLeft)
+        setCode("")
+        toast.add({ type: "success", title: t("newCodeSent") })
+        return
+      }
+      setError(result.error)
+      setRestart(!!result.restart)
+      if (result.retryAt) setResendAt(new Date(result.retryAt))
+    })
+  }
+
+  if (restart) {
+    return (
+      <div className="flex flex-col gap-6">
+        <AuthHeading title={t("title")} />
+        <Alert variant="destructive">
+          <CircleAlertIcon />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+        <Button nativeButton={false} render={<Link href="/login" />}>
+          {tCommon("backToLogin")}
+        </Button>
+      </div>
+    )
+  }
+
+  return (
+    <form
+      className="flex flex-col gap-6"
+      onSubmit={(event) => {
+        event.preventDefault()
+        verify(code)
+      }}
+    >
+      <AuthHeading
+        title={t("title")}
+        description={t.rich("description", {
+          length: CODE_LENGTH,
+          email: maskedEmail,
+          strong: (chunks) => <strong>{chunks}</strong>,
+        })}
+      />
+
+      <div className="flex flex-col items-center gap-3">
+        <InputOTP
+          maxLength={CODE_LENGTH}
+          pattern="^\d+$"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          aria-label={t("codeLabel")}
+          value={code}
+          onChange={setCode}
+          onComplete={verify}
+          disabled={expired || verifying}
+        >
+          <InputOTPGroup>
+            {Array.from({ length: CODE_LENGTH }, (_, index) => (
+              <InputOTPSlot key={index} index={index} />
+            ))}
+          </InputOTPGroup>
+        </InputOTP>
+        <p
+          className="text-sm text-muted-foreground"
+          aria-live={expired ? "assertive" : "off"}
+          data-testid="code-timer"
+        >
+          {expired ? (
+            <span className="text-destructive">{t("expired")}</span>
+          ) : (
+            t("validFor", { time: formatCountdown(codeLeft) })
+          )}
+        </p>
+      </div>
+
+      <Field orientation="horizontal">
+        <Checkbox
+          id={rememberId}
+          checked={remember}
+          onCheckedChange={(checked) => setRemember(checked === true)}
+        />
+        <FieldLabel htmlFor={rememberId} className="font-normal">
+          {t("remember", { days: TRUST_DAYS })}
+        </FieldLabel>
+      </Field>
+
+      <div aria-live="polite" className="empty:hidden">
+        {error && (
+          <Alert variant="destructive">
+            <CircleAlertIcon />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Button
+          type="submit"
+          disabled={code.length !== CODE_LENGTH || expired || verifying}
+          aria-busy={verifying || undefined}
+        >
+          {verifying && <Spinner data-icon="inline-start" />}
+          {t("submit")}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={resend}
+          disabled={resending || resendLeft > 0 || resendsLeft <= 0}
+          aria-busy={resending || undefined}
+        >
+          {resending && <Spinner data-icon="inline-start" />}
+          {resendsLeft <= 0
+            ? t("resendLimit")
+            : resendLeft > 0
+              ? t("resendIn", { time: formatCountdown(resendLeft) })
+              : t("resend")}
+        </Button>
+      </div>
+
+      <p className="text-center text-sm text-muted-foreground">
+        <Link href="/login" className="underline underline-offset-4">
+          {t("otherAccount")}
+        </Link>
+      </p>
+    </form>
+  )
+}

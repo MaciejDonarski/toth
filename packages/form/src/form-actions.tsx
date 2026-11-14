@@ -9,7 +9,7 @@ import { Button } from "@toth/ui/components/button"
 import { Spinner } from "@toth/ui/components/spinner"
 import { cn } from "@toth/ui/lib/utils"
 
-import { useFormConfig } from "./form-context"
+import { useFormConfig, useFormLocale } from "./form-context"
 import type { FormAction, LinkComponent } from "./types"
 
 function DefaultLink({
@@ -27,6 +27,7 @@ function DefaultLink({
 /** Form-level error returned from `onSubmit`. Renders nothing when empty. */
 function FormError({ className, ...props }: ComponentProps<"div">) {
   const { formError } = useFormConfig()
+  const { translateError } = useFormLocale()
   if (!formError) return null
 
   return (
@@ -37,7 +38,7 @@ function FormError({ className, ...props }: ComponentProps<"div">) {
       {...props}
     >
       <CircleAlertIcon />
-      <AlertDescription>{formError}</AlertDescription>
+      <AlertDescription>{translateError(formError)}</AlertDescription>
     </Alert>
   )
 }

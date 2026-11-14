@@ -17,7 +17,10 @@ class ResizeObserverMock {
 globalThis.ResizeObserver ??=
   ResizeObserverMock as unknown as typeof ResizeObserver
 
-if (!window.matchMedia) {
+// Files that opt into `@vitest-environment node` have no DOM.
+const hasDom = typeof window !== "undefined"
+
+if (hasDom && !window.matchMedia) {
   Object.defineProperty(window, "matchMedia", {
     writable: true,
     value: vi.fn().mockImplementation((query: string) => ({
@@ -33,7 +36,11 @@ if (!window.matchMedia) {
   })
 }
 
-Element.prototype.scrollIntoView ??= vi.fn()
-Element.prototype.hasPointerCapture ??= vi.fn(() => false)
-Element.prototype.setPointerCapture ??= vi.fn()
-Element.prototype.releasePointerCapture ??= vi.fn()
+if (hasDom) {
+  Element.prototype.scrollIntoView ??= vi.fn()
+  Element.prototype.hasPointerCapture ??= vi.fn(() => false)
+  Element.prototype.setPointerCapture ??= vi.fn()
+  Element.prototype.releasePointerCapture ??= vi.fn()
+  // input-otp (InputOTP) probes the caret position.
+  document.elementFromPoint ??= () => null
+}

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { render, screen } from "@test/render"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { AdminBreadcrumbs } from "./admin-breadcrumbs"
@@ -14,14 +14,20 @@ describe("AdminBreadcrumbs", () => {
 
   it("shows the nav group and the current page", () => {
     render(<AdminBreadcrumbs />)
-    expect(screen.getByText("Management")).toBeInTheDocument()
-    expect(screen.getByText("Users")).toHaveAttribute("aria-current", "page")
+    expect(screen.getByText("Zarządzanie")).toBeInTheDocument()
+    expect(screen.getByText("Użytkownicy")).toHaveAttribute(
+      "aria-current",
+      "page"
+    )
   })
 
   it("matches nested paths to their nav item", () => {
     pathname.current = "/settings/billing"
     render(<AdminBreadcrumbs />)
-    expect(screen.getByText("Settings")).toHaveAttribute("aria-current", "page")
+    expect(screen.getByText("Ustawienia")).toHaveAttribute(
+      "aria-current",
+      "page"
+    )
   })
 
   it("renders nothing for unknown paths", () => {

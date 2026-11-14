@@ -19,6 +19,12 @@ export interface FormLocaleSettings {
   dateFormat?: string
   /** UI strings; missing keys fall back to English. */
   messages?: FormMessagesInput
+  /**
+   * Turns a validation or submit error message into display text. Lets
+   * schemas and servers return message keys that the app translates.
+   * Defaults to showing the message as is.
+   */
+  translateError?: (message: string) => string
 }
 
 export interface FormConfig extends FormLocaleSettings {
@@ -42,7 +48,10 @@ export interface ResolvedFormLocale {
   locale?: Locale
   dateFormat: string
   messages: FormMessages
+  translateError: (message: string) => string
 }
+
+const identity = (message: string) => message
 
 /**
  * Locale settings in effect for a field: `<Form>` props win over
@@ -60,14 +69,18 @@ export function useFormLocale(): ResolvedFormLocale {
         defaults.messages,
         config.messages
       ) as FormMessages,
+      translateError:
+        config.translateError ?? defaults.translateError ?? identity,
     }),
     [
       config.locale,
       config.dateFormat,
       config.messages,
+      config.translateError,
       defaults.locale,
       defaults.dateFormat,
       defaults.messages,
+      defaults.translateError,
     ]
   )
 }

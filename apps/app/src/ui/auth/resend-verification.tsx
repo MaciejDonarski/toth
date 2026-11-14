@@ -1,0 +1,99 @@
+"use client"
+
+import { useState, useTransition } from "react"
+import { useTranslations } from "next-intl"
+
+import { Alert, AlertDescription } from "@toth/ui/components/alert"
+import { toast } from "@toth/ui/components/toast"
+import { Button } from "@toth/ui/components/button"
+import { Field, FieldLabel } from "@toth/ui/components/field"
+import { Input } from "@toth/ui/components/input"
+import { Spinner } from "@toth/ui/components/spinner"
+
+import { AUTH_POLICY } from "@/core/auth/domain/auth-policy"
+import { formatCountdown, useCountdown } from "@/ui/hooks/use-countdown"
+
+type ResendResult = { ok: true } | { ok: false; error: string }
+
+export type ResendVerificationProps = {
+  onResend: (email?: string) => Promise<ResendResult>
+  /** Without a remembered address the user types it in. */
+  askForEmail?: boolean
+  /** Start in cooldown, e.g. right after registration sent the first link. */
+  startInCooldown?: boolean
+}
+
+function cooldownEnd() {
+  return new Date(Date.now() + AUTH_POLICY.emailVerificationResendCooldownMs)
+}
+
+export function ResendVerification({
+  onResend,
+  askForEmail = false,
+  startInCooldown = false,
+}: ResendVerificationProps) {
+  const [availableAt, setAvailableAt] = useState<Date | null>(() =>
+    startInCooldown ? cooldownEnd() : null
+  )
+  const t = useTranslations()
+  const [email, setEmail] = useState("")
+  const [error, setError] = useState<string | null>(null)
+  const [pending, startTransition] = useTransition()
+  const remaining = useCountdown(availableAt)
+  const coolingDown = remaining > 0
+
+  function resend() {
+    startTransition(async () => {
+      const result = await onResend(askForEmail ? email : undefined)
+      if (result.ok) {
+        setError(null)
+        setAvailableAt(cooldownEnd())
+        toast.add({ type: "success", title: t("auth.checkEmail.resent") })
+      } else {
+        setError(result.error)
+      }
+    })
+  }
+
+  return (
+    <form
+      className="flex flex-col gap-4"
+      onSubmit={(event) => {
+        event.preventDefault()
+        resend()
+      }}
+    >
+      {askForEmail && (
+        <Field>
+          <FieldLabel htmlFor="resend-email">{t("common.email")}</FieldLabel>
+          <Input
+            id="resend-email"
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+          />
+        </Field>
+      )}
+      <Button
+        type="submit"
+        variant="outline"
+        disabled={pending || coolingDown}
+        aria-busy={pending || undefined}
+      >
+        {pending && <Spinner data-icon="inline-start" />}
+        {coolingDown
+          ? t("auth.checkEmail.resendIn", { time: formatCountdown(remaining) })
+          : t("auth.checkEmail.resend")}
+      </Button>
+      <div aria-live="polite">
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+      </div>
+    </form>
+  )
+}

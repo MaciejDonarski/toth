@@ -1,6 +1,7 @@
 "use client"
 
 import { usePathname } from "next/navigation"
+import { useTranslations } from "next-intl"
 
 import {
   Breadcrumb,
@@ -10,24 +11,35 @@ import {
   BreadcrumbSeparator,
 } from "@toth/ui/components/breadcrumb"
 
-import { findNavTrail } from "./nav-config"
+import { findNavTrail, isActiveHref } from "./nav-config"
 
 function AdminBreadcrumbs() {
-  const trail = findNavTrail(usePathname())
+  const t = useTranslations("nav")
+  const pathname = usePathname()
+  const trail = findNavTrail(pathname)
 
+  // Pages outside the sidebar (reached from the user menu): title only.
   if (!trail) {
-    return null
+    return isActiveHref(pathname, "/profile") ? (
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbPage>{t("pages.profile")}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+    ) : null
   }
 
   return (
     <Breadcrumb>
       <BreadcrumbList>
         <BreadcrumbItem className="hidden md:block">
-          {trail.group.label}
+          {t(`groups.${trail.group.key}`)}
         </BreadcrumbItem>
         <BreadcrumbSeparator className="hidden md:block" />
         <BreadcrumbItem>
-          <BreadcrumbPage>{trail.item.title}</BreadcrumbPage>
+          <BreadcrumbPage>{t(`items.${trail.item.key}`)}</BreadcrumbPage>
         </BreadcrumbItem>
       </BreadcrumbList>
     </Breadcrumb>

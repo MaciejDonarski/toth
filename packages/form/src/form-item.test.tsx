@@ -77,6 +77,20 @@ describe("FormItem", () => {
     expect(await submit()).toEqual({ title: "Hi", bio: "Long text" })
   })
 
+  it("time keeps the HH:MM string", async () => {
+    const { submit } = renderInForm(
+      <FormItem type="time" name="start" label="Start" />,
+      { start: "08:00" }
+    )
+    const input = screen.getByLabelText("Start")
+    expect(input).toHaveAttribute("type", "time")
+    expect(input).toHaveValue("08:00")
+
+    await userEvent.clear(input)
+    await userEvent.type(input, "09:30")
+    expect(await submit()).toEqual({ start: "09:30" })
+  })
+
   it("number maps empty input to undefined", async () => {
     const user = userEvent.setup()
     const { submit } = renderInForm(

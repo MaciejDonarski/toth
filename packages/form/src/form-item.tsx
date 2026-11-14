@@ -18,9 +18,13 @@ import { DateField } from "./fields/date-field"
 import { DateRangeField } from "./fields/date-range-field"
 import type { FieldRendererProps } from "./fields/field-props"
 import { InputField } from "./fields/input-field"
+import { NumberRangeField } from "./fields/number-range-field"
+import { ColorField } from "./fields/color-field"
 import { RadioField } from "./fields/radio-field"
 import { SelectField } from "./fields/select-field"
+import { TagsField } from "./fields/tags-field"
 import { TextareaField } from "./fields/textarea-field"
+import { useFormLocale } from "./form-context"
 import { colSpanClassName } from "./lib/grid"
 import type { FormItemConfig, FormItemType } from "./types"
 
@@ -33,14 +37,18 @@ const RENDERERS = {
   number: InputField,
   tel: InputField,
   url: InputField,
+  time: InputField,
   textarea: TextareaField,
   select: SelectField,
   multiselect: SelectField,
   checkbox: BooleanField,
   switch: BooleanField,
   radio: RadioField,
+  color: ColorField,
   date: DateField,
   "date-range": DateRangeField,
+  "number-range": NumberRangeField,
+  tags: TagsField,
 } satisfies Record<FormItemType, unknown> as unknown as Record<
   FormItemType,
   AnyRenderer
@@ -99,7 +107,18 @@ function FormItem<TValues extends FieldValues = FieldValues>(
   const descriptionNode = description && (
     <FieldDescription id={descriptionId}>{description}</FieldDescription>
   )
-  const errorNode = <FieldError id={errorId} errors={[fieldState.error]} />
+  const { translateError } = useFormLocale()
+  const errorMessage = fieldState.error?.message
+  const errorNode = (
+    <FieldError
+      id={errorId}
+      errors={[
+        errorMessage === undefined
+          ? fieldState.error
+          : { message: translateError(errorMessage) },
+      ]}
+    />
+  )
   const fieldProps = {
     "data-invalid": fieldState.invalid || undefined,
     "data-disabled": props.disabled || undefined,
@@ -124,8 +143,8 @@ function FormItem<TValues extends FieldValues = FieldValues>(
 
   return (
     <Field {...fieldProps}>
-      {props.type === "radio" ? (
-        // A radio group is not labelable, so it is named via aria-labelledby.
+      {props.type === "radio" || props.type === "color" ? (
+        // A radio/color group is not labelable, so it is named via aria-labelledby.
         <FieldTitle id={labelId}>{labelContent}</FieldTitle>
       ) : (
         <FieldLabel id={labelId} htmlFor={id}>

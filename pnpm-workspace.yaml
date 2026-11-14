@@ -9,6 +9,8 @@ allowBuilds:
   msw: false
   "@prisma/engines": true
   prisma: true
+  "@parcel/watcher": false
+  "@swc/core": false
 
 minimumReleaseAgeExclude:
   - "@testing-library/user-event@14.6.10"

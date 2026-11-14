@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { render, screen } from "@test/render"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -21,26 +21,36 @@ describe("UserMenu", () => {
 
   it("shows the user's initials, name and email", () => {
     render(<UserMenu user={user} onLogout={vi.fn()} />)
-    const trigger = screen.getByRole("button", { name: /account menu/i })
+    const trigger = screen.getByRole("button", { name: /Menu konta/ })
     expect(trigger).toHaveTextContent("JD")
     expect(trigger).toHaveTextContent("Jane Doe")
     expect(trigger).toHaveTextContent("jane@example.com")
   })
 
-  it("toggles from light to dark mode", async () => {
+  it("switches to dark mode without closing the menu", async () => {
     const u = userEvent.setup()
     render(<UserMenu user={user} onLogout={vi.fn()} />)
-    await u.click(screen.getByRole("button", { name: /account menu/i }))
-    await u.click(await screen.findByRole("menuitem", { name: "Dark mode" }))
+    await u.click(screen.getByRole("button", { name: /Menu konta/ }))
+    const row = await screen.findByRole("menuitemcheckbox", {
+      name: "Tryb ciemny",
+    })
+    expect(row).toHaveAttribute("aria-checked", "false")
+    await u.click(row)
     expect(theme.setTheme).toHaveBeenCalledWith("dark")
+    // The menu stays open so the switch visibly flips.
+    expect(screen.getByRole("menu")).toBeInTheDocument()
   })
 
-  it("toggles from dark to light mode", async () => {
+  it("switches back to light mode", async () => {
     theme.resolvedTheme = "dark"
     const u = userEvent.setup()
     render(<UserMenu user={user} onLogout={vi.fn()} />)
-    await u.click(screen.getByRole("button", { name: /account menu/i }))
-    await u.click(await screen.findByRole("menuitem", { name: "Light mode" }))
+    await u.click(screen.getByRole("button", { name: /Menu konta/ }))
+    const row = await screen.findByRole("menuitemcheckbox", {
+      name: "Tryb ciemny",
+    })
+    expect(row).toHaveAttribute("aria-checked", "true")
+    await u.click(row)
     expect(theme.setTheme).toHaveBeenCalledWith("light")
   })
 
@@ -48,8 +58,8 @@ describe("UserMenu", () => {
     const onLogout = vi.fn().mockResolvedValue(undefined)
     const u = userEvent.setup()
     render(<UserMenu user={user} onLogout={onLogout} />)
-    await u.click(screen.getByRole("button", { name: /account menu/i }))
-    await u.click(await screen.findByRole("menuitem", { name: "Log out" }))
+    await u.click(screen.getByRole("button", { name: /Menu konta/ }))
+    await u.click(await screen.findByRole("menuitem", { name: "Wyloguj" }))
     expect(onLogout).toHaveBeenCalledTimes(1)
   })
 })

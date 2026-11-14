@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { z } from "zod"
 
 import { Form } from "./form"
+import { FormActions } from "./form-actions"
 import { FormDefaultsProvider } from "./form-defaults"
 import { FormItem, type FormItemProps } from "./form-item"
 import { DATE_PRESETS, DATE_RANGE_PRESETS } from "./lib/date-presets"
@@ -45,6 +46,7 @@ export const Text: Story = {
   },
 }
 export const Email: Story = { args: { type: "email", label: "Email" } }
+export const Time: Story = { args: { type: "time", label: "Start", step: 900 } }
 export const Password: Story = { args: { type: "password", label: "Password" } }
 export const NumberInput: Story = {
   args: { type: "number", label: "Quantity", min: 0, step: 1 },
@@ -94,6 +96,16 @@ export const DateRangeWithPresets: Story = {
     presets: DATE_RANGE_PRESETS,
   },
 }
+export const NumberRange: Story = {
+  args: { type: "number-range", label: "Quantity", min: 0, step: 1 },
+}
+export const Tags: Story = {
+  args: {
+    type: "tags",
+    label: "SKU",
+    description: "Enter or comma adds a tag, Backspace removes the last.",
+  },
+}
 export const Disabled: Story = {
   args: { type: "text", label: "Disabled", disabled: true },
 }
@@ -116,4 +128,32 @@ export const PolishDateRange: Story = {
       </FormDefaultsProvider>
     ),
   ],
+}
+
+const keyedSchema = z.object({
+  email: z.email("validation.email.invalid"),
+})
+const dictionary: Record<string, string> = {
+  "validation.email.invalid": "Nieprawidłowy adres email",
+}
+
+/**
+ * Schemas (and servers) return message keys; `translateError` on
+ * `FormDefaultsProvider` turns them into text. Submit to see the error.
+ */
+export const TranslatedErrors: Story = {
+  args: { type: "email", name: "email", label: "Email" },
+  render: (args) => (
+    <FormDefaultsProvider translateError={(key) => dictionary[key] ?? key}>
+      <Form
+        schema={keyedSchema}
+        defaultValues={{ email: "not-an-email" }}
+        onSubmit={() => {}}
+        className="w-80"
+      >
+        <FormItem {...args} />
+        <FormActions actions={[{ kind: "submit", label: "Zapisz" }]} />
+      </Form>
+    </FormDefaultsProvider>
+  ),
 }

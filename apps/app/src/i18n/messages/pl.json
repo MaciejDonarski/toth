@@ -1,0 +1,408 @@
+{
+  "common": {
+    "brand": "Toth",
+    "homeLink": "Toth — strona główna",
+    "email": "Email",
+    "emailPlaceholder": "jan@firma.pl",
+    "password": "Hasło",
+    "confirmPassword": "Powtórz hasło",
+    "name": "Imię i nazwisko",
+    "acceptTerms": "Akceptuję regulamin",
+    "readTerms": "Przeczytaj regulamin",
+    "backToLogin": "Wróć do logowania",
+    "goToLogin": "Przejdź do logowania",
+    "you": "(Ty)",
+    "never": "Nigdy",
+    "save": "Zapisz",
+    "saved": "Zapisano zmiany."
+  },
+  "metadata": {
+    "appTitle": "Toth",
+    "titleTemplate": "%s · Toth",
+    "description": "Panel administracyjny Toth",
+    "login": "Logowanie",
+    "verify": "Weryfikacja dwuetapowa",
+    "register": "Rejestracja",
+    "checkEmail": "Sprawdź skrzynkę",
+    "verifyEmail": "Potwierdź email",
+    "terms": "Regulamin",
+    "forgotPassword": "Reset hasła",
+    "resetPassword": "Nowe hasło",
+    "acceptInvite": "Zaproszenie",
+    "dashboard": "Pulpit",
+    "users": "Użytkownicy",
+    "settings": "Ustawienia",
+    "profile": "Profil",
+    "forbidden": "Brak dostępu"
+  },
+  "nav": {
+    "groups": {
+      "overview": "Przegląd",
+      "management": "Zarządzanie"
+    },
+    "items": {
+      "dashboard": "Pulpit",
+      "users": "Użytkownicy",
+      "settings": "Ustawienia"
+    },
+    "pages": {
+      "profile": "Profil"
+    }
+  },
+  "userMenu": {
+    "trigger": "Menu konta: {name}",
+    "profile": "Profil",
+    "darkMode": "Tryb ciemny",
+    "logout": "Wyloguj"
+  },
+  "dashboard": {
+    "badge": "@toth/app",
+    "greeting": "Cześć, {name}!",
+    "description": "Next.js + architektura heksagonalna, stylowane @toth/ui."
+  },
+  "settings": {
+    "title": "Ustawienia"
+  },
+  "forbidden": {
+    "title": "Brak dostępu",
+    "description": "Twoja rola nie pozwala na otwarcie tej strony. Jeśli potrzebujesz dostępu, skontaktuj się z administratorem firmy.",
+    "back": "Wróć do pulpitu"
+  },
+  "errors": {
+    "generic": "Coś poszło nie tak. Spróbuj ponownie za chwilę.",
+    "rateLimited": "Zbyt wiele prób. Odczekaj chwilę i spróbuj ponownie."
+  },
+  "roles": {
+    "ADMIN": "Administrator",
+    "MANAGER": "Kierownik",
+    "WORKER": "Pracownik"
+  },
+  "passwordRules": {
+    "listLabel": "Wymagania hasła",
+    "met": " — spełnione",
+    "unmet": " — niespełnione",
+    "minLength": "Co najmniej {min} znaków",
+    "maxLength": "Najwyżej {max} znaków",
+    "lowercase": "Mała litera",
+    "uppercase": "Wielka litera",
+    "digit": "Cyfra",
+    "special": "Znak specjalny"
+  },
+  "auth": {
+    "login": {
+      "title": "Zaloguj się",
+      "description": "Podaj email i hasło, aby zalogować się do panelu",
+      "forgotPassword": "Nie pamiętasz hasła?",
+      "submit": "Zaloguj",
+      "noAccount": "Nie masz konta?",
+      "register": "Zarejestruj firmę",
+      "resendActivation": "Wyślij link aktywacyjny ponownie",
+      "verified": "Adres email potwierdzony. Możesz się zalogować.",
+      "expired": "Weryfikacja wygasła. Zaloguj się ponownie.",
+      "reset": "Hasło zostało zmienione, a wszystkie sesje wylogowane. Zaloguj się nowym hasłem.",
+      "invited": "Konto zostało utworzone. Zaloguj się, aby dołączyć do firmy.",
+      "errors": {
+        "invalidCredentials": "Nieprawidłowy email lub hasło.",
+        "locked": "Konto jest tymczasowo zablokowane po wielu nieudanych próbach. Spróbuj ponownie za {minutes} min.",
+        "unverified": "Najpierw potwierdź adres email linkiem z wiadomości.",
+        "signInFailed": "Logowanie nie powiodło się. Zaloguj się ponownie."
+      }
+    },
+    "verify": {
+      "title": "Weryfikacja dwuetapowa",
+      "description": "Wpisz {length}-cyfrowy kod wysłany na adres <strong>{email}</strong>.",
+      "codeLabel": "Kod weryfikacyjny",
+      "validFor": "Kod jest ważny jeszcze {time}",
+      "expired": "Kod wygasł. Wyślij nowy kod.",
+      "remember": "Zapamiętaj tę przeglądarkę na {days} dni",
+      "submit": "Zweryfikuj",
+      "resend": "Wyślij kod ponownie",
+      "resendIn": "Wyślij kod ponownie za {time}",
+      "resendLimit": "Limit ponownych wysyłek wykorzystany",
+      "newCodeSent": "Wysłaliśmy nowy kod. Poprzedni przestał działać.",
+      "otherAccount": "Zaloguj się na inne konto",
+      "errors": {
+        "invalidCode": "Nieprawidłowy kod. Pozostało prób: {count}.",
+        "codeExpired": "Kod wygasł. Wyślij nowy kod.",
+        "restart": "Logowanie wygasło lub wykorzystano limit prób. Zaloguj się ponownie.",
+        "resendTooSoon": "Odczekaj chwilę przed ponowną wysyłką.",
+        "resendLimit": "Wykorzystano limit ponownych wysyłek. Zaloguj się ponownie."
+      }
+    },
+    "register": {
+      "title": "Załóż konto firmy",
+      "description": "Zarejestruj firmę i zostań jej administratorem.",
+      "companyName": "Nazwa firmy",
+      "submit": "Zarejestruj",
+      "haveAccount": "Masz już konto?",
+      "login": "Zaloguj się"
+    },
+    "checkEmail": {
+      "title": "Sprawdź skrzynkę",
+      "sent": "Jeśli adres <strong>{email}</strong> nie ma jeszcze potwierdzonego konta, wysłaliśmy na niego link aktywacyjny. Link jest ważny 24 godziny.",
+      "askEmail": "Podaj adres email użyty przy rejestracji, a wyślemy nowy link aktywacyjny.",
+      "resend": "Wyślij link ponownie",
+      "resendIn": "Wyślij ponownie za {time}",
+      "resent": "Jeśli konto czeka na potwierdzenie, wysłaliśmy nowy link.",
+      "invalidEmail": "Podaj prawidłowy adres email."
+    },
+    "verifyEmail": {
+      "title": "Potwierdź adres email",
+      "description": "Kliknij przycisk poniżej, aby aktywować konto.",
+      "submit": "Potwierdź adres email",
+      "invalidTitle": "Link jest nieprawidłowy lub wygasł",
+      "invalidDescription": "Link mógł zostać już użyty albo minęła jego ważność. Wyślij nowy link, aby potwierdzić adres.",
+      "sendNew": "Wyślij nowy link"
+    },
+    "forgot": {
+      "title": "Nie pamiętasz hasła?",
+      "description": "Podaj adres email konta, a wyślemy link do ustawienia nowego hasła.",
+      "submit": "Wyślij link",
+      "sentTitle": "Sprawdź skrzynkę",
+      "sentDescription": "Jeśli konto z tym adresem istnieje, wysłaliśmy na nie link do zmiany hasła. Link jest ważny {minutes} minut i działa tylko raz."
+    },
+    "reset": {
+      "title": "Ustaw nowe hasło",
+      "description": "Po zmianie hasła zostaniesz wylogowany ze wszystkich urządzeń.",
+      "newPassword": "Nowe hasło",
+      "confirmPassword": "Powtórz nowe hasło",
+      "submit": "Zmień hasło",
+      "invalidTitle": "Link jest nieprawidłowy lub wygasł",
+      "invalidDescription": "Link do zmiany hasła działa tylko raz i przez ograniczony czas. Poproś o nowy.",
+      "sendNew": "Wyślij nowy link",
+      "errors": {
+        "invalidToken": "Link wygasł lub został już użyty."
+      }
+    },
+    "terms": {
+      "title": "Regulamin",
+      "version": "Wersja {version}",
+      "placeholder": "Treść regulaminu zostanie uzupełniona."
+    }
+  },
+  "users": {
+    "title": "Użytkownicy",
+    "seats": "Wykorzystane miejsca: {used} z {limit}",
+    "inviteHeading": "Zaproś osobę",
+    "membersHeading": "Członkowie firmy",
+    "invitationsHeading": "Oczekujące zaproszenia",
+    "columns": {
+      "user": "Użytkownik",
+      "role": "Rola",
+      "status": "Status",
+      "phone": "Telefon",
+      "lastLogin": "Ostatnie logowanie",
+      "actions": "Akcje",
+      "email": "Email",
+      "expiresAt": "Ważne do"
+    },
+    "status": {
+      "ACTIVE": "Aktywny",
+      "DISABLED": "Wyłączony"
+    },
+    "roleFor": "Rola: {email}",
+    "disable": "Wyłącz",
+    "enable": "Włącz",
+    "disableFor": "Wyłącz {email}",
+    "enableFor": "Włącz {email}",
+    "revoke": "Odwołaj",
+    "revokeFor": "Odwołaj zaproszenie {email}",
+    "noInvitations": "Brak oczekujących zaproszeń.",
+    "invite": {
+      "role": "Rola",
+      "submit": "Zaproś",
+      "limitReached": "Wykorzystano wszystkie miejsca w firmie. Odwołaj zaproszenie lub wyłącz nieaktywnego użytkownika, aby zaprosić kolejną osobę.",
+      "sent": "Wysłano zaproszenie na adres {email}. Jest ważne {hours} godziny."
+    },
+    "errors": {
+      "SELF_CHANGE": "Nie możesz zmienić roli ani wyłączyć własnego konta.",
+      "LAST_ADMIN": "Firma musi mieć co najmniej jednego aktywnego administratora.",
+      "NOT_FOUND": "Nie znaleziono użytkownika lub zaproszenia.",
+      "USER_LIMIT_REACHED": "Osiągnięto limit użytkowników firmy.",
+      "EMAIL_TAKEN": "Ta osoba jest już użytkownikiem Twojej firmy."
+    }
+  },
+  "acceptInvite": {
+    "title": "Dołącz do {company}",
+    "description": "Zaproszenie dla <strong>{email}</strong> z rolą <strong>{role}</strong>. Ustaw swoje dane logowania.",
+    "submit": "Załóż konto",
+    "invalidHeading": "Zaproszenie",
+    "invalidTitle": "Zaproszenie jest nieważne",
+    "invalidDescription": "Link wygasł, został już użyty albo zaproszenie odwołano. Poproś administratora firmy o nowe zaproszenie.",
+    "errors": {
+      "invalid": "Zaproszenie jest nieważne.",
+      "limit": "Firma wykorzystała limit użytkowników. Skontaktuj się z administratorem.",
+      "emailTaken": "Ten adres ma już konto. Zaloguj się albo zresetuj hasło."
+    }
+  },
+  "validation": {
+    "email": {
+      "required": "Podaj adres email",
+      "tooLong": "Adres email jest za długi",
+      "invalid": "Nieprawidłowy adres email"
+    },
+    "password": {
+      "required": "Podaj hasło",
+      "tooLong": "Hasło jest za długie",
+      "weak": "Hasło nie spełnia wymagań",
+      "confirmRequired": "Powtórz hasło",
+      "mismatch": "Hasła nie są identyczne",
+      "currentInvalid": "Obecne hasło jest nieprawidłowe",
+      "sameAsCurrent": "Nowe hasło musi się różnić od obecnego"
+    },
+    "companyName": {
+      "tooShort": "Podaj nazwę firmy",
+      "tooLong": "Nazwa firmy jest za długa"
+    },
+    "name": {
+      "tooShort": "Podaj imię i nazwisko",
+      "tooLong": "Imię i nazwisko jest za długie"
+    },
+    "terms": {
+      "required": "Musisz zaakceptować regulamin"
+    },
+    "code": {
+      "format": "Kod składa się z 6 cyfr"
+    },
+    "role": {
+      "invalid": "Wybierz rolę"
+    },
+    "generic": {
+      "invalid_type": "Nieprawidłowa wartość",
+      "too_small": "Wartość jest za krótka lub za mała",
+      "too_big": "Wartość jest za długa lub za duża",
+      "invalid_format": "Nieprawidłowy format",
+      "not_multiple_of": "Nieprawidłowa wartość",
+      "unrecognized_keys": "Nieznane pola",
+      "invalid_union": "Nieprawidłowa wartość",
+      "invalid_key": "Nieprawidłowy klucz",
+      "invalid_element": "Nieprawidłowy element",
+      "invalid_value": "Nieprawidłowa wartość",
+      "custom": "Nieprawidłowa wartość"
+    },
+    "phone": {
+      "invalid": "Nieprawidłowy numer telefonu",
+      "tooLong": "Numer telefonu jest za długi"
+    },
+    "workingHours": {
+      "invalidTime": "Podaj godzinę w formacie GG:MM",
+      "order": "Koniec musi być później niż początek"
+    },
+    "color": {
+      "invalid": "Wybierz kolor z listy"
+    }
+  },
+  "mail": {
+    "notYou": "Jeśli to nie Ty, zignoruj tę wiadomość.",
+    "duration": {
+      "minutes": "{count, plural, one {# minuta} few {# minuty} many {# minut} other {# minuty}}",
+      "hours": "{count, plural, one {# godzina} few {# godziny} many {# godzin} other {# godziny}}",
+      "days": "{count, plural, one {# dzień} other {# dni}}"
+    },
+    "loginCode": {
+      "subject": "Kod logowania",
+      "intro": "Twój kod do zalogowania:",
+      "validity": "Kod jest ważny przez {duration}.",
+      "warning": "Nikomu go nie podawaj."
+    },
+    "emailVerification": {
+      "subject": "Potwierdź adres email",
+      "intro": "Dziękujemy za rejestrację. Potwierdź adres email, aby aktywować konto.",
+      "button": "Potwierdź email",
+      "validity": "Link jest ważny przez {duration}."
+    },
+    "registrationAttempt": {
+      "subject": "Próba rejestracji na Twój adres",
+      "intro": "Ktoś próbował założyć nowe konto na ten adres email, ale konto już istnieje.",
+      "login": "Zaloguj się",
+      "forgot": "Nie pamiętasz hasła? Możesz je zresetować:",
+      "reset": "Zresetuj hasło"
+    },
+    "passwordReset": {
+      "subject": "Reset hasła",
+      "intro": "Otrzymaliśmy prośbę o zresetowanie hasła do Twojego konta.",
+      "button": "Ustaw nowe hasło",
+      "validity": "Link jest ważny przez {duration} i działa tylko raz.",
+      "unchanged": "Twoje hasło pozostanie bez zmian."
+    },
+    "passwordChanged": {
+      "subject": "Hasło zostało zmienione",
+      "intro": "Hasło do Twojego konta zostało właśnie zmienione. Pozostałe sesje i zapamiętane przeglądarki zostały wylogowane.",
+      "notYou": "Jeśli to nie Ty, natychmiast zresetuj hasło:",
+      "reset": "Zresetuj hasło"
+    },
+    "accountLocked": {
+      "subject": "Wykryto nieudane próby logowania",
+      "intro": "Z powodu wielu nieudanych prób logowania konto zostało tymczasowo zablokowane na {duration}.",
+      "advice": "Jeśli to nie Ty, zalecamy zmianę hasła:",
+      "reset": "Zresetuj hasło"
+    },
+    "invitation": {
+      "subject": "Zaproszenie do {company}",
+      "intro": "Zostałeś zaproszony do firmy {company}. Ustaw hasło, aby aktywować konto.",
+      "button": "Przyjmij zaproszenie",
+      "validity": "Zaproszenie jest ważne przez {duration}."
+    },
+    "invitationExistingAccount": {
+      "subject": "Zaproszenie do {company}",
+      "intro": "Firma {company} zaprosiła Cię do swojego konta.",
+      "explain": "Twój adres email ma już konto w innej firmie, a jedno konto może należeć tylko do jednej firmy, więc nie możesz przyjąć tego zaproszenia. Jeśli chcesz dołączyć, poproś zapraszającego o zaproszenie na inny adres.",
+      "login": "Zaloguj się na swoje konto"
+    }
+  },
+  "profile": {
+    "detailsHeading": "Twoje dane",
+    "detailsDescription": "Dane kontaktowe i godziny pracy widoczne w Twoim koncie.",
+    "email": "Email",
+    "role": "Rola",
+    "phone": "Telefon",
+    "phonePlaceholder": "600 100 200",
+    "phoneDescription": "Numer zagraniczny wpisz z prefiksem kraju, np. +49.",
+    "hoursHeading": "Czas pracy",
+    "hoursDescription": "Zaznacz dni, w które pracujesz, i podaj godziny. Niezaznaczony dzień jest wolny.",
+    "worksOn": "Pracuje w: {day}",
+    "from": "Od",
+    "to": "Do",
+    "fromFor": "Od ({day})",
+    "toFor": "Do ({day})",
+    "save": "Zapisz zmiany",
+    "saved": "Zapisano zmiany.",
+    "passwordHeading": "Zmiana hasła",
+    "passwordDescription": "Po zmianie hasła pozostałe sesje i zapamiętane przeglądarki zostaną wylogowane. Ta sesja pozostanie aktywna.",
+    "currentPassword": "Obecne hasło",
+    "newPassword": "Nowe hasło",
+    "confirmPassword": "Powtórz nowe hasło",
+    "changePassword": "Zmień hasło",
+    "passwordChanged": "Hasło zostało zmienione. Pozostałe sesje wylogowano.",
+    "weekdays": {
+      "1": "Poniedziałek",
+      "2": "Wtorek",
+      "3": "Środa",
+      "4": "Czwartek",
+      "5": "Piątek",
+      "6": "Sobota",
+      "7": "Niedziela"
+    },
+    "color": "Kolor avatara",
+    "colorDescription": "Wybierz kolor, którym oznaczamy Cię w aplikacji.",
+    "colors": {
+      "red": "Czerwony",
+      "orange": "Pomarańczowy",
+      "amber": "Bursztynowy",
+      "yellow": "Żółty",
+      "lime": "Limonkowy",
+      "green": "Zielony",
+      "emerald": "Szmaragdowy",
+      "teal": "Morski",
+      "cyan": "Cyjanowy",
+      "sky": "Niebieski jasny",
+      "blue": "Niebieski",
+      "indigo": "Indygo",
+      "violet": "Fioletowy",
+      "purple": "Purpurowy",
+      "fuchsia": "Fuksja",
+      "pink": "Różowy",
+      "rose": "Różany"
+    }
+  }
+}

@@ -96,6 +96,16 @@ export const DateRangeWithPresets: Story = {
     presets: DATE_RANGE_PRESETS,
   },
 }
+export const NumberRange: Story = {
+  args: { type: "number-range", label: "Quantity", min: 0, step: 1 },
+}
+export const Tags: Story = {
+  args: {
+    type: "tags",
+    label: "SKU",
+    description: "Enter or comma adds a tag, Backspace removes the last.",
+  },
+}
 export const Disabled: Story = {
   args: { type: "text", label: "Disabled", disabled: true },
 }

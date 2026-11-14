@@ -1,7 +1,7 @@
 /**
  * @toth/form — declarative forms on react-hook-form + zod and @toth/ui.
  */
-export { Form, type FormProps } from "./form"
+export { Form, type FormProps, type ProvidedFormProps } from "./form"
 export { FormItem, defineFormItems, type FormItemProps } from "./form-item"
 export { FormSection, type FormSectionProps } from "./form-section"
 export { FormActions, FormError, type FormActionsProps } from "./form-actions"
@@ -37,7 +37,9 @@ export type {
   FormAction,
   FormItemConfig,
   FormItemType,
+  ColorOption,
   FormOption,
   LinkComponent,
+  NumberRangeValue,
   Span,
 } from "./types"

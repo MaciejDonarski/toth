@@ -84,6 +84,21 @@ export interface RadioItem<
   orientation?: "vertical" | "horizontal"
 }
 
+/** A swatch in a `color` field. `color` is any CSS color. */
+export interface ColorOption {
+  value: string
+  label: string
+  color: string
+  disabled?: boolean
+}
+
+export interface ColorItem<
+  TValues extends FieldValues = FieldValues,
+> extends BaseItem<TValues> {
+  type: "color"
+  options: ColorOption[]
+}
+
 /**
  * Preset label: plain text, or a key into `FormMessages` (used by the
  * built-in presets so they follow the active language).
@@ -119,14 +134,39 @@ export interface DateRangeItem<
   presets?: DateRangePreset[]
 }
 
+/** `{ from, to }` — two number inputs; an empty end is `null`. */
+export interface NumberRangeValue {
+  from: number | null
+  to: number | null
+}
+
+export interface NumberRangeItem<
+  TValues extends FieldValues = FieldValues,
+> extends BaseItem<TValues> {
+  type: "number-range"
+  min?: number
+  max?: number
+  step?: number
+}
+
+/** Free-text tags (`string[]`): Enter or comma adds, Backspace removes the last. */
+export interface TagsItem<
+  TValues extends FieldValues = FieldValues,
+> extends BaseItem<TValues> {
+  type: "tags"
+}
+
 export type FormItemConfig<TValues extends FieldValues = FieldValues> =
   | InputItem<TValues>
   | TextareaItem<TValues>
   | SelectItem<TValues>
   | BooleanItem<TValues>
   | RadioItem<TValues>
+  | ColorItem<TValues>
   | DateItem<TValues>
   | DateRangeItem<TValues>
+  | NumberRangeItem<TValues>
+  | TagsItem<TValues>
 
 export type FormItemType = FormItemConfig["type"]
 

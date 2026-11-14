@@ -19,6 +19,10 @@ export interface FormMessages {
   clearTo: string
   /** Accessible name of the preset button group. */
   presets: string
+  /** Placeholder of a `tags` field without its own `placeholder`. */
+  addTag: string
+  /** Accessible name of a tag's remove button. */
+  removeTag: (tag: string) => string
   datePresets: Record<DatePresetKey, string>
   rangePresets: Record<DateRangePresetKey, string>
 }
@@ -40,6 +44,8 @@ export const enMessages: FormMessages = {
   clearFrom: "Clear from",
   clearTo: "Clear to",
   presets: "Presets",
+  addTag: "Type and press Enter",
+  removeTag: (tag) => `Remove ${tag}`,
   datePresets: {
     yesterday: "Yesterday",
     daysAgo3: "3 days ago",
@@ -64,6 +70,8 @@ export const plMessages: FormMessages = {
   clearFrom: "Wyczyść datę od",
   clearTo: "Wyczyść datę do",
   presets: "Szybki wybór",
+  addTag: "Wpisz i naciśnij Enter",
+  removeTag: (tag) => `Usuń ${tag}`,
   datePresets: {
     yesterday: "Wczoraj",
     daysAgo3: "3 dni temu",

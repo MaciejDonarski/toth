@@ -205,6 +205,9 @@ importers:
       '@toth/form':
         specifier: workspace:*
         version: link:../../packages/form
+      '@toth/table':
+        specifier: workspace:*
+        version: link:../../packages/table
       '@toth/ui':
         specifier: workspace:*
         version: link:../../packages/ui
